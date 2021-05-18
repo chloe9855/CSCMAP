@@ -1,0 +1,166 @@
+{
+  "data": [
+    {
+      "id": "1111",
+      "title": "第三冷主變電站",
+      "typeName": "yu",
+      "buildingName": "第三冷主變電站123",
+      "department": "W51/劉小華",
+      "time": "2019-11-26 18:00:36",
+      "tags": [
+        {
+          "isChecked": false,
+          "name": "房屋稅籍"
+        },
+        {
+          "isChecked": true,
+          "name": "工廠登記"
+        },
+        {
+          "isChecked": true,
+          "name": "優惠減免"
+        },
+        {
+          "isChecked": true,
+          "name": "保存登記"
+        }
+      ],
+      "detailUrl": "https://www.google.com/"
+    },
+    {
+      "id": "1112",
+      "title": "第三冷主變電站",
+      "typeName": "jiun",
+      "buildingName": "第三冷主變電站123",
+      "department": "W51/劉小華",
+      "time": "2019-11-26 18:00:36",
+      "tags": [
+        {
+          "isChecked": false,
+          "name": "房屋稅籍"
+        },
+        {
+          "isChecked": true,
+          "name": "工廠登記"
+        },
+        {
+          "isChecked": true,
+          "name": "優惠減免"
+        },
+        {
+          "isChecked": true,
+          "name": "保存登記"
+        }
+      ],
+      "detailUrl": "https://www.google.com/"
+    },
+    {
+      "id": "1113",
+      "title": "第三冷主變電站",
+      "typeName": "shin",
+      "buildingName": "第三冷主變電站123",
+      "department": "W51/劉小華",
+      "time": "2019-11-26 18:00:36",
+      "tags": [
+        {
+          "isChecked": false,
+          "name": "房屋稅籍"
+        },
+        {
+          "isChecked": true,
+          "name": "工廠登記"
+        },
+        {
+          "isChecked": true,
+          "name": "優惠減免"
+        },
+        {
+          "isChecked": true,
+          "name": "保存登記"
+        }
+      ],
+      "detailUrl": "https://www.google.com/"
+    },
+    {
+      "id": "1114",
+      "title": "第三冷主變電站456",
+      "typeName": "shin",
+      "buildingName": "第三冷主變電站456",
+      "department": "W51/劉小華",
+      "time": "2019-11-26 18:00:36",
+      "tags": [
+        {
+          "isChecked": false,
+          "name": "房屋稅籍"
+        },
+        {
+          "isChecked": true,
+          "name": "工廠登記"
+        },
+        {
+          "isChecked": true,
+          "name": "優惠減免"
+        },
+        {
+          "isChecked": true,
+          "name": "保存登記"
+        }
+      ],
+      "detailUrl": "https://www.google.com/"
+    },
+    {
+      "id": "1115",
+      "title": "第三冷主變電站666",
+      "typeName": "jiun",
+      "buildingName": "第三冷主變電站666",
+      "department": "W51/劉小華",
+      "time": "2019-11-26 18:00:36",
+      "tags": [
+        {
+          "isChecked": false,
+          "name": "房屋稅籍"
+        },
+        {
+          "isChecked": true,
+          "name": "工廠登記"
+        },
+        {
+          "isChecked": true,
+          "name": "優惠減免"
+        },
+        {
+          "isChecked": true,
+          "name": "保存登記"
+        }
+      ],
+      "detailUrl": "https://www.google.com/"
+    },
+    {
+      "id": "1116",
+      "title": "第三冷主變電站999",
+      "typeName": "yu",
+      "buildingName": "第三冷主變電站999",
+      "department": "W51/劉小華",
+      "time": "2019-11-26 18:00:36",
+      "tags": [
+        {
+          "isChecked": false,
+          "name": "房屋稅籍"
+        },
+        {
+          "isChecked": true,
+          "name": "工廠登記"
+        },
+        {
+          "isChecked": true,
+          "name": "優惠減免"
+        },
+        {
+          "isChecked": true,
+          "name": "保存登記"
+        }
+      ],
+      "detailUrl": "https://www.google.com/"
+    }
+  ]
+}

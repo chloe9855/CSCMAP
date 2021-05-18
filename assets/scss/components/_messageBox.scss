@@ -1,0 +1,96 @@
+@charset "UTF-8";
+@import '../utils/_utils.scss';
+
+// * ==========================================================================
+// * 訊息視窗樣式
+// * ==========================================================================
+
+.msgbox {
+  overflow: hidden;
+  background-color: $color-white;
+  border-radius: 10px;
+  box-shadow: 5px 4px 15px rgba($color-black, 0.15);
+}
+
+.msgbox__wrapper {
+  width: 325px;
+  display: flex;
+  flex-direction: column;
+}
+
+.msgbox__header {
+  min-height: 45px;
+  padding-right: 10px;
+  display: flex;
+  color: $color-white;
+  background-color: $color-blue-dark;
+}
+
+.msgbox__header-content {
+  width: calc(100% - 25px);
+}
+
+.msgbox__title {
+  padding: 10px 0 10px 10px;
+  display: block;
+
+  &.has-icon {
+    line-height: 25px;
+
+    &::before {
+      content: '';
+      width: 25px;
+      height: 25px;
+      margin-right: 5px;
+      display: inline-block;
+      vertical-align: top;
+
+      @include min-width(map-get($desktop, sm)) {
+        background-size: contain;
+      }
+
+      background: {
+        position: center;
+        repeat: no-repeat;
+        size: 80%;
+      }
+    }
+
+    &.icon-add-land::before {
+      background: {
+        image: url('~/assets/img/icon/icon-add.svg');
+        size: 80%;
+      }
+    }
+
+    &.icon-set-position::before {
+      background-image: url('~/assets/img/icon/icon-set-position_white.svg');
+    }
+
+    &.icon-my-position::before {
+      background-image: url('~/assets/img/icon/icon-my-position_white.svg');
+    }
+
+    &.icon-measure::before {
+      background-image: url('~/assets/img/icon/icon-measure_white.svg');
+    }
+
+    &.icon-grid::before {
+      background-image: url('~/assets/img/icon/icon-grid_black.svg');
+    }
+  }
+}
+
+.msgbox__close-btn {
+  width: 25px;
+  height: 25px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  display: block;
+  background: url('~/assets/img/icon/icon-clear_white.svg') no-repeat center/contain;
+}
+
+.msgbox__content {
+  background-color: $color-white;
+  flex-grow: 1;
+}

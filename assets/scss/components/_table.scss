@@ -1,0 +1,25 @@
+@charset "UTF-8";
+@import '../utils/_utils.scss';
+
+// * ==========================================================================
+// * 表格的基本設定
+// * ==========================================================================
+
+table {
+  width: 100%;
+}
+
+thead {
+  background-color: $color-blue-light;
+}
+
+th {
+  padding: 9px 10px;
+  color: $color-white;
+  background-color: $color-blue-light;
+}
+
+td {
+  padding: 5px 10px;
+  vertical-align: middle;
+}

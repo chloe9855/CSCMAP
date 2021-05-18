@@ -1,0 +1,151 @@
+@charset "UTF-8";
+@import '../utils/_utils.scss';
+
+// * ==========================================================================
+// * 首頁左下方的功能介面
+// * ==========================================================================
+
+.guide-service {
+  width: calc(100% - 40px);
+  margin: auto;
+
+  @include min-width(map-get($tablet, sm)) {
+    width: 460px;
+  }
+
+  @include min-width(map-get($tablet, md)) {
+    width: 550px;
+    position: absolute;
+    bottom: 40px;
+    left: 40px;
+  }
+
+  @include min-width(map-get($desktop, sm)) {
+    min-height: 420px;
+    animation: fadeInUp 1s;
+  }
+
+  @include min-width(map-get($desktop, md)) {
+    width: 600px;
+  }
+
+  @include min-width(map-get($desktop, xl)) {
+    width: 650px;
+  }
+}
+
+.guide-service__title {
+  width: 90%;
+  height: 0;
+  padding-bottom: 13%;
+  margin-right: auto;
+  margin-left: auto;
+  background: url('~/assets/img/logo.svg') no-repeat center/contain;
+  margin-bottom: 1rem;
+
+  @include min-width(map-get($tablet, sm)) {
+    margin-bottom: 2rem;
+  }
+
+  @include min-width(map-get($tablet, md)) {
+    width: 70%;
+    padding-bottom: 13%;
+    margin-right: 0;
+    margin-left: 0;
+  }
+
+  @include min-width(map-get($desktop, sm)) {
+    background-image: url('~/assets/img/logo_title.svg');
+  }
+
+  @include min-width(map-get($desktop, md)) {
+    width: 80%;
+    padding-bottom: 14%;
+  }
+
+  @include min-width(map-get($desktop, xl)) {
+    width: 95%;
+    padding-bottom: 17%;
+  }
+
+  span {
+    display: none;
+  }
+}
+
+.guide-service__content {
+  p {
+    font-size: map-get($font-size, md);
+    line-height: 1.6em;
+    margin-bottom: 0;
+  }
+}
+
+// * ==========================================================================
+// * 登入相關的元件
+// * ==========================================================================
+
+.guide-service__form-group {
+  margin-bottom: 3rem;
+
+  @include min-width(map-get($tablet, md)) {
+    width: 70%;
+  }
+}
+
+// * ==========================================================================
+// * 關於介紹
+// * ==========================================================================
+
+.guide-service__intro {
+  display: none;
+
+  @include min-width(map-get($desktop, sm)) {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+}
+
+.guide-service__intro-caption,
+.guide-service__intro-content {
+  padding-bottom: 25px;
+  position: relative;
+  line-height: 1.6em;
+
+  &::after {
+    content: '';
+    width: 100%;
+    height: 10px;
+    display: block;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+  }
+}
+
+.guide-service__intro-caption {
+  width: 110px;
+  font-size: map-get($font-size, lg);
+  font-weight: 500;
+  text-align: center;
+  white-space: nowrap;
+  color: $color-black-light;
+
+  @include hack-ie {
+    font-weight: bold;
+  }
+
+  &::after {
+    background-color: $color-blue;
+  }
+}
+
+.guide-service__intro-content {
+  width: calc(100% - 125px);
+
+  &::after {
+    background-color: #cde0ef;
+  }
+}

@@ -1,0 +1,202 @@
+@charset "UTF-8";
+@import './utils/_utils.scss';
+
+// * ==========================================================================
+// * 
+// * ==========================================================================
+
+$header-height: 60px;
+$aside-width: (
+  lg: 375px,
+  md: 300px
+);
+
+.article__container {
+  width: 100%;
+  height: calc(100% - #{$header-height});
+  display: block;
+  position: absolute;
+  top: $header-height;
+  left: 0;
+}
+
+.article__aside {
+  width: map-get($aside-width, md);
+  height: 100%;
+  padding: 20px 15px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: $color-white;
+  background-color: $color-blue-light;
+
+  @include min-width(map-get($desktop, xl)) {
+    width: map-get($aside-width, lg);
+  }
+}
+
+.article__content {
+  width: calc(100% - #{map-get($aside-width, md)});
+  height: 100%;
+  padding: 30px 20px;
+  position: absolute;
+  top: 0;
+  left: map-get($aside-width, md);
+  background-color: $color-white;
+
+  @include min-width(map-get($desktop, lg)) {
+    padding: 40px 30px;
+  }
+
+  @include min-width(map-get($desktop, xl)) {
+    width: calc(100% - #{map-get($aside-width, lg)});
+    left: map-get($aside-width, lg);
+  }
+}
+
+.article__wrap {
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+// * 側邊選單的頁籤
+
+.asideNavtabs {
+  margin-bottom: 1rem;
+}
+
+.asideNavtabs__header {
+  display: flex;
+}
+
+.asideNavtabs__btn {
+  width: 100%;
+  padding: 10px;
+  display: block;
+  text-align: center;
+  color: $color-white;
+  flex-grow: 1;
+  line-height: 1em;
+
+  &.current {
+    color: $color-blue-dark;
+    background-color: $color-white;
+    border-top-left-radius: 7px;
+    border-top-right-radius: 7px;
+  }
+}
+
+.asideNavtabs__body {
+  padding: 5px;
+  color: $color-blue-dark;
+  background-color: $color-white;
+  border-radius: 7px;
+
+  &.is-current-first {
+    border-top-left-radius: 0;
+  }
+
+  &.is-current-last {
+    border-top-right-radius: 0;
+  }
+}
+
+.asideNavtabs__content {
+  padding: 10px;
+}
+
+// * 資料的表格
+
+.dataTable__wrapper {
+  width: 100%;
+  margin-top: 1.5rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.dataTable {
+  min-width: 1125px;
+
+  th,
+  td {
+    padding: 0.75rem;
+    text-align: left;
+  }
+
+  th {
+    word-break: keep-all;
+  }
+
+  tbody {
+    tr:nth-child(odd) {
+      background-color: #eef4f6;
+    }
+  }
+}
+
+.dataTable__title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  span {
+    margin-right: 10px;
+    display: block;
+  }
+}
+
+.dataTable__input {
+  width: 150px;
+}
+
+.dataTable__checkbox {
+  label {
+    color: $color-basic;
+  }
+
+  input[type='checkbox'] + label::before {
+    border: 1px $color-gray-light solid;
+  }
+
+  input[type='checkbox']:checked + label::before {
+    border-color: $color-orange;
+  }
+}
+
+// * 排序按鈕
+
+.sort-select {
+  width: 9px;
+}
+
+.sort-select__ascending {
+  display: block;
+  margin-bottom: 3px;
+
+  &::before {
+    content: '';
+    width: 0;
+    height: 0;
+    display: block;
+    border-style: solid;
+    border-width: 0 4.5px 6px;
+    border-color: transparent transparent $color-white transparent;
+  }
+}
+
+.sort-select__descending {
+  display: block;
+
+  &::before {
+    content: '';
+    width: 0;
+    height: 0;
+    display: block;
+    border-style: solid;
+    border-width: 6px 4.5px 0;
+    border-color: $color-white transparent transparent;
+  }
+}

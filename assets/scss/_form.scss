@@ -1,0 +1,383 @@
+@charset "UTF-8";
+@import './utils/_utils.scss';
+
+// * ==========================================================================
+// * 表單相關元件
+// * ==========================================================================
+
+$icon-size: map-get($font-size, base) * 1.6;
+
+.select {
+  width: 100%;
+  display: inline-block;
+  position: relative;
+  cursor: pointer;
+
+  &::after {
+    content: '';
+    width: $icon-size;
+    height: $icon-size;
+    display: block;
+    position: absolute;
+    top: 6px + 1px;
+    right: 10px;
+    background: url('../img/icon/arrow-down.svg') no-repeat center/55%;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  select {
+    padding-right: 40px;
+    appearance: none;
+    cursor: pointer;
+
+    &[multiple] {
+      opacity: 0;
+    }
+  }
+}
+
+.fieldset {
+  margin-bottom: 1rem;
+  position: relative;
+
+  label {
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  // * 有 icon 的元件
+  &.has-icon {
+    input,
+    select {
+      font-weight: 500;
+      line-height: 1.6em;
+      padding: {
+        top: 6px;
+        bottom: 6px;
+        left: 40px;
+      }
+    }
+
+    .fieldset-icon {
+      @include hidetext;
+
+      width: $icon-size;
+      height: $icon-size;
+      display: block;
+      margin-bottom: 0;
+      position: absolute;
+      top: 6px + 1px;
+      left: 10px;
+      z-index: 1;
+      background: {
+        repeat: no-repeat;
+        position: center;
+        size: 75%;
+      }
+
+      &.icon-company {
+        background-image: url('../img/icon/icon-company.svg');
+      }
+
+      &.icon-account {
+        background-image: url('../img/icon/icon-account.svg');
+      }
+
+      &.icon-password {
+        background-image: url('../img/icon/icon-password.svg');
+      }
+    }
+  }
+
+  // * input 裡面有按鈕的原件
+  &.has-inner-btn {
+    @include max-width(map-get($tablet, lg)) {
+      input {
+        line-height: 1.6em;
+        padding: {
+          top: 6px;
+          bottom: 6px;
+          right: $icon-size * 2 + 20px;
+        }
+      }
+    }
+  }
+
+  @at-root .row & {
+    flex-grow: 1;
+    flex-basis: 0;
+    margin-bottom: 0;
+  }
+}
+
+.row {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+
+  &.is-space-between {
+    justify-content: space-between;
+  }
+
+  &.is-flex-end {
+    justify-content: flex-end;
+  }
+
+  &.is-flex-center {
+    justify-content: center;
+  }
+
+  &.has-padding {
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+}
+
+.row-column {
+  & + .row-column {
+    margin-left: 10px;
+  }
+}
+
+// * ==========================================================================
+// * 選項按鈕類型的（checkbox）
+// * ==========================================================================
+
+.option-btn {
+  margin-right: 5px;
+  margin-bottom: 5px;
+
+  @include min-width(map-get($phone, md)) {
+    margin-right: 7px;
+  }
+}
+
+.option-btn-group {
+  width: 100%;
+  margin-top: 5px;
+  display: flex;
+  flex-wrap: wrap;
+
+  @include max-width(map-get($phone, md) - 1) {
+    width: 100%;
+    align-items: center;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    flex-wrap: nowrap;
+    word-break: break-all;
+  }
+}
+
+// * ==========================================================================
+// * 選項類型的 input（checkbox）
+// * ==========================================================================
+
+.checkbox {
+  display: inline-block;
+  vertical-align: top;
+
+  label {
+    display: block;
+    color: $color-white;
+    line-height: 1.3em;
+    cursor: pointer;
+
+    @include min-width(map-get($phone, md)) {
+      line-height: 1.4em;
+    }
+
+    &::before {
+      content: '';
+      width: 1.3em;
+      height: 1.3em;
+      display: inline-block;
+      vertical-align: top;
+
+      @include min-width(map-get($phone, md)) {
+        line-height: 1.4em;
+      }
+    }
+  }
+
+  input[type='checkbox'] {
+    width: 0;
+    height: 0;
+    padding: 0;
+    margin: 0;
+    position: absolute;
+    opacity: 0;
+    z-index: -9999;
+
+    &[disabled] + label {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    & + label::before {
+      margin-right: 5px;
+      background-color: $color-white;
+      border-radius: 5px;
+    }
+
+    &:checked + label::before {
+      background: $color-orange url('../img/icon/icon-checked.svg') no-repeat center/70%;
+    }
+  }
+}
+
+// * ==========================================================================
+// * 切換框按鈕
+// * ==========================================================================
+
+.type-control {
+  display: inline-flex;
+  overflow: hidden;
+  border-radius: 5px;
+}
+
+.type-control__item {
+  label {
+    padding: 6px 10px;
+    display: block;
+    color: $color-white;
+    background-color: $color-blue-dark;
+    border: 1px $color-blue-dark solid;
+    line-height: 1.6em;
+    cursor: pointer;
+    opacity: 0.5;
+  }
+
+  input {
+    width: 0;
+    height: 0;
+    padding: 0;
+    margin: 0;
+    position: absolute;
+    opacity: 0;
+    z-index: -9999;
+
+    &:checked + label {
+      background-color: $color-blue-light-2;
+      border-color: $color-blue-light-2;
+      opacity: 1;
+    }
+  }
+}
+
+// * ==========================================================================
+// * 在 input 裡面的按鈕
+// * ==========================================================================
+
+.inner-input__control {
+  height: 100%;
+  padding: 6px 7.5px;
+  display: flex;
+  align-items: center;
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  &.is-desktop-hide {
+    @include min-width(map-get($desktop, sm)) {
+      display: none;
+    }
+  }
+}
+
+.inner-input__btn {
+  @include hidetext;
+
+  width: $icon-size;
+  height: $icon-size;
+  margin-right: 5px;
+  display: block;
+  background: {
+    position: center;
+    repeat: no-repeat;
+    size: 80%;
+  }
+
+  &:last-child {
+    margin-right: 0;
+  }
+
+  &.icon-search {
+    background-image: url('../img/icon/icon-search_dark-blue.svg');
+  }
+
+  &.icon-clear {
+    background-image: url('../img/icon/icon-clear_dark-blue.svg');
+  }
+
+  &.icon-download {
+    background-image: url('../img/icon/icon-download_dark-blue.svg');
+  }
+
+  &.icon-color-circle {
+    background-image: url('../img/icon/icon-color-circle.svg');
+  }
+}
+
+// * ==========================================================================
+// * 尚未添加內容提示
+// * ==========================================================================
+
+.notice-tips {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+// * ==========================================================================
+// * 提示箭頭
+// * ==========================================================================
+
+.slideup-tips {
+  padding: 7px 10px;
+  background-color: $color-white;
+
+  @include min-width(map-get($desktop, sm)) {
+    display: none;
+  }
+
+  &::before {
+    content: '';
+    width: 0;
+    height: 0;
+    margin: auto;
+    display: block;
+    border-style: solid;
+    border-width: 7px 20px 0;
+    border-color: $color-gray-dark transparent transparent transparent;
+    cursor: pointer;
+  }
+
+  &.is-hidden::before {
+    border-width: 0 20px 7px;
+    border-color: transparent transparent $color-gray-dark;
+  }
+}
+
+// * ==========================================================================
+// * Scrollbar 的樣式
+// * ==========================================================================
+
+.theme-scrollbar {
+  &::-webkit-scrollbar-track {
+    background-color: $color-white;
+  }
+
+  &::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+    background-color: $color-white;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #c4c4c4;
+  }
+}

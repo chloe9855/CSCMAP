@@ -1,0 +1,291 @@
+@charset "UTF-8";
+@import './utils/_utils.scss';
+
+// * ==========================================================================
+// * 按鈕樣式
+// * ==========================================================================
+
+.btn {
+  min-width: 85px;
+  padding: 6px 17px;
+  display: inline-block;
+  font-size: map-get($font-size, base);
+  text-align: center;
+  color: $color-white;
+  background-color: $color-blue;
+  border: 1px $color-blue solid;
+  border-radius: 5px;
+  vertical-align: top;
+  line-height: 1.6em;
+
+  @include min-width(map-get($desktop, sm)) {
+    &:hover,
+    &:focus {
+      background-color: $color-blue-dark;
+    }
+
+    &:focus {
+      box-shadow: focusborder(false, 0.4);
+    }
+  }
+
+  &.is-disabled {
+    color: $color-gray;
+    background-color: transparent;
+    border-color: $color-gray-light;
+    cursor: not-allowed;
+  }
+
+  // * 按鈕顏色
+  &.color-blue {
+    background-color: $color-blue-light;
+    border-color: $color-blue-light;
+
+    @include min-width(map-get($desktop, sm)) {
+      &:hover,
+      &:focus {
+        background-color: $color-blue-dark;
+        border-color: $color-blue-dark;
+      }
+    }
+  }
+
+  &.color-light-blue {
+    color: $color-blue-light;
+    background-color: #c8e6f6;
+    border-color: #c8e6f6;
+
+    @include min-width(map-get($desktop, sm)) {
+      &:hover,
+      &:focus {
+        background-color: #bedff1;
+        border-color: #bedff1;
+      }
+    }
+  }
+
+  &.color-white {
+    color: $color-black;
+    background-color: $color-white;
+    border-color: $color-white;
+
+    @include min-width(map-get($desktop, sm)) {
+      &:hover,
+      &:focus {
+        color: $color-black;
+        background-color: $color-white;
+        border-color: $color-white;
+      }
+    }
+  }
+
+  // * 按鈕尺寸
+  &.size-small {
+    padding: 5px 11px;
+  }
+
+  &.size-full {
+    width: 100%;
+    padding-right: 11px;
+    padding-left: 11px;
+  }
+
+  // * 有外框的按鈕
+  &.has-outline {
+    background-color: transparent;
+
+    &.outline-color-default {
+      color: $color-black-light;
+      border-color: $color-gray-light;
+
+      @include min-width(map-get($desktop, sm)) {
+        &:hover,
+        &:focus {
+          color: $color-white;
+          background-color: $color-blue-dark;
+          border-color: $color-blue-dark;
+        }
+      }
+    }
+
+    &.outline-color-white {
+      border-color: $color-white;
+
+      @include min-width(map-get($desktop, sm)) {
+        &:hover,
+        &:focus {
+          background-color: $color-blue-dark;
+          border-color: $color-blue-dark;
+        }
+      }
+    }
+
+    &.outline-color-blue-light {
+      color: $color-blue-light;
+      border-color: $color-blue-light;
+
+      @include min-width(map-get($desktop, sm)) {
+        &:hover,
+        &:focus {
+          color: $color-white;
+          background-color: $color-blue-dark;
+          border-color: $color-blue-dark;
+        }
+      }
+    }
+  }
+
+  // * 有 icon 的按鈕
+  &.has-back-icon {
+    &::after {
+      content: '';
+      width: 1.6em;
+      height: 1.6em;
+      display: inline-block;
+      vertical-align: top;
+      background: {
+        repeat: no-repeat;
+        position: center;
+        size: contain;
+      }
+    }
+
+    &.icon-search::after {
+      background: {
+        image: url('../img/icon/icon-search.svg');
+        size: 80%;
+      }
+    }
+
+    &.icon-download::after {
+      background-image: url('../img/icon/icon-download.svg');
+    }
+
+    &.icon-add-layer::after {
+      background: {
+        image: url('../img/icon/icon-add-layer.svg');
+        size: 80%;
+      }
+    }
+
+    &.icon-location::after {
+      background-image: url('../img/icon/icon-location.svg');
+    }
+
+    &.icon-delete::after {
+      background-image: url('../img/icon/icon-delete_blue.svg');
+    }
+
+    &.icon-back::after {
+      background-image: url('../img/icon/icon-back_white.svg');
+    }
+  }
+
+  &.has-front-icon {
+    &::before {
+      content: '';
+      width: 1.6em;
+      height: 1.6em;
+      display: inline-block;
+      vertical-align: top;
+      background: {
+        repeat: no-repeat;
+        position: center;
+        size: contain;
+      }
+    }
+
+    &.icon-search::before {
+      background: {
+        image: url('../img/icon/icon-search.svg');
+        size: 80%;
+      }
+    }
+
+    &.icon-download::before {
+      background-image: url('../img/icon/icon-download.svg');
+    }
+
+    &.icon-add-layer::before {
+      background: {
+        image: url('../img/icon/icon-add-layer.svg');
+        size: 80%;
+      }
+    }
+
+    &.icon-location::before {
+      background-image: url('../img/icon/icon-location.svg');
+    }
+
+    &.icon-delete::before {
+      background-image: url('../img/icon/icon-delete_blue.svg');
+    }
+
+    &.icon-back::before {
+      background-image: url('../img/icon/icon-back_white.svg');
+      margin-right: 5px;
+    }
+  }
+}
+
+.btn-group {
+  display: flex;
+  align-items: center;
+
+  .btn {
+    margin-right: 5px;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+
+  &.is-flex-end {
+    justify-content: flex-end;
+  }
+}
+
+.links-btn {
+  margin-right: 5px;
+  margin-left: 5px;
+  display: inline-block;
+  text-decoration: underline;
+  color: $color-blue-light;
+  vertical-align: top;
+
+  &.color-red {
+    color: $color-red;
+  }
+
+  &.color-light-blue {
+    color: rgba($color-blue-light, 0.5);
+  }
+}
+
+.circle-btn {
+  width: 35px;
+  height: 35px;
+  margin-right: 10px;
+  margin-left: 10px;
+  display: inline-block;
+  border-radius: 100%;
+  vertical-align: top;
+  background: {
+    position: center;
+    color: #eff2f6;
+    repeat: no-repeat;
+    size: 55%;
+  }
+
+  span {
+    display: none;
+  }
+
+  &.icon-comeback {
+    background-image: url('~/assets/img/icon/icon-back_blue.svg');
+  }
+
+  &.icon-increase {
+    background-image: url('~/assets/img/icon/icon-increase_blue.svg');
+  }
+}

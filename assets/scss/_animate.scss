@@ -1,0 +1,109 @@
+@charset "UTF-8";
+@import './utils/_utils.scss';
+
+// * ==========================================================================
+// * CSS Animation
+// * ==========================================================================
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 100%, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes popupSlideUp {
+  from {
+    // transform: translateY(0%);
+    bottom: -100%;
+  }
+
+  to {
+    // transform: translateY(-100%);
+    bottom: 0%;
+  }
+}
+
+@keyframes popupSlideDown {
+  from {
+    // transform: translateY(-100%);
+    bottom: 0%;
+  }
+
+  to {
+    // transform: translateY(0%);
+    bottom: -100%;
+  }
+}
+
+// * ==========================================================================
+// * Vue Animation
+// * ==========================================================================
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease-in-out;
+}
+
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
+}
+
+// * Popup Slide
+
+// .popup-slide-enter-active {
+//   animation: popupSlideUp 0.4s;
+// }
+
+// .popup-slide-leave-active {
+//   animation: popupSlideDown 0.4s;
+// }
+
+// .popup-slide-enter,
+// .popup-slide-leave-to {
+//   transform: translateY(0%);
+// }
+
+// .popup-slide-enter-to,
+// .popup-slide-leave {
+//   transform: translateY(-100%);
+// }
+
+.popup-slide-enter,
+.popup-slide-leave-to {
+  bottom: -100%;
+}
+
+.popup-slide-enter-to,
+.popup-slide-leave {
+  bottom: 0%;
+}
+
+.popup-slide-enter-active {
+  animation: popupSlideUp 0.6s;
+}
+
+.popup-slide-leave-active {
+  animation: popupSlideDown 1s;
+}
+
+// * Accordion
+
+.accordion-enter-active,
+.accordion-leave-active {
+  overflow: hidden;
+  transition: height 0.6s ease, opacity 0.6s ease;
+  will-change: height, opacity;
+}
+
+.accordion-enter,
+.accordion-leave-to {
+  height: 0 !important;
+  opacity: 0;
+}

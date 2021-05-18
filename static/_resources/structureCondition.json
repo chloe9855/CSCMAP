@@ -1,0 +1,17 @@
+{
+  "statusCondition": [
+    { "name": "建物狀態（不限）", "value": "A" },
+    { "name": "AAA", "value": "B" },
+    { "name": "BBB", "value": "C" }
+  ],
+  "typesCondition": [
+    { "name": "廠房", "value": "A" },
+    { "name": "倉庫", "value": "B" },
+    { "name": "設備", "value": "C" },
+    { "name": "水廠", "value": "D" },
+    { "name": "辦公室", "value": "E" },
+    { "name": "電器室", "value": "F" },
+    { "name": "附屬雜項", "value": "G" },
+    { "name": "雜項", "value": "H" }
+  ]
+}

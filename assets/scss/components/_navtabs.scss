@@ -1,0 +1,94 @@
+@charset "UTF-8";
+@import '../utils/_utils.scss';
+
+// * ==========================================================================
+// * 一般樣式的頁籤
+// * ==========================================================================
+
+.navtabs__header {
+  display: flex;
+  background-color: $color-white;
+
+  @include min-width(map-get($desktop, sm)) {
+    background-color: $color-blue-light;
+  }
+
+  &.theme-dark-mode {
+    background-color: $color-blue-dark;
+  }
+}
+
+.navtabs__btn {
+  width: 100%;
+  padding: 5px 10px 8px;
+  display: block;
+  position: relative;
+  text-align: center;
+  color: $color-black;
+  background-color: $color-white;
+  flex-grow: 1;
+
+  @include min-width(map-get($desktop, sm)) {
+    padding-top: 9px;
+    padding-bottom: 9px;
+    color: $color-white;
+    background-color: $color-blue-light;
+  }
+
+  span {
+    display: inline-block;
+    vertical-align: top;
+    line-height: 1.4em;
+  }
+
+  &::after {
+    content: '';
+    width: 100%;
+    height: 6px;
+    display: block;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    background-color: $color-blue-light-2;
+    opacity: 0.15;
+
+    @include min-width(map-get($desktop, sm)) {
+      opacity: 0;
+    }
+  }
+
+  &.current::after {
+    opacity: 1;
+  }
+
+  &.theme-dark-mode {
+    @include min-width(map-get($desktop, sm)) {
+      padding-top: 10px;
+      padding-bottom: 10px;
+      background-color: $color-blue-dark;
+      opacity: 0.6;
+
+      > span {
+        line-height: 25px;
+      }
+
+      &.current {
+        opacity: 1;
+      }
+    }
+  }
+}
+
+.navtabs__body {
+  background-color: $color-white;
+}
+
+.navtabs__content {
+  padding-right: 10px;
+  padding-left: 10px;
+
+  &.theme-dark-mode {
+    padding-right: 0;
+    padding-left: 0;
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "data": [
+    {
+      "id": "123456",
+      "layer_index": "1",
+      "name": "GIS系統定位圖",
+      "type": "local",
+      "visible": true,
+      "opacity": 5,
+      "text_color": "",
+      "update_time": "2019/08/25 10:00:00",
+      "enabled": true,
+      "can_upadte": true
+    },
+    {
+      "id": "123457",
+      "layer_index": "2",
+      "name": "中鋼Layout配置圖",
+      "type": "local",
+      "visible": true,
+      "opacity": 5,
+      "text_color": "",
+      "update_time": "2019/08/25 10:00:00",
+      "enabled": true,
+      "can_upadte": false
+    },
+    {
+      "id": "123458",
+      "layer_index": "3",
+      "name": "地籍界線圖",
+      "type": "local",
+      "visible": false,
+      "opacity": 0,
+      "text_color": "#000",
+      "update_time": "2019/08/25 10:00:00",
+      "enabled": true,
+      "can_upadte": false
+    },
+    {
+      "id": "123459",
+      "layer_index": "4",
+      "name": "廠區道路圖",
+      "type": "local",
+      "visible": false,
+      "opacity": 0,
+      "text_color": "#000",
+      "update_time": "2019/08/25 10:00:00",
+      "enabled": true,
+      "can_upadte": false
+    },
+    {
+      "id": "123460",
+      "layer_index": "5",
+      "name": "廠區彩色佈置圖",
+      "type": "local",
+      "visible": false,
+      "opacity": 5,
+      "text_color": "#000",
+      "update_time": "2019/08/25 10:00:00",
+      "enabled": true,
+      "can_upadte": false
+    },
+    {
+      "id": "123461",
+      "layer_index": "6",
+      "name": "衛星影像圖",
+      "type": "local",
+      "visible": false,
+      "opacity": 5,
+      "text_color": "#000",
+      "update_time": "2019/08/25 10:00:00",
+      "enabled": true,
+      "can_upadte": false
+    },
+    {
+      "id": "123462",
+      "layer_index": "7",
+      "name": "通用電子地圖",
+      "type": "local",
+      "visible": true,
+      "opacity": 0,
+      "text_color": "#000",
+      "update_time": "2019/08/25 10:00:00",
+      "enabled": true,
+      "can_upadte": false
+    }
+  ]
+}

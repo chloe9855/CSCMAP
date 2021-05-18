@@ -1,0 +1,172 @@
+@charset "UTF-8";
+@import './utils/_utils.scss';
+
+// * ==========================================================================
+// * 基本的標籤樣式
+// * ==========================================================================
+
+html {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+body {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow-x: hidden;
+  overflow-y: auto;
+  font-size: map-get($font-size, base);
+  font-family: $font-family;
+  color: $color-basic;
+  background-color: $color-white;
+  line-height: 1.6em;
+  letter-spacing: 0;
+  -webkit-overflow-scrolling: touch;
+  -o-overflow-scrolling: touch;
+}
+
+#__nuxt,
+#__layout {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+
+  @at-root .theme-home & {
+    @include min-width(map-get($tablet, md)) {
+      background: url('../img/banner_desktop.jpg') no-repeat right top/contain;
+    }
+
+    @include max-width(map-get($phone, lg)) {
+      height: auto;
+      overflow: auto;
+    }
+
+    &::before {
+      content: '';
+      width: 100%;
+      height: 0;
+      padding-bottom: 90%;
+      display: block;
+      background: url('../img/banner_phone.png') no-repeat right top/100%;
+      margin-bottom: 37px;
+
+      @include min-width(map-get($tablet, sm)) {
+        padding-bottom: 85%;
+        background-image: url('../img/banner_tablet.jpg');
+      }
+
+      @include min-width(map-get($tablet, md)) {
+        display: none;
+      }
+    }
+  }
+}
+
+a {
+  text-decoration: none;
+
+  > span {
+    color: inherit;
+    line-height: 1em;
+  }
+
+  &:focus {
+    outline: none;
+  }
+}
+
+p {
+  margin-bottom: 1rem;
+}
+
+input,
+select,
+textarea,
+button {
+  padding: 0;
+  margin: 0;
+  display: inline-block;
+  font-size: map-get($font-size, base);
+  font-family: $font-family;
+  background-color: transparent;
+  border: none;
+  line-height: 1;
+
+  &:focus {
+    outline: none;
+  }
+}
+
+input[type='text'],
+input[type='password'],
+input[type='number'],
+input[type='email'],
+input[type='file'],
+input[type='date'],
+select,
+textarea {
+  width: 100%;
+  padding: 6px 10px;
+  position: relative;
+  color: $color-basic;
+  background-color: $color-white;
+  border: 1px $color-gray-light solid;
+  border-radius: 5px;
+  transition: box-shadow 0.15s;
+  transform: translateZ(0);
+  line-height: 1.6em;
+
+  @include max-width(map-get($desktop, sm)) {
+    appearance: none;
+  }
+
+  &:focus {
+    border-color: $color-gray;
+  }
+
+  &.has-content {
+    color: $color-blue-dark;
+    border-color: $color-blue;
+    box-shadow: 0 0 0 2px rgba($color-blue-light-2, 0.6);
+  }
+}
+
+select::-ms-expand {
+  display: none;
+}
+
+textarea {
+  height: 200px;
+  display: block;
+  resize: none;
+}
+
+button {
+  font: inherit;
+}
+
+input[type='submit'],
+input[type='reset'],
+input[type='button'],
+button {
+  cursor: pointer;
+
+  @include max-width(map-get($desktop, sm)) {
+    appearance: none;
+  }
+}
+
+[v-cloak] {
+  display: none;
+}

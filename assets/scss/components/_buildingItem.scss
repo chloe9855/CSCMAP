@@ -1,0 +1,220 @@
+@charset "UTF-8";
+@import '../utils/_utils.scss';
+
+// * ==========================================================================
+// * 建物搜尋結果
+// * ==========================================================================
+
+.building__item {
+  height: 142px;
+  padding: 10px 10px 10px 15px;
+  display: block;
+  position: relative;
+  background-color: $color-white;
+  cursor: pointer;
+
+  @include min-width(map-get($desktop, sm)) {
+    &:hover::before,
+    &:focus::before {
+      opacity: 1;
+    }
+  }
+
+  &.current::before {
+    opacity: 1;
+  }
+
+  &::before {
+    content: '';
+    width: 5px;
+    height: 100%;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: $color-orange;
+    opacity: 0;
+  }
+
+  &.theme-in-map {
+    height: auto;
+    padding: 5px 10px;
+
+    &::before {
+      display: none;
+    }
+  }
+
+  @at-root .infowindow__content &:nth-child(odd) {
+    background-color: #eef4f6;
+  }
+}
+
+.building__title {
+  position: relative;
+  overflow: hidden;
+  font-size: map-get($font-size, sm);
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: $color-blue;
+  word-break: keep-all;
+  line-height: 25px;
+
+  &::before {
+    content: '';
+    width: 25px;
+    height: 25px;
+    margin-right: 5px;
+    display: inline-block;
+    vertical-align: top;
+    background: {
+      position: center;
+      repeat: no-repeat;
+      size: contain;
+    }
+  }
+
+  &.icon-type-yu::before {
+    background-image: url('~/assets/img/building-type-yu.svg');
+  }
+
+  &.icon-type-jiun::before {
+    background-image: url('~/assets/img/building-type-jiun.svg');
+  }
+
+  &.icon-type-shin::before {
+    background-image: url('~/assets/img/building-type-shin.svg');
+  }
+
+  @at-root .infowindow .building__item & {
+    padding-right: 10px;
+
+    &::after {
+      content: '';
+      width: 0;
+      height: 0;
+      display: block;
+      position: absolute;
+      top: calc((100% - 6px) / 2);
+      right: 0;
+      border-style: solid;
+      border-width: 6px 5px 0;
+      border-color: $color-black transparent transparent;
+      z-index: 1;
+    }
+  }
+
+  @at-root .infowindow .building__item.is-open &::after {
+    border-width: 0 5px 6px;
+    border-color: transparent transparent $color-black;
+  }
+}
+
+.building__article {
+  display: none;
+
+  @at-root .infowindow .building__item.is-open & {
+    display: block;
+  }
+}
+
+.building__body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.building__content {
+  width: calc(100% - 80px);
+  color: $color-gray-dark;
+
+  strong {
+    margin-right: 10px;
+    color: $color-black;
+  }
+
+  p {
+    margin-bottom: 0;
+    line-height: 25px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    word-break: keep-all;
+
+    &.has-icon::before {
+      content: '';
+      width: 15px;
+      height: 15px;
+      margin: 5px 5px 5px 0;
+      display: inline-block;
+      vertical-align: top;
+      background: {
+        repeat: no-repeat;
+        position: center;
+        size: contain;
+      }
+    }
+
+    &.icon-building::before {
+      background-image: url('~/assets/img/icon/icon-building.svg');
+    }
+
+    &.icon-people::before {
+      background-image: url('~/assets/img/icon/icon-people.svg');
+    }
+
+    &.icon-license::before {
+      background-image: url('~/assets/img/icon/icon-license.svg');
+    }
+  }
+}
+
+.building__tag-group {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.building__tag {
+  margin-right: 5px;
+  display: flex;
+  align-items: center;
+
+  &::before {
+    content: '';
+    width: 15px;
+    height: 15px;
+    margin-right: 5px;
+    display: block;
+    background: {
+      repeat: no-repeat;
+      position: center;
+      size: contain;
+    }
+  }
+
+  &.icon-error::before {
+    background-image: url('~/assets/img/icon/icon-error.svg');
+  }
+
+  &.icon-checked::before {
+    background-image: url('~/assets/img/icon/icon-check.svg');
+  }
+}
+
+.read-more-btn {
+  width: 80px;
+  display: block;
+  color: $color-gray-dark;
+  line-height: 25px;
+
+  &::before {
+    content: '';
+    width: 25px;
+    height: 25px;
+    margin-right: 5px;
+    display: inline-block;
+    vertical-align: top;
+    background: url('~/assets/img/icon/icon-back.svg') no-repeat center/contain;
+  }
+}

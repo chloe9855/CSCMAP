@@ -1,0 +1,82 @@
+@charset "UTF-8";
+
+// * ==========================================================================
+// * Color
+// * ==========================================================================
+
+$color-white: #fff;
+$color-black: #000;
+$color-black-light: #565656;
+
+$color-blue: #165f88;
+$color-blue-dark: #0d3b55;
+$color-blue-light: #408bc5;
+$color-blue-light-2: #60b4f5;
+
+$color-gray: #6c757d;
+$color-gray-dark: #707070;
+$color-gray-light: #dbdbdb;
+
+$color-red: #d37672;
+
+$color-orange: #f08300;
+$color-orange-dark: #c57a20;
+$color-orange-light: #fff2ce;
+
+$color-yellow: #ffeaad;
+
+$color-basic: $color-gray;
+
+// * ==========================================================================
+// * Font Family
+// * ==========================================================================
+
+$font-family: 'Noto Sans TC', '微軟正黑體', 'Microsoft JhengHei', sans-serif, arial;
+
+// * ==========================================================================
+// * RWD Breakpoints
+// * ==========================================================================
+
+$desktop: (
+  xl: 1600px,
+  lg: 1440px,
+  md: 1280px,
+  sm: 1024px
+);
+
+$tablet: (
+  lg: 1023px,
+  md: 960px,
+  sm: 768px
+);
+
+$phone: (
+  lg: 767px,
+  md: 480px,
+  sm: 370px
+);
+
+// * ==========================================================================
+// * Font Size
+// * ==========================================================================
+
+$font-size: (
+  lg: 24px,
+  md: 18px,
+  sm: 16px,
+  base: 14px
+);
+
+// * ==========================================================================
+// * Focus Style
+// * ==========================================================================
+
+@function focusborder($inside: false, $opacity: 0.6) {
+  @if $inside == true {
+    @return inset 0 0 0 0.2rem rgba($color-blue-light, $opacity);
+  }
+
+  @else {
+    @return 0 0 0 0.2rem rgba($color-blue-light, $opacity);
+  }
+}

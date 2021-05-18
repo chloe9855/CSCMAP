@@ -1,0 +1,27 @@
+@charset "UTF-8";
+@import '../utils/_utils.scss';
+
+// * ==========================================================================
+// * 地圖裡的資訊視窗
+// * ==========================================================================
+
+.infowindow {
+  padding: 10px 0;
+  background-color: $color-white;
+}
+
+.infowindow__title {
+  padding: 0 10px;
+  font-size: map-get($font-size, md);
+  font-weight: 500;
+  color: $color-blue;
+  line-height: 1.4em;
+  margin-bottom: 10px;
+}
+
+.infowindow__content {
+  width: 100%;
+  max-height: 110px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
