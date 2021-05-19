@@ -70,7 +70,7 @@
               href="#"
               class="member-btn member-login-btn"
               title="登入"
-              @click.stop="$store.commit('SET_ACCESS_TOKEN', '123')"
+              @click.stop="loginHandler"
               @mousedown.prevent
             >
               登入
@@ -162,8 +162,12 @@ export default {
           isDesktopHide: true,
           classNameList: []
         }
-      ]
+      ],
+      userData: ''
     };
+  },
+  mounted () {
+    this.getUserData();
   },
   methods: {
     // * 控制 menu 選單開啟/關閉
@@ -179,6 +183,35 @@ export default {
     logoutHandler () {
       this.$store.commit('SET_ACCESS_TOKEN', '');
       this.$router.push('/index');
+    },
+    // * 登入 跳轉SSO
+    loginHandler () {
+      location.href = 'https://eip.csc.com.tw/SSO/DSS0/DSAOS0.aspx?.done=' + encodeURIComponent(window.location.href);
+    },
+    getUserData () {
+      // fetch('http://192.168.1.57/api/SignOnStatus', {
+      //   method: 'GET',
+      //   headers: new Headers({
+      //     'Content-Type': 'application/json'
+      //   })
+      // }).then(res => res.json())
+      //   .then(response => console.log('Success:', response))
+      //   .catch(error => console.error('Error:', error));
+
+      fetch('http://192.168.1.57/api/SignOnStatus', {
+        method: 'GET',
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        })
+      }).then((response) => {
+        return response.json();
+      }).then((jsonData) => {
+        console.log(jsonData);
+        this.userData = jsonData;
+        console.log(this.userData.UserName);
+      }).catch((err) => {
+        console.log('錯誤:', err);
+      });
     }
   },
   computed: {
