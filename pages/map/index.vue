@@ -1,7 +1,7 @@
 <template>
   <div class="app">
     <div
-      id="map"
+      id="CSCMap"
       @mousemove="getMousePositionHandler"
       @click.stop="mapClickHandler"
     >
@@ -809,9 +809,24 @@ export default {
         this.queryWindowOpen = true;
 
         // * 如果是從首頁點擊「坐標查詢」來這一頁，預設就開啟「坐標查詢」
-        if (this.$route.params.preload === 'openSetPosition') {
+        // if (this.$route.params.preload === 'openSetPosition') {
+        //   this.activeWindow = 'setPositionWindow';
+        // }
+        const searchURL = window.location.search;
+        const targetPageName = searchURL.split('=')[1];
+        if (targetPageName === 'openSetPosition') {
           this.activeWindow = 'setPositionWindow';
+          this.$store.commit('SET_MOBILE_SELECT', true);
         }
+
+        // * 引入地圖api
+        const map = new CSC.GISOnlineMap(document.getElementById('CSCMap'), { autoLoad: true });
+        // 滑鼠坐標
+        CSC.GISEvent.addListener(map, 'coordinate', function (o) { console.log(o); });
+        // 設定球標顯示
+        map.setupMarker({ visible: true });
+        // 設定圖層顯示、透明度
+        map.setupLayer({ fid: 10, visible: false, opacity: 100 });
       }, 1000);
     },
     // * 控制視窗顯示
@@ -1128,7 +1143,7 @@ export default {
   z-index: 0;
 }
 
-#map {
+#CSCMap {
   width: 100%;
   height: 100%;
   position: absolute;

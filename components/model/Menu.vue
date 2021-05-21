@@ -37,7 +37,7 @@
       class="member-control"
     >
       <div class="member-info">
-        <label>王小明</label>
+        <label>{{ userName }}</label>
       </div>
       <a
         href="javascript:;"
@@ -54,12 +54,56 @@
 
 <script>
 export default {
+  data () {
+    return {
+      userName: ''
+    };
+  },
+  mounted () {
+    this.getUserData();
+  },
   methods: {
     // * 登出
     logoutHandler () {
       this.$store.commit('SET_ACCESS_TOKEN', '');
       this.$store.commit('CTRL_MENU_OPEN', false);
       this.$router.push('/index');
+      this.logOut(false);
+    },
+    // * 獲取登入資料
+    getUserData () {
+      fetch('/csc2api/api/SignOnStatus', {
+        method: 'GET',
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        })
+      }).then((response) => {
+        return response.json();
+      }).then((jsonData) => {
+        console.log(jsonData);
+        this.userID = jsonData.UID;
+        this.userName = jsonData.UserName;
+        this.$store.commit('SET_ACCESS_TOKEN', jsonData.UID);
+      }).catch((err) => {
+        console.log('錯誤:', err);
+        console.log(err.status);
+      });
+    },
+    // *登出重設cookie
+    logOut (autoRedirectQS) {
+      console.log('logout');
+      const redirectQS = autoRedirectQS !== false;
+      const date = new Date();
+      const cookieExpire = date.getTime - 1000;
+      // 刪除 cookie 時，名稱、路徑和域名必須相同
+      document.cookie = ' zsid=;domain=csc.com.tw;path=/';
+      document.cookie = ' gcid=;domain=csc.com.tw;path=/';
+      document.cookie = ' guid=;domain=csc.com.tw;path=/';
+      document.cookie = ' sid=;domain=csc.com.tw;path=/';
+
+      if (redirectQS) {
+        window.location = 'https://cs.csc.com.tw/qss/ec/qssec';
+      }
     }
   },
   computed: {

@@ -5,41 +5,45 @@
     </h1>
     <div class="guide-service__content">
       <div class="guide-service__enter-group">
-        <nuxt-link
-          :to="'/map'"
+        <a
+          href="javascript:;"
           class="guide-service__enter-btn icon-map"
           title="進入圖台"
           @mousedown.prevent
+          @click="loginHandler"
         >
           <span>進入圖台</span>
-        </nuxt-link>
+        </a>
         <a
           v-if="screenWidth > 1023"
-          href="#"
+          href="javascript:;"
           class="guide-service__enter-btn icon-info"
           title="建物資訊"
           @mousedown.prevent
+          @click="loginHandler"
         >
           <span>建物資訊</span>
         </a>
-        <nuxt-link
+        <a
           v-if="screenWidth < 1024"
-          :to="{ name: 'map', params: { preload: 'searchModeLattice' } }"
+          href="javascript:;"
           class="guide-service__enter-btn theme-normal icon-grid is-desktop-hide"
           title="方格圖載入"
           @mousedown.prevent
+          @click="loginHandler2"
         >
           <span>方格圖載入</span>
-        </nuxt-link>
-        <nuxt-link
+        </a>
+        <a
           v-if="screenWidth < 1024"
-          :to="{ name: 'map', params: { preload: 'openSetPosition' } }"
+          href="javascript:;"
           class="guide-service__enter-btn theme-normal icon-search is-desktop-hide"
           title="坐標定位"
           @mousedown.prevent
+          @click="loginHandler3"
         >
           <span>坐標定位</span>
-        </nuxt-link>
+        </a>
       </div>
 
       <div class="guide-service__intro">
@@ -60,6 +64,32 @@ export default {
         class: 'theme-home'
       }
     };
+  },
+  methods: {
+    loginHandler () {
+      if (this.$store.state.accessToken === '') { // 如果沒登入
+        location.href = `https://eip.csc.com.tw/SSO/DSS0/DSAOS0.aspx?.done=${encodeURIComponent(window.location.href)}map`;
+      } else {
+        location.href = `${window.location.href}map`;
+      }
+    },
+    loginHandler2 () {
+      if (this.$store.state.accessToken === '') { // 如果沒登入
+        location.href = `https://eip.csc.com.tw/SSO/DSS0/DSAOS0.aspx?.done=${encodeURIComponent(window.location.href)}map?now=searchModeLattice`;
+      } else {
+        location.href = `${window.location.href}map?now=searchModeLattice`;
+      }
+    },
+    loginHandler3 () {
+      if (this.$store.state.accessToken === '') { // 如果沒登入
+        // 跳登入頁 按下登入後跳回首頁
+        location.href = `https://eip.csc.com.tw/SSO/DSS0/DSAOS0.aspx?.done=${encodeURIComponent(window.location.href)}map?now=openSetPosition`;
+        // 導回座標定位
+        // this.$router.push({ name: 'map', params: { preload: 'openSetPosition' } });
+      } else {
+        location.href = `${window.location.href}map?now=openSetPosition`;
+      }
+    }
   },
   computed: {
     screenWidth () {

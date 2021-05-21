@@ -263,9 +263,12 @@ export default {
     this.structure.status.selected = this.structure.status.options[0];
 
     // * 如果是從首頁點擊「方格圖載入」，搜尋類型切換成「方格」
-    if (this.$route.params.preload === 'searchModeLattice') {
-      this.modeType = 'lattice';
-    }
+    // if (this.$route.params.preload === 'searchModeLattice') {
+    //   this.modeType = 'lattice';
+    // }
+  },
+  mounted () {
+    this.switchType();
   },
   methods: {
     // * 更新建物類型選項
@@ -342,6 +345,14 @@ export default {
       }
 
       return result;
+    },
+    // * 如果是從首頁點擊「方格圖載入」，搜尋類型切換成「方格」
+    switchType () {
+      const searchURL = window.location.search;
+      const targetPageName = searchURL.split('=')[1];
+      if (targetPageName === 'searchModeLattice') {
+        this.modeType = 'lattice';
+      }
     }
   },
   computed: {

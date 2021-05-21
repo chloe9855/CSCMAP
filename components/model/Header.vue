@@ -63,11 +63,11 @@
               v-if="hasAccessToken === true"
               class="member-info"
             >
-              <label>王小明</label>
+              <label>{{ userName }}</label>
             </div>
             <a
               v-if="hasAccessToken === false"
-              href="#"
+              href="javascript:;"
               class="member-btn member-login-btn"
               title="登入"
               @click.stop="loginHandler"
@@ -163,7 +163,8 @@ export default {
           classNameList: []
         }
       ],
-      userData: ''
+      userID: '',
+      userName: ''
     };
   },
   mounted () {
@@ -183,22 +184,32 @@ export default {
     logoutHandler () {
       this.$store.commit('SET_ACCESS_TOKEN', '');
       this.$router.push('/index');
+      this.logOut(false);
+    },
+    // *登出重設cookie
+    logOut (autoRedirectQS) {
+      console.log('logout');
+      const redirectQS = autoRedirectQS !== false;
+      const date = new Date();
+      const cookieExpire = date.getTime - 1000;
+      // 刪除 cookie 時，名稱、路徑和域名必須相同
+      document.cookie = ' zsid=;domain=csc.com.tw;path=/';
+      document.cookie = ' gcid=;domain=csc.com.tw;path=/';
+      document.cookie = ' guid=;domain=csc.com.tw;path=/';
+      document.cookie = ' sid=;domain=csc.com.tw;path=/';
+
+      if (redirectQS) {
+        window.location = 'https://cs.csc.com.tw/qss/ec/qssec';
+      }
     },
     // * 登入 跳轉SSO
     loginHandler () {
       location.href = 'https://eip.csc.com.tw/SSO/DSS0/DSAOS0.aspx?.done=' + encodeURIComponent(window.location.href);
+      this.getUserData();
     },
+    // * 獲取登入資料
     getUserData () {
-      // fetch('http://192.168.1.57/api/SignOnStatus', {
-      //   method: 'GET',
-      //   headers: new Headers({
-      //     'Content-Type': 'application/json'
-      //   })
-      // }).then(res => res.json())
-      //   .then(response => console.log('Success:', response))
-      //   .catch(error => console.error('Error:', error));
-
-      fetch('http://192.168.1.57/api/SignOnStatus', {
+      fetch('/csc2api/api/SignOnStatus', {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -207,10 +218,12 @@ export default {
         return response.json();
       }).then((jsonData) => {
         console.log(jsonData);
-        this.userData = jsonData;
-        console.log(this.userData.UserName);
+        this.userID = jsonData.UID;
+        this.userName = jsonData.UserName;
+        this.$store.commit('SET_ACCESS_TOKEN', jsonData.UID);
       }).catch((err) => {
         console.log('錯誤:', err);
+        console.log(err.status);
       });
     }
   },

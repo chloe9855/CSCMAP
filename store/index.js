@@ -44,6 +44,7 @@ export const mutations = {
   },
 
   // *手機版選取單一建物->上方的MultipleSelectMobileList會上滑消失
+  // *控制上方MultipleSelectMobileList 和右側工具列消失
   SET_MOBILE_SELECT (state, payload) {
     state.mobileSelectUP = payload;
   }
