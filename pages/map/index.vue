@@ -17,8 +17,17 @@
 
     <!-- 右下角的坐標資訊 -->
     <div v-if="screenWidth > 1023" class="coordinates">
-      <div>滑鼠相對於地圖的 X 坐標：{{ mousePosition.x }}</div>
-      <div>滑鼠相對於地圖的 Y 坐標：{{ mousePosition.y }}</div>
+      <!-- <div>滑鼠相對於地圖的 X 坐標：{{ mousePosition.x }}</div>
+      <div>滑鼠相對於地圖的 Y 坐標：{{ mousePosition.y }}</div> -->
+      <div class="co_cube">
+        方格座標({{ coordinatesCube.x }}, {{ coordinatesCube.y }})
+      </div>
+      <div class="co_cubeno">
+        方格圖號: {{ CubeNo }}
+      </div>
+      <div class="co_TWD">
+        TWD97({{ coordinatesTwd.x }},{{ coordinatesTwd.y }})
+      </div>
     </div>
 
     <!-- 行動版幾何繪圖的準心 -->
@@ -765,6 +774,18 @@ export default {
       mousePosition: {
         x: 0,
         y: 0
+      },
+      // * 方格座標
+      coordinatesCube: {
+        x: '',
+        y: ''
+      },
+      // * 方格圖號
+      CubeNo: '',
+      // * TWD座標
+      coordinatesTwd: {
+        x: '',
+        y: ''
       }
     };
   },
@@ -822,7 +843,14 @@ export default {
         // * 引入地圖api
         const map = new CSC.GISOnlineMap(document.getElementById('CSCMap'), { autoLoad: true });
         // 滑鼠坐標
-        CSC.GISEvent.addListener(map, 'coordinate', function (o) { console.log(o); });
+        CSC.GISEvent.addListener(map, 'coordinate', (o) => {
+          this.coordinatesCube.x = o.CSC.x.toFixed(2);
+          this.coordinatesCube.y = o.CSC.y.toFixed(2);
+          this.CubeNo = o.GridNO;
+          this.coordinatesTwd.x = o.TWD97.x.toFixed(2);
+          this.coordinatesTwd.y = o.TWD97.y.toFixed(2);
+          console.log(this);
+        });
         // 設定球標顯示
         map.setupMarker({ visible: true });
         // 設定圖層顯示、透明度
@@ -1184,8 +1212,30 @@ export default {
   position: absolute;
   bottom: 10px;
   right: 10px;
+  color: #707070;
   background-color: $color-white;
   z-index: 4000;
+}
+
+.co_cube {
+  position: absolute;
+  top: 8px;
+  left: 15px;
+  font-size: 12px;
+}
+
+.co_cubeno {
+  position: absolute;
+  top: 8px;
+  left: 180px;
+  font-size: 12px;
+}
+
+.co_TWD {
+  position: absolute;
+  top: 30px;
+  left: 15px;
+  font-size: 12px;
 }
 
 // * 圖層工具的表格
