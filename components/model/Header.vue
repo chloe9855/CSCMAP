@@ -204,7 +204,7 @@ export default {
     },
     // * 登入 跳轉SSO
     loginHandler () {
-      location.href = 'https://eip.csc.com.tw/SSO/DSS0/DSAOS0.aspx?.done=' + encodeURIComponent(window.location.href);
+      location.href = 'https://testeip.csc.com.tw:1443/SSO/DSS0/DSAOS0.aspx?.done=' + encodeURIComponent(window.location.href);
       this.getUserData();
     },
     // * 獲取登入資料

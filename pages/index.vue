@@ -68,14 +68,14 @@ export default {
   methods: {
     loginHandler () {
       if (this.$store.state.accessToken === '') { // 如果沒登入
-        location.href = `https://eip.csc.com.tw/SSO/DSS0/DSAOS0.aspx?.done=${encodeURIComponent(window.location.href)}map`;
+        location.href = `https://testeip.csc.com.tw:1443/SSO/DSS0/DSAOS0.aspx?.done=${encodeURIComponent(window.location.href)}map`;
       } else {
         location.href = `${window.location.href}map`;
       }
     },
     loginHandler2 () {
       if (this.$store.state.accessToken === '') { // 如果沒登入
-        location.href = `https://eip.csc.com.tw/SSO/DSS0/DSAOS0.aspx?.done=${encodeURIComponent(window.location.href)}map?now=searchModeLattice`;
+        location.href = `https://testeip.csc.com.tw:1443/SSO/DSS0/DSAOS0.aspx?.done=${encodeURIComponent(window.location.href)}map?now=searchModeLattice`;
       } else {
         location.href = `${window.location.href}map?now=searchModeLattice`;
       }
@@ -83,7 +83,7 @@ export default {
     loginHandler3 () {
       if (this.$store.state.accessToken === '') { // 如果沒登入
         // 跳登入頁 按下登入後跳回首頁
-        location.href = `https://eip.csc.com.tw/SSO/DSS0/DSAOS0.aspx?.done=${encodeURIComponent(window.location.href)}map?now=openSetPosition`;
+        location.href = `https://testeip.csc.com.tw:1443/SSO/DSS0/DSAOS0.aspx?.done=${encodeURIComponent(window.location.href)}map?now=openSetPosition`;
         // 導回座標定位
         // this.$router.push({ name: 'map', params: { preload: 'openSetPosition' } });
       } else {

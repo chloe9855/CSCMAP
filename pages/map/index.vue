@@ -214,6 +214,7 @@
       @select="payload => activeWindow = payload"
       @setPositionAlert="ctrlPositionAlert"
       @hideTagBar="hideTagBarCtrl"
+      @hideCluster="hideClusterHandler"
     />
 
     <!-- ERP 視窗（建物搜尋結果） -->
@@ -786,7 +787,9 @@ export default {
       coordinatesTwd: {
         x: '',
         y: ''
-      }
+      },
+      gisMap: '',
+      markerVisible: true
     };
   },
   components: {
@@ -842,6 +845,7 @@ export default {
 
         // * 引入地圖api
         const map = new CSC.GISOnlineMap(document.getElementById('CSCMap'), { autoLoad: true });
+        this.gisMap = map;
         // 滑鼠坐標
         CSC.GISEvent.addListener(map, 'coordinate', (o) => {
           this.coordinatesCube.x = o.CSC.x.toFixed(2);
@@ -849,10 +853,14 @@ export default {
           this.CubeNo = o.GridNO;
           this.coordinatesTwd.x = o.TWD97.x.toFixed(2);
           this.coordinatesTwd.y = o.TWD97.y.toFixed(2);
-          console.log(this);
+          console.log(o);
+        });
+
+        CSC.GISEvent.addListener(map, 'markerclick', function (e) {
+          console.log(e.markers.length);
         });
         // 設定球標顯示
-        map.setupMarker({ visible: true });
+        // map.setupMarker({ visible: true });
         // 設定圖層顯示、透明度
         map.setupLayer({ fid: 10, visible: false, opacity: 100 });
       }, 1000);
@@ -1112,7 +1120,26 @@ export default {
     // 手機版按"X"關閉PopupBox時 上方TAG列和右側工具列會恢復顯示
     showTagBarCtrl () {
       this.$store.commit('SET_MOBILE_SELECT', false);
+    },
+    // * 隱藏建物球標
+    hideClusterHandler () {
+      this.gisMap.setupMarker({ visible: this.markerVisible = !this.markerVisible });
     }
+    // getStructureCondition () {
+    //   fetch('https://east.csc.com.tw/eas/mhb/rest/mhbe/BuildingList?_format=json&Keyword=&Status=&Type=', {
+    //     method: 'GET',
+    //     headers: new Headers({
+    //       'Content-Type': 'application/json'
+    //     })
+    //   }).then((response) => {
+    //     return response.json();
+    //   }).then((data) => {
+    //     console.log(data);
+    //     data.
+    //   }).catch((err) => {
+    //     console.log('錯誤:', err);
+    //   });
+    // }
   },
   computed: {
     screenWidth () {

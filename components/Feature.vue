@@ -29,6 +29,7 @@
         <a
           href="javascript:;"
           class="feature__btn icon-cluster-switch"
+          @click.stop="$emit('hideCluster')"
           @mousedown.prevent
         >
           <span>隱藏建物球標</span>
@@ -118,6 +119,11 @@
 
 <script>
 export default {
+  data () {
+    return {
+      myColor: 'icon-cluster-switch'
+    };
+  },
   props: {
     current: String
   },
