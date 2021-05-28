@@ -51,7 +51,7 @@
                 <div class="checkbox dataTable__checkbox">
                   <input
                     :id="`visible_${rowsItem['layer_index']}_${index}`"
-                    v-model="rowsItem['enabled']"
+                    v-model="rowsItem['inUse']"
                     type="checkbox"
                   >
                   <label :for="`visible_${rowsItem['layer_index']}_${index}`">啟用</label>
@@ -119,7 +119,7 @@ export default {
             name: '底圖新增/更新'
           },
           {
-            id: 'enabled',
+            id: 'inUse',
             name: '啟用'
           }
         ],

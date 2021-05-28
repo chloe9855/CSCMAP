@@ -255,11 +255,13 @@ export default {
   props: {
     open: Boolean,
     condition: Object,
+    buildtype: Object,
     resultType: String
   },
   created () {
-    this.structure.types.options = this.condition.typesCondition;
-    this.structure.status.options = this.condition.statusCondition;
+    this.structure.types.options = this.buildtype;
+    this.structure.status.options = this.condition.data;
+    // this.structure.status.options = this.condition.statusCondition;
     this.structure.status.selected = this.structure.status.options[0];
 
     // * 如果是從首頁點擊「方格圖載入」，搜尋類型切換成「方格」

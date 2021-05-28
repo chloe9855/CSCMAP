@@ -33,16 +33,19 @@ export default {
   methods: {
     // * 透明度控制
     valueComputeHandler (isIncrease) {
-      const _value = isIncrease === true ? 1 : -1;
+      // const _value = isIncrease === true ? 1 : -1;
+      const _value = isIncrease === true ? 10 : -10;
       this.opacity = this.opacity + _value;
-      if (this.opacity >= 10) { this.opacity = 10; }
+      // if (this.opacity >= 10) { this.opacity = 10; }
       if (this.opacity <= 0) { this.opacity = 0; }
+      if (this.opacity >= 100) { this.opacity = 100; }
     }
   },
   computed: {
     // * 透明度顯示文字
     valueTextHandler () {
-      return `${this.opacity * 10}%`;
+      // return `${this.opacity * 10}%`;
+      return `${this.opacity}%`;
     }
   },
   watch: {

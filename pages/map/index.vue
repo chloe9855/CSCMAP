@@ -179,6 +179,7 @@
       ref="queryWindow"
       :open="queryWindowOpen"
       :condition="structureCondition"
+      :buildtype="structureType"
       :result-type="searchResult.types"
       @control="payload => queryWindowOpen = payload"
       @search="searchHandler"
@@ -452,26 +453,26 @@
               <tbody>
                 <template v-for="layerItem of switchLayerProvider(layerOptions.current)">
                   <tr
-                    :key="layerItem.id"
-                    :class="{ 'is-active': layerOptions.current === 'addition' && layerOptions.active === layerItem.id }"
-                    @mouseenter="layerOptions.active = layerItem.id"
+                    :key="layerItem.fid"
+                    :class="{ 'is-active': layerOptions.current === 'addition' && layerOptions.active === layerItem.fid }"
+                    @mouseenter="layerOptions.active = layerItem.fid"
                     @mouseleave="layerOptions.active = ''"
                   >
                     <td>
                       <div class="layersTable__btn">
-                        {{ layerItem.name }}
+                        {{ layerItem.title }}
                       </div>
                     </td>
                     <td>
                       <ViewCheckbox
-                        :id="layerItem.id"
+                        :id="layerItem.fid"
                         :visible="layerItem.visible"
-                        @change="layerItem.visible = $event"
+                        @change="layerVisibleHandler"
                       />
                     </td>
                     <td>
                       <OpacityController
-                        :id="layerItem.id"
+                        :id="layerItem.fid"
                         :value="layerItem.opacity"
                         @update="updateLayerOpacities"
                       />
@@ -479,10 +480,10 @@
                   </tr>
                   <tr
                     v-if="layerOptions.current === 'addition'"
-                    v-show="layerOptions.active === layerItem.id"
-                    :key="`table-detail_${layerItem.id}`"
-                    :class="{ 'is-active': layerOptions.current === 'addition' && layerOptions.active === layerItem.id }"
-                    @mouseenter="layerOptions.active = layerItem.id"
+                    v-show="layerOptions.active === layerItem.fid"
+                    :key="`table-detail_${layerItem.fid}`"
+                    :class="{ 'is-active': layerOptions.current === 'addition' && layerOptions.active === layerItem.fid }"
+                    @mouseenter="layerOptions.active = layerItem.fid"
                     @mouseleave="layerOptions.active = ''"
                   >
                     <td class="layersTable__detail" colspan="3">
@@ -491,7 +492,7 @@
                           href="javascript:;"
                           class="btn color-light-blue size-small has-front-icon icon-location"
                           title="定位"
-                          @click.stop="setLayerPositionHandler(layerItem.id)"
+                          @click.stop="setLayerPositionHandler(layerItem.fid)"
                           @mousedown.prevent
                         >
                           <span>定位</span>
@@ -500,7 +501,7 @@
                           href="javascript:;"
                           class="btn color-light-blue size-small has-front-icon icon-delete"
                           title="移除"
-                          @click.stop="deleteLayerHandler(layerItem.id)"
+                          @click.stop="deleteLayerHandler(layerItem.fid)"
                           @mousedown.prevent
                         >
                           <span>移除</span>
@@ -558,22 +559,22 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="layerItem of switchLayerProvider('local')" :key="layerItem.id">
+            <tr v-for="layerItem of switchLayerProvider('local')" :key="layerItem.fid">
               <td>
                 <div class="layersTable__btn">
-                  {{ layerItem.name }}
+                  {{ layerItem.title }}
                 </div>
               </td>
               <td>
                 <ViewCheckbox
-                  :id="layerItem.id"
+                  :id="layerItem.fid"
                   :visible="layerItem.visible"
-                  @change="layerItem.visible = $event"
+                  @change="layerVisibleHandler"
                 />
               </td>
               <td>
                 <OpacityController
-                  :id="layerItem.id"
+                  :id="layerItem.fid"
                   :value="layerItem.opacity"
                   @update="updateLayerOpacities"
                 />
@@ -789,7 +790,8 @@ export default {
         y: ''
       },
       gisMap: '',
-      markerVisible: true
+      markerVisible: true,
+      structureType: ''
     };
   },
   components: {
@@ -822,11 +824,14 @@ export default {
       // ? 用 setTimeout 模擬 ajax 完成的狀態給人看
       setTimeout(() => {
         // ! 取得建物搜尋條件，這邊應該要用 ajax 抓資料回來
-        this.structureCondition = require('~/static/_resources/structureCondition.json');
+        this.getStructureType();
+        // this.structureCondition = require('~/static/_resources/structureCondition.json');
+        this.structureCondition = require('~/static/_resources/structureStatus.json');
 
         // ! 取得預設圖層，這邊應該要用 ajax 抓資料回來
-        const _layers = require('~/static/_resources/defaultLayerList.json');
-        this.layerOptions.layerList = [..._layers.data];
+        this.getDefaultLayer();
+        // const _layers = require('~/static/_resources/defaultLayerList.json');
+        // this.layerOptions.layerList = [..._layers.data];
 
         // 關閉 Loading 視窗與開啟側邊選單
         this.$store.commit('CTRL_LOADING_MASK', false);
@@ -853,16 +858,16 @@ export default {
           this.CubeNo = o.GridNO;
           this.coordinatesTwd.x = o.TWD97.x.toFixed(2);
           this.coordinatesTwd.y = o.TWD97.y.toFixed(2);
-          console.log(o);
+          // console.log(o);
         });
 
         CSC.GISEvent.addListener(map, 'markerclick', function (e) {
           console.log(e.markers.length);
         });
         // 設定球標顯示
-        // map.setupMarker({ visible: true });
+        this.gisMap.setupMarker({ visible: true });
         // 設定圖層顯示、透明度
-        map.setupLayer({ fid: 10, visible: false, opacity: 100 });
+        // this.gisMap.setupLayer({ fid: 10, visible: false, opacity: 100 });
       }, 1000);
     },
     // * 控制視窗顯示
@@ -935,15 +940,22 @@ export default {
       this.positionAlert.reference.latitude = 0;
       this.positionAlert.reference.longitude = 0;
     },
+    // * 圖層顯示或隱藏
+    layerVisibleHandler ($event, id) {
+      this.gisMap.setupLayer({ fid: id, visible: $event });
+      console.log(`id ${id} 是否顯示 ${$event}`);
+    },
     // * @圖層切換調整：修改透明度數值
     updateLayerOpacities (id, value) {
       /*
         當透明度控制器（@OpacityController）的資料更新時
         同步更新對應項目的資料
        */
-      const { layerList } = this.layerOptions;
-      const index = layerList.findIndex(item => item.id === id);
-      layerList[index].opacity = value;
+      // const { layerList } = this.layerOptions;
+      // const index = layerList.findIndex(item => item.id === id);
+      // layerList[index].opacity = value;
+      console.log(`id ${id}  value ${value}`);
+      this.gisMap.setupLayer({ fid: id, opacity: value });
     },
     // * @圖層切換調整：刪除圖層
     deleteLayerHandler (id) {
@@ -963,7 +975,7 @@ export default {
         透過 currentName（我的圖層：local、加入圖層：addition）來篩選出對應的資料
        */
       return this.layerOptions.layerList.filter((item) => {
-        return item.type === currentName && item.enabled === true;
+        return item.type === currentName && item.inUse === true;
       });
     },
     // ? @圖層切換調整：新增圖層
@@ -979,7 +991,7 @@ export default {
         type: 'addition',
         visible: false,
         opacity: 10,
-        enabled: true
+        inUse: true
       };
 
       this.layerOptions.layerList.push(_layer);
@@ -1124,22 +1136,47 @@ export default {
     // * 隱藏建物球標
     hideClusterHandler () {
       this.gisMap.setupMarker({ visible: this.markerVisible = !this.markerVisible });
+    },
+    // * 取得建物類型資料 F3 API
+    getStructureType () {
+      fetch('/csc2api/api/proxy?url=https://eas.csc.com.tw/mhb/rest/mhbe/BuildingType?_format=json', {
+        method: 'GET',
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        })
+      }).then((response) => {
+        return response.json();
+      }).then((data) => {
+        console.log(data);
+        this.structureType = data;
+      }).catch((err) => {
+        console.log('錯誤:', err);
+      });
+    },
+    // * 取得預設圖層API
+    getDefaultLayer () {
+      fetch('/csc2api/api/layer?uid=1111&role=1', {
+        method: 'GET',
+        // body: JSON.stringify({
+        //   uid: '1111',
+        //   role: 1
+        // }),
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        })
+      }).then((response) => {
+        return response.json();
+      }).then((data) => {
+        // 在撈回的data中新增屬性type 其值為local
+        data.forEach((item, index, array) => {
+          item.type = 'local';
+        });
+        this.layerOptions.layerList = data;
+        console.log(this.layerOptions.layerList);
+      }).catch((err) => {
+        console.log('錯誤:', err);
+      });
     }
-    // getStructureCondition () {
-    //   fetch('https://east.csc.com.tw/eas/mhb/rest/mhbe/BuildingList?_format=json&Keyword=&Status=&Type=', {
-    //     method: 'GET',
-    //     headers: new Headers({
-    //       'Content-Type': 'application/json'
-    //     })
-    //   }).then((response) => {
-    //     return response.json();
-    //   }).then((data) => {
-    //     console.log(data);
-    //     data.
-    //   }).catch((err) => {
-    //     console.log('錯誤:', err);
-    //   });
-    // }
   },
   computed: {
     screenWidth () {

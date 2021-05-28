@@ -1,0 +1,13 @@
+{
+  "data":[
+    { "name": "建物狀態（不限）", "value": "1" },
+    { "name": "用地預定", "value": "A" },
+    { "name": "用印中", "value": "B" },
+    { "name": "請照中", "value": "C" },
+    { "name": "施工階段", "value": "D" },
+    { "name": "使照取得", "value": "E" },
+    { "name": "資產已到帳", "value": "F" },
+    { "name": "停用", "value": "G" },
+    { "name": "其他", "value": "Z" }
+  ]
+}

@@ -4,7 +4,7 @@
       :id="`view-check_${id}`"
       :checked="visible"
       type="checkbox"
-      @change="$emit('change', $event.target.checked)"
+      @change="$emit('change', $event.target.checked, id)"
     >
     <label :for="`view-check_${id}`" />
   </div>

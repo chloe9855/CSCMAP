@@ -1,16 +1,16 @@
 {
   "data": [
     {
-      "id": "123456",
-      "layer_index": "1",
-      "name": "GIS系統定位圖",
+      "id": "123456", 
+      "layer_index": "1", 
+      "name": "GIS系統定位圖", 
       "type": "local",
-      "visible": true,
-      "opacity": 5,
-      "text_color": "",
-      "update_time": "2019/08/25 10:00:00",
-      "enabled": true,
-      "can_upadte": true
+      "visible": true, 
+      "opacity": 5, 
+      "text_color": "", 
+      "update_time": "2019/08/25 10:00:00", 
+      "enabled": true, 
+      "can_upadte": true 
     },
     {
       "id": "123457",

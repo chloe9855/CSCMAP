@@ -2,7 +2,8 @@ export default {
   mode: 'universal',
   vue: {
     config: {
-      devtools: process.env.NODE_ENV === 'development'
+      devtools: process.env.NODE_ENV === 'development',
+      productionTip: false
     }
   },
   router: {

@@ -74,6 +74,7 @@ export default {
     getUserData () {
       fetch('/csc2api/api/SignOnStatus', {
         method: 'GET',
+        credentials: 'include',
         headers: new Headers({
           'Content-Type': 'application/json'
         })
