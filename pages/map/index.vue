@@ -175,7 +175,7 @@
 
     <!-- 左側的搜尋選單 -->
     <QueryWindow-component
-      v-if="Object.keys(structureCondition).length > 0"
+      v-if="structureType.length > 0"
       ref="queryWindow"
       :open="queryWindowOpen"
       :condition="structureCondition"
@@ -791,7 +791,7 @@ export default {
       },
       gisMap: '',
       markerVisible: true,
-      structureType: ''
+      structureType: []
     };
   },
   components: {
@@ -1147,8 +1147,14 @@ export default {
       }).then((response) => {
         return response.json();
       }).then((data) => {
-        console.log(data);
-        this.structureType = data;
+        const newData = JSON.parse(data);
+        const newObject = Object.entries(newData)
+          .map(([buildValue, buildName]) => {
+            return { value: buildValue, name: buildName };
+          });
+        this.structureType = newObject;
+        // console.log(newObject);
+        console.log(this.structureType);
       }).catch((err) => {
         console.log('錯誤:', err);
       });

@@ -255,7 +255,7 @@ export default {
   props: {
     open: Boolean,
     condition: Object,
-    buildtype: Object,
+    buildtype: Array,
     resultType: String
   },
   created () {
@@ -271,6 +271,7 @@ export default {
   },
   mounted () {
     this.switchType();
+    this.structure.types.options = this.buildtype;
   },
   methods: {
     // * 更新建物類型選項
