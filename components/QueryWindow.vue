@@ -261,7 +261,6 @@ export default {
   created () {
     this.structure.types.options = this.buildtype;
     this.structure.status.options = this.condition.data;
-    // this.structure.status.options = this.condition.statusCondition;
     this.structure.status.selected = this.structure.status.options[0];
 
     // * 如果是從首頁點擊「方格圖載入」，搜尋類型切換成「方格」
@@ -318,8 +317,14 @@ export default {
         const validResult = this.latticeKeywordValidator(KEYWORD);
         if (validResult === false) { return false; }
       } else if (MODE_TYPE === 'structure') {
-        result.status = this[MODE_TYPE].status.selected;
-        result.types = this[MODE_TYPE].types.selected;
+        result.status = this[MODE_TYPE].status.selected.value;
+
+        const newArr = [];
+        this[MODE_TYPE].types.selected.forEach((item) => {
+          newArr.push(item.value);
+        });
+        const letters = newArr.join(',');
+        result.types = letters;
       }
 
       this.$emit('search', result);

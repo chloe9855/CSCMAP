@@ -50,6 +50,7 @@
         <a
           href="javascript:;"
           class="feature__btn icon-change-direction"
+          @click.stop="$emit('setOptions')"
           @mousedown.prevent
         >
           <span>圖北切換</span>
@@ -90,6 +91,7 @@
         <a
           href="javascript:;"
           class="feature__btn icon-home"
+          @click.stop="$emit('backFullPic')"
           @mousedown.prevent
         >
           <span>回到全圖</span>

@@ -216,6 +216,8 @@
       @setPositionAlert="ctrlPositionAlert"
       @hideTagBar="hideTagBarCtrl"
       @hideCluster="hideClusterHandler"
+      @setOptions="setOptionsHandler"
+      @backFullPic="gisMap.resetExtent()"
     />
 
     <!-- ERP 視窗（建物搜尋結果） -->
@@ -758,6 +760,16 @@ export default {
         // 準心
         aimpoint: false
       },
+      // * 建物搜尋條件選項 建物狀態all
+      structureCondition: {},
+      // * 建物搜尋條件選項 建物類型all
+      structureType: [],
+      // * 建物搜尋 使用者搜尋時所選擇的關鍵字、建物狀態、建物類型
+      searchSelected: {
+        keyword: '',
+        status: '',
+        types: ''
+      },
       // * 搜尋結果類型
       searchResult: {
         // 搜尋結果類型（建物：structure、方格：lattice）
@@ -770,8 +782,7 @@ export default {
         // 目前選取的建物
         currentBuilding: ''
       },
-      // * 建物搜尋條件選項
-      structureCondition: {},
+
       // * 相對於地圖頁面滑鼠座標
       mousePosition: {
         x: 0,
@@ -790,8 +801,10 @@ export default {
         y: ''
       },
       gisMap: '',
+      // * 控制球標顯示/隱藏變數
       markerVisible: true,
-      structureType: []
+      // * 圖北切換
+      switchOptions: ''
     };
   },
   components: {
@@ -1049,13 +1062,22 @@ export default {
 
       // ! 先用 setTimeout 做一個模擬 ajax 的樣子給人看
       setTimeout(() => {
+        // 搜尋結果是建物or方格
         const MODE_TYPE = payload.modeType;
 
         // ! 這邊要用 call api 抓資料
-        const result = require(`~/static/_resources/${MODE_TYPE}Result.json`);
+        this.getSearchResult();
 
         this.searchResult.types = MODE_TYPE;
-        this.searchResult.list[MODE_TYPE] = [...result.data];
+        // 所選擇的搜尋條件
+        this.searchSelected.keyword = payload.keyword;
+        this.searchSelected.status = payload.status;
+        this.searchSelected.types = payload.types;
+
+        // const result = require(`~/static/_resources/${MODE_TYPE}Result.json`);
+
+        // this.searchResult.types = MODE_TYPE;
+        // this.searchResult.list[MODE_TYPE] = [...result.data];
         // this.activeWindow = '';  //0517修改 讓桌機版建物搜尋後 圖層工具仍開啟
 
         // ? 看 MODE_TYPE 是建物還是方格，控制地圖API
@@ -1137,6 +1159,17 @@ export default {
     hideClusterHandler () {
       this.gisMap.setupMarker({ visible: this.markerVisible = !this.markerVisible });
     },
+    // * 圖北切換
+    setOptionsHandler () {
+      if (this.switchOptions === '') {
+        this.switchOptions = 'MAP_N';
+      } else if (this.switchOptions === 'MAP_N') {
+        this.switchOptions = 'CSC_N';
+      } else if (this.switchOptions === 'CSC_N') {
+        this.switchOptions = 'MAP_N';
+      }
+      this.gisMap.setOptions({ angle: this.switchOptions });
+    },
     // * 取得建物類型資料 F3 API
     getStructureType () {
       fetch('/csc2api/api/proxy?url=https://eas.csc.com.tw/mhb/rest/mhbe/BuildingType?_format=json', {
@@ -1147,8 +1180,8 @@ export default {
       }).then((response) => {
         return response.json();
       }).then((data) => {
-        const newData = JSON.parse(data);
-        const newObject = Object.entries(newData)
+        // const newData = JSON.parse(data);
+        const newObject = Object.entries(data)
           .map(([buildValue, buildName]) => {
             return { value: buildValue, name: buildName };
           });
@@ -1161,12 +1194,8 @@ export default {
     },
     // * 取得預設圖層API
     getDefaultLayer () {
-      fetch('/csc2api/api/layer?uid=1111&role=1', {
+      fetch('/csc2api/api/layer', {
         method: 'GET',
-        // body: JSON.stringify({
-        //   uid: '1111',
-        //   role: 1
-        // }),
         headers: new Headers({
           'Content-Type': 'application/json'
         })
@@ -1179,6 +1208,22 @@ export default {
         });
         this.layerOptions.layerList = data;
         console.log(this.layerOptions.layerList);
+      }).catch((err) => {
+        console.log('錯誤:', err);
+      });
+    },
+    // * 取得建物搜尋結果 F3 API
+    getSearchResult () {
+      fetch(`/csc2api/api/proxy?url=${encodeURIComponent(`https://eas.csc.com.tw/mhb/rest/mhbe/BuildingList?_format=json&Keyword=${this.searchSelected.keyword}&Status=${this.searchSelected.status}&Type=${this.searchSelected.types}`)}`, {
+        method: 'GET',
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        })
+      }).then((response) => {
+        return response.json();
+      }).then((data) => {
+        this.searchResult.list.structure = data;
+        console.log(data);
       }).catch((err) => {
         console.log('錯誤:', err);
       });
