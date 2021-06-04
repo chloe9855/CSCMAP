@@ -50,6 +50,7 @@
         <a
           href="javascript:;"
           class="feature__btn icon-change-direction"
+          :class="{'add-bgcolor': iconcolor === true}"
           @click.stop="$emit('setOptions')"
           @mousedown.prevent
         >
@@ -127,7 +128,8 @@ export default {
     };
   },
   props: {
-    current: String
+    current: String,
+    iconcolor: Boolean
   },
   methods: {
     // * 設定拖曳選單開啟/關閉
@@ -392,6 +394,11 @@ $btn-color: #eff2f6;
     &.current {
       background-image: url('~/assets/img/icon/icon-change-direction_current.svg');
     }
+  }
+
+  &.add-bgcolor {
+    background-image: url('~/assets/img/icon/icon-change-direction_current.svg');
+    background-color: $color-blue-light;
   }
 
   &.icon-home,

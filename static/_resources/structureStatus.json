@@ -1,6 +1,6 @@
 {
   "data":[
-    { "name": "建物狀態（不限）", "value": "1" },
+    { "name": "建物狀態（不限）", "value": "" },
     { "name": "用地預定", "value": "A" },
     { "name": "用印中", "value": "B" },
     { "name": "請照中", "value": "C" },

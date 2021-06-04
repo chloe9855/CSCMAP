@@ -75,16 +75,36 @@
     }
   }
 
-  &.icon-type-yu::before {
+  &.icon-type-A::before {
     background-image: url('~/assets/img/building-type-yu.svg');
   }
 
-  &.icon-type-jiun::before {
+  &.icon-type-E::before {
     background-image: url('~/assets/img/building-type-jiun.svg');
   }
 
-  &.icon-type-shin::before {
+  &.icon-type-F::before {
+    background-image: url('~/assets/img/building-type-jiun.svg');
+  }
+
+  &.icon-type-B::before {
     background-image: url('~/assets/img/building-type-shin.svg');
+  }
+
+  &.icon-type-C::before {
+    background-image: url('~/assets/img/building-type-shin.svg');
+  }
+
+  &.icon-type-D::before {
+    background-image: url('~/assets/img/building-type-shin.svg');
+  }
+
+  &.icon-type-G::before {
+    background-image: url('~/assets/img/building-type-ting.svg');
+  }
+
+  &.icon-type-Z::before {
+    background-image: url('~/assets/img/building-type-wu.svg');
   }
 
   @at-root .infowindow .building__item & {

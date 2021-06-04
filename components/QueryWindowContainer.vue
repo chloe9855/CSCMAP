@@ -9,14 +9,16 @@
           <a
             href="javascript:;"
             class="btn size-full has-front-icon icon-back"
+            @click.stop="$emit('go-datail')"
             @mousedown.prevent
           >到ERP看詳細</a>
         </div>
         <div class="query-window__info-column">
           <div class="select">
-            <select>
-              <option>時間由近到遠</option>
-              <option>時間由遠到近</option>
+            <select v-model="timeSelected">
+              <option v-for="textOption in textOptions" :key="textOption">
+                {{ textOption }}
+              </option>
             </select>
           </div>
         </div>
@@ -32,9 +34,23 @@
 
 <script>
 export default {
+  data () {
+    return {
+      timeSelected: '時間由近到遠',
+      textOptions: ['時間由近到遠', '時間由遠到近']
+    };
+  },
   props: {
     resultType: String,
     resultNumber: Number
+  },
+  watch: {
+    timeSelected: {
+      handler (value) {
+        this.$emit('update', value);
+      },
+      deep: true
+    }
   }
 };
 </script>

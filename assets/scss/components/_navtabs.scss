@@ -80,12 +80,30 @@
 }
 
 .navtabs__body {
+  padding-bottom: 22px;
   background-color: $color-white;
 }
 
 .navtabs__content {
-  padding-right: 10px;
-  padding-left: 10px;
+  padding: 11px 33px;
+
+  p {
+    margin-bottom: 0;
+
+    strong {
+      margin-right: 7px;
+      color: #000;
+    }
+  }
+
+  .add_icon {
+    margin-left: -19px;
+  }
+
+  .mipic {
+    margin-bottom: -2px;
+  }
+
 
   &.theme-dark-mode {
     padding-right: 0;

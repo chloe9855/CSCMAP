@@ -14,7 +14,7 @@ Vue.mixin({
     // * 另開視窗
     REDIRECT_DETAIL (urlPath) {
       if (process.client) {
-        window.open(urlPath);
+        window.open(`https://east.csc.com.tw/eas/mhb/platform/mhbbd?manageNo=${urlPath}`);
       }
     },
     // * 提醒用的 concole

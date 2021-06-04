@@ -2,15 +2,15 @@
   <ul class="buildingList">
     <li
       v-for="item of itemsList"
-      :key="item.id"
+      :key="item.key"
     >
       <BuildingItem-component
-        :key="item.id"
+        :key="item.key"
         :item="item"
-        :class="{ 'current': item.id === currentId }"
+        :class="{ 'current': item.key === currentId }"
         :detail-btn="detailBtn"
         @click-block="$emit('click-block', item)"
-        @click-detail="$emit('click-detail', item)"
+        @click-detail="$emit('click-detail', item.key)"
       />
     </li>
   </ul>

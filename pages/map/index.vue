@@ -189,6 +189,8 @@
         v-if="screenWidth > 1023 && (searchResult.types === 'structure' || searchResult.types === 'lattice')"
         :result-type="searchResult.types"
         :result-number="searchResult.list.structure.length"
+        @go-datail="allErpDetail"
+        @update="sortTimeHandler"
       >
         <!-- 建物搜尋結果 -->
         <BuildingList-component
@@ -196,7 +198,7 @@
           :items-list="searchResult.list.structure"
           :current-id="searchResult.currentBuilding"
           @click-block="focusBuildingHandler"
-          @click-detail="payload => REDIRECT_DETAIL(payload.detailUrl)"
+          @click-detail="singleErpDetail"
         />
         <!-- 方格搜尋結果 -->
         <LatticeListTable-component
@@ -212,6 +214,7 @@
     <!-- 右側的功能選單 -->
     <Feature-component
       :current="activeWindow"
+      :iconcolor="switchBgColor"
       @select="payload => activeWindow = payload"
       @setPositionAlert="ctrlPositionAlert"
       @hideTagBar="hideTagBarCtrl"
@@ -804,7 +807,9 @@ export default {
       // * 控制球標顯示/隱藏變數
       markerVisible: true,
       // * 圖北切換
-      switchOptions: ''
+      switchOptions: '',
+      // * 圖北切換icon背景色
+      switchBgColor: false
     };
   },
   components: {
@@ -1064,15 +1069,14 @@ export default {
       setTimeout(() => {
         // 搜尋結果是建物or方格
         const MODE_TYPE = payload.modeType;
-
-        // ! 這邊要用 call api 抓資料
-        this.getSearchResult();
-
         this.searchResult.types = MODE_TYPE;
         // 所選擇的搜尋條件
         this.searchSelected.keyword = payload.keyword;
         this.searchSelected.status = payload.status;
         this.searchSelected.types = payload.types;
+
+        // ! 這邊要用 call api 抓資料
+        this.getSearchResult();
 
         // const result = require(`~/static/_resources/${MODE_TYPE}Result.json`);
 
@@ -1163,10 +1167,13 @@ export default {
     setOptionsHandler () {
       if (this.switchOptions === '') {
         this.switchOptions = 'MAP_N';
+        this.switchBgColor = true;
       } else if (this.switchOptions === 'MAP_N') {
         this.switchOptions = 'CSC_N';
+        this.switchBgColor = false;
       } else if (this.switchOptions === 'CSC_N') {
         this.switchOptions = 'MAP_N';
+        this.switchBgColor = true;
       }
       this.gisMap.setOptions({ angle: this.switchOptions });
     },
@@ -1186,7 +1193,6 @@ export default {
             return { value: buildValue, name: buildName };
           });
         this.structureType = newObject;
-        // console.log(newObject);
         console.log(this.structureType);
       }).catch((err) => {
         console.log('錯誤:', err);
@@ -1222,11 +1228,40 @@ export default {
       }).then((response) => {
         return response.json();
       }).then((data) => {
-        this.searchResult.list.structure = data;
         console.log(data);
+        // 依時間排序
+        data.sort(function (a, b) {
+          return a.applytime < b.applytime ? 1 : -1;
+        });
+        this.searchResult.list.structure = data;
       }).catch((err) => {
         console.log('錯誤:', err);
       });
+    },
+    // * 桌機版 點擊單筆ERP看詳細
+    singleErpDetail (payload) {
+      window.open(`https://east.csc.com.tw/eas/mhb/platform/mhbbd?manageNo=${payload}`);
+    },
+    // * 桌機版 點擊多筆ERP看詳細
+    allErpDetail () {
+      const newArr = [];
+      this.searchResult.list.structure.forEach((item) => {
+        newArr.push(item.key);
+      });
+      const keyNumber = newArr.join(',');
+      window.open(`https://east.csc.com.tw/eas/mhb/platform/mhbba?keys=${keyNumber}`);
+    },
+    sortTimeHandler (payload) {
+      console.log(payload);
+      if (payload === '時間由近到遠') {
+        this.searchResult.list.structure.sort(function (a, b) {
+          return a.applytime < b.applytime ? 1 : -1;
+        });
+      } else if (payload === '時間由遠到近') {
+        this.searchResult.list.structure.sort(function (a, b) {
+          return a.applytime > b.applytime ? 1 : -1;
+        });
+      }
     }
   },
   computed: {
