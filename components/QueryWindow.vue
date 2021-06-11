@@ -215,7 +215,7 @@
       :id="'m_multiple_select'"
       :selected="structure.types.selected"
       :options="structure.types.options"
-      @update="updateStructureSelected"
+      @update="searchHandler2"
     />
 
     <slot />
@@ -361,6 +361,42 @@ export default {
       if (targetPageName === 'searchModeLattice') {
         this.modeType = 'lattice';
       }
+    },
+    searchHandler2 (payload) {
+      this.structure.types.selected = payload;
+
+      const MODE_TYPE = this.modeType;
+      const KEYWORD = this[MODE_TYPE].keyword.replace(/\s/g, '').replace(/,$/, '');
+
+      const result = {
+        modeType: MODE_TYPE,
+        keyword: KEYWORD
+      };
+
+      if (MODE_TYPE === 'lattice') {
+        if (KEYWORD === '') {
+          this.$swal({
+            text: '請輸入方格圖號',
+            confirmButtonText: '確定',
+            showCloseButton: true
+          });
+          return false;
+        }
+
+        const validResult = this.latticeKeywordValidator(KEYWORD);
+        if (validResult === false) { return false; }
+      } else if (MODE_TYPE === 'structure') {
+        result.status = this[MODE_TYPE].status.selected.value;
+
+        const newArr = [];
+        this[MODE_TYPE].types.selected.forEach((item) => {
+          newArr.push(item.value);
+        });
+        const letters = newArr.join(',');
+        result.types = letters;
+      }
+
+      this.$emit('search', result);
     }
   },
   computed: {

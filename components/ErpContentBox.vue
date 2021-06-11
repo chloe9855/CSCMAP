@@ -112,7 +112,7 @@
                 <p><strong>使照編號備註</strong> {{ licenseData.useMemo }}</p>
                 <p><strong>環評狀態</strong> {{ checkEnvType(licenseData.envType) }}</p>
                 <p><strong>說明</strong> {{ licenseData.envDesc }}</p>
-                <p class="add_icon">
+                <p v-if="licenseData.removeChangeDatas.length > 0" class="add_icon">
                   <img class="mipic" :src="changePic" @click="picToggler">
                   <strong>拆除變更資料</strong>
                 </p>
@@ -185,6 +185,7 @@ export default {
       detailTypeCurrent: '',
       changePic: require('~/assets/img/minus.png'),
       changePic3: require('~/assets/img/minus.png'),
+      myKey: '',
       detailTypeList: [
         {
           id: 0,
@@ -226,6 +227,7 @@ export default {
       this.currentItem = payload;
       this.modeType = 'current';
       this.$store.commit('SET_MOBILE_SELECT', true);
+      this.getMyKey();
     },
     // * 返回搜尋結果
     backToNormalModeHandler () {
@@ -249,9 +251,14 @@ export default {
       this.getDetailData();
       this.CONSOLE('【ERP介面】根據所選項目取得建物的詳細資訊');
     },
+    // * 先切割每筆資料的key值 (到'-'符號之前)
+    getMyKey () {
+      const newArr = this.currentItem.key.split('-');
+      this.myKey = newArr[0];
+    },
     // * 根據所選項目取得建物的詳細資訊
     getDetailData () {
-      fetch('/csc2api/api/proxy?url=http://east.csc.com.tw/eas/mhb/rest/mhbe/getDataByManageNo?_format=json%26manageNo=00535', {
+      fetch(`/csc2api/api/proxy?url=http://east.csc.com.tw/eas/mhb/rest/mhbe/getDataByManageNo?_format=json%26manageNo=${this.myKey}`, {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -259,6 +266,8 @@ export default {
       }).then((response) => {
         return response.json();
       }).then((data) => {
+        console.log(data);
+
         this.assetData = data.assetData;
         this.buildingData = data.buildingData;
         this.licenseData = data.licenseData;

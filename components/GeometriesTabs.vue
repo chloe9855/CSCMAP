@@ -9,7 +9,7 @@
           class="geometry-tabs__btn"
           :class="buttonClassProvider(typeItem.id)"
           :title="typeItem.name"
-          @click.stop="$emit('selectType', typeItem.id)"
+          @click.stop="$emit('selectType', typeItem.id),$emit('allTypeList', typesIdList)"
           @mouseenter="caption = typeItem.name"
           @mouseleave="caption = ''"
           @mousedown.prevent
@@ -34,13 +34,14 @@
               href="javascript:;"
               class="btn color-white"
               title="上一步"
+              @click.stop="$emit('goBack')"
               @mousedown.prevent
             >上一步</a>
             <a
               href="javascript:;"
               class="btn color-white"
               title="取消"
-              @click.stop="$emit('selectType', '')"
+              @click.stop="$emit('selectType', ''),$emit('cancel')"
               @mousedown.prevent
             >取消</a>
           </div>
@@ -55,37 +56,50 @@
         <li
           v-for="graphItem of graphList"
           :key="graphItem.id"
+          class="gogoli"
         >
           <div class="geometry-list__item">
             <div
-              class="geometry-list__main"
-              :class="`type-${graphItem.type}`"
+              :class="`switch-bg-${graphItem.id}`"
+              class="pickme"
+              @click.stop="$emit('getPosition',graphItem.id),changeColorHandler(graphItem.id)"
             >
-              <div class="geometry-list__content">
-                <div class="geometry-list__header">
-                  <div class="geometry-list__title">
-                    {{ graphItem.name }}
+              <div
+                class="geometry-list__main"
+                :class="`type-${graphItem.type}`"
+              >
+                <div class="geometry-list__content">
+                  <div class="geometry-list__header">
+                    <div class="geometry-list__title">
+                      {{ graphItem.name }}
+                    </div>
+                    <div class="geometry-list__btn-group">
+                      <a
+                        href="javascript:;"
+                        class="geometry-list__btn icon-edit"
+                        title="編輯"
+                        @click.stop="graphItem.controlBar = !graphItem.controlBar,$emit('modify', graphItem.id)"
+                        @mousedown.prevent
+                      />
+                      <a
+                        href="javascript:;"
+                        class="geometry-list__btn icon-close"
+                        title="刪除"
+                        @click.stop="$emit('deleteGraph', graphItem.id)"
+                        @mousedown.prevent
+                      />
+                    </div>
                   </div>
-                  <div class="geometry-list__btn-group">
-                    <a
-                      href="javascript:;"
-                      class="geometry-list__btn icon-edit"
-                      title="編輯"
-                      @click.stop="graphItem.controlBar = !graphItem.controlBar"
-                      @mousedown.prevent
-                    />
-                    <a
-                      href="javascript:;"
-                      class="geometry-list__btn icon-close"
-                      title="刪除"
-                      @click.stop="$emit('deleteGraph', graphItem.id)"
-                      @mousedown.prevent
-                    />
-                  </div>
+                  <p v-if="graphItem.type === 'circleLand' || graphItem.type === 'circle'">
+                    {{ graphItem.radius }}
+                  </p>
+                  <p v-if="graphItem.type === 'line'">
+                    總長{{ graphItem.radius }}
+                  </p>
+                  <p v-if="graphItem.type !== 'line'">
+                    總面積{{ graphItem.detail }}平方公尺
+                  </p>
                 </div>
-                <p v-for="detailText of graphItem.detail" :key="detailText">
-                  {{ detailText }}
-                </p>
               </div>
             </div>
             <div
@@ -97,13 +111,14 @@
                   href="javascript:;"
                   class="btn color-light-blue"
                   title="上一步"
+                  @click.stop="$emit('goBack')"
                   @mousedown.prevent
                 >上一步</a>
                 <a
                   href="javascript:;"
                   class="btn color-light-blue"
                   title="取消"
-                  @click.stop="graphItem.controlBar = false"
+                  @click.stop="graphItem.controlBar = false,$emit('cancel')"
                   @mousedown.prevent
                 >取消</a>
               </div>
@@ -122,6 +137,15 @@
           @click.stop="$emit('deleteAllGraph', typesIdList)"
           @mousedown.prevent
         >清除全部</a>
+
+        <a
+          v-if="!typesIdList.includes('line','rect','poly','circle')"
+          href="javascript:;"
+          class="btn size-small addme"
+          title="確定"
+          @click.stop="$emit('uploadAllGraph')"
+          @mousedown.prevent
+        >確定</a>
       </div>
       <p
         v-if="graphList.length <= 0"
@@ -143,12 +167,33 @@ export default {
   props: {
     current: String,
     typesList: Array,
-    graphList: Array
+    graphList: Array,
+    myGraphs: Array
+  },
+  mounted () {
+    this.setItemColor();
   },
   methods: {
     // * 類型按鈕的 class
     buttonClassProvider (id) {
       return `icon-${id} ${this.current === id ? 'current' : ''}`;
+    },
+    setItemColor () {
+      this.graphList.forEach((item, index) => {
+        if (index % 2 !== 0) {
+          document.querySelector(`.switch-bg-${item.id}`).style.backgroundColor = '#f2f2f2';
+        }
+      });
+    },
+    // * 點按預定地列表變更背景色
+    changeColorHandler (id) {
+      console.log(id);
+      // 先清空被點過有變色的
+      this.graphList.forEach((item) => {
+        document.querySelector(`.switch-bg-${item.id}`).style.backgroundColor = '';
+      });
+      this.setItemColor();
+      document.querySelector(`.switch-bg-${id}`).style.backgroundColor = '#FFF2CE';
     }
   },
   computed: {
@@ -169,6 +214,16 @@ export default {
 @import '~/assets/scss/utils/_utils.scss';
 
 // * 測量元件的頁籤
+
+// .add_bgcolor {
+//   background-color: $color-orange-light;
+// }
+
+.addme {
+  margin-left: 13px;
+  color: #f2f2f2;
+  background-color: $color-blue-light;
+}
 
 .geometry-tabs__header {
   padding: 10px;
@@ -358,13 +413,13 @@ export default {
 }
 
 .geometry-list__item {
-  padding: 10px;
-  background-color: #f2f2f2;
+  // padding: 6px 10px;
+  // background-color: #f2f2f2;
 
   @include min-width(map-get($desktop, sm)) {
     &:hover,
     &:focus {
-      background-color: $color-orange-light;
+      // background-color: $color-orange-light;
 
       .geometry-list__main.type-line::before {
         background-image: url('~/assets/img/icon/icon-geometry-line_orange.svg');
@@ -385,6 +440,26 @@ export default {
   }
 }
 
+.add_bgcolor {
+  // background-color: $color-orange-light;
+}
+
+.pickme {
+  padding: 10px;
+}
+
+.pickme:hover {
+  background-color: $color-orange-light;
+}
+
+.pickme:focus {
+  background-color: $color-orange-light;
+}
+
+.gogoli {
+  padding: 10px;
+}
+
 .geometry-list__main {
   display: flex;
 
@@ -392,8 +467,8 @@ export default {
     content: '';
     width: 40px;
     height: 40px;
-    flex-basis: 40px;
     display: block;
+    flex-basis: 40px;
     background: {
       position: center;
       repeat:no-repeat;
