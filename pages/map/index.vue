@@ -16,16 +16,19 @@
     </div>
 
     <!-- 右下角的坐標資訊 -->
-    <div v-if="screenWidth > 1023" class="coordinates">
+    <div v-if="screenWidth > 1023" class="coordinates" :class="{'more-height': coldCube.x !== ''}">
       <!-- <div>滑鼠相對於地圖的 X 坐標：{{ mousePosition.x }}</div>
       <div>滑鼠相對於地圖的 Y 坐標：{{ mousePosition.y }}</div> -->
       <div class="co_cube">
         方格座標({{ coordinatesCube.x }}, {{ coordinatesCube.y }})
       </div>
-      <div class="co_cubeno">
-        方格圖號: {{ CubeNo }}
+      <div v-if="coldCube.x !== ''" class="co_cube2">
+        冷三方格座標({{ coldCube.x }}, {{ coldCube.y }})
       </div>
-      <div class="co_TWD">
+      <div class="co_cubeno">
+        {{ cubeName }}: {{ CubeNo }}
+      </div>
+      <div class="co_TWD" :class="{'twd_push': coldCube.x !== ''}">
         TWD97({{ coordinatesTwd.x }},{{ coordinatesTwd.y }})
       </div>
     </div>
@@ -34,7 +37,7 @@
     <div v-if="geometryMeasurer.aimpoint === true" class="aimpoint" />
 
     <!-- ↓↓ 在地圖API裡面需要用到的DOM -->
-    <div
+    <!-- <div
       v-if="screenWidth > 1023"
       :style="'width: 365px; position: absolute; top: 100px; right: 100px;'"
     >
@@ -60,10 +63,10 @@
           <span class="building__tag icon-error">房屋稅籍</span><span class="building__tag icon-checked">工廠登記</span><span class="building__tag icon-checked">優惠減免</span><span class="building__tag icon-checked">保存登記</span>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <!-- 在 .building__item 添加 is-open 這個 class，選單項目就會展開 -->
-    <div
+    <!-- <div
       v-if="screenWidth > 1023"
       :style="'width: 365px; position: absolute; top: 250px; right: 100px;'"
     >
@@ -170,7 +173,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
     <!-- ↑↑ 在地圖API裡面需要用到的DOM -->
 
     <!-- 左側的搜尋選單 -->
@@ -215,12 +218,16 @@
     <Feature-component
       :current="activeWindow"
       :iconcolor="switchBgColor"
+      :screen-src="screenImgSrc"
       @select="payload => activeWindow = payload"
       @setPositionAlert="ctrlPositionAlert"
       @hideTagBar="hideTagBarCtrl"
       @hideCluster="hideClusterHandler"
       @setOptions="setOptionsHandler"
       @backFullPic="gisMap.resetBounds()"
+      @zoomIn="gisMap.ZoomIn()"
+      @zoomOut="gisMap.ZoomOut()"
+      @screenShot="screenShotHandler"
     />
 
     <!-- ERP 視窗（建物搜尋結果） -->
@@ -272,7 +279,7 @@
           :current="geometryOptions.current"
           :types-list="geometryTypesProvider(['rectangleLand', 'polygonLand', 'circleLand'])"
           :graph-list="geometryGraphProvider(['rectangleLand', 'polygonLand', 'circleLand'])"
-          :my-graphs="myGraphs"
+          :my-graphs="myGraphsProvider(['rectangleLand', 'polygonLand', 'circleLand'])"
           @allTypeList="payload => myTypeList = payload"
           @selectType="startDrawing"
           @deleteGraph="deleteGeometryItemHandler"
@@ -340,11 +347,11 @@
           :current="geometryOptions.current"
           :types-list="geometryTypesProvider(['line', 'rect', 'poly', 'circle'])"
           :graph-list="geometryGraphProvider(['line', 'rect', 'poly', 'circle'])"
-          :my-graphs="myGraphs"
+          :my-graphs="myGraphsProvider(['line', 'rect', 'poly', 'circle'])"
           @allTypeList="payload => myTypeList = payload"
           @selectType="startDrawing"
-          @deleteGraph="deleteGeometryItemHandler"
-          @deleteAllGraph="deleteAllGeometryItemHandler"
+          @deleteGraph="deleteGeometryItemHandler2"
+          @deleteAllGraph="deleteAllGeometryItemHandler2"
           @goBack="backStepHandler"
           @cancel="cancelStepHandler"
           @modify="modifyStepHandler"
@@ -828,13 +835,21 @@ export default {
         x: '',
         y: ''
       },
+      coldCube: {
+        x: '',
+        y: ''
+      },
+      cubeName: '',
+      // * 地圖載入
       gisMap: '',
       // * 控制球標顯示/隱藏變數
       markerVisible: true,
       // * 圖北切換
       switchOptions: '',
       // * 圖北切換icon背景色
-      switchBgColor: false
+      switchBgColor: false,
+      // * 畫面截圖url
+      screenImgSrc: ''
     };
   },
   components: {
@@ -854,6 +869,7 @@ export default {
   },
   mounted () {
     this.getDefaultData();
+    this.$store.commit('GET_NOW_URL', 'map');
   },
   beforeDestroy () {
     clearTimeout(this.positionAlert.timer);
@@ -900,6 +916,15 @@ export default {
           this.CubeNo = map.coordinateInfo(e.point).GridNO;
           this.coordinatesTwd.x = map.coordinateInfo(e.point).TWD97.x.toFixed(2);
           this.coordinatesTwd.y = map.coordinateInfo(e.point).TWD97.y.toFixed(2);
+          if (typeof map.coordinateInfo(e.point).CRM !== 'undefined') {
+            this.coldCube.x = map.coordinateInfo(e.point).CRM.x.toFixed(2);
+            this.coldCube.y = map.coordinateInfo(e.point).CRM.y.toFixed(2);
+            this.cubeName = '冷三方格圖號';
+          } else {
+            this.cubeName = '方格圖號';
+            this.coldCube.x = '';
+            this.coldCube.y = '';
+          }
         });
 
         CSC.GISEvent.addListener(map, 'markerclick', function (e) {
@@ -912,21 +937,22 @@ export default {
         // 設定繪圖
         this.gisMap.drawingMethod(CSC.DrawingMethod.Draw, {
           textOptions: { fontColor: '#000000', font: 'Microsoft Jhenghei', fontSize: '16px' },
-          strokeOptions: { strokeColor: '#000000' },
-          fillOptions: { strokeColor: '#000000', fillOpacity: 0.3, fillColor: '#8D2683' },
+          strokeOptions: { strokeColor: '#000000', strokeWeight: 2 },
+          fillOptions: { strokeColor: '#000000', fillOpacity: 0.3 },
           tipSkin: '<div class=\'contentArea\' style=\'background-color:blanchedalmond;color:coral;border-radius:5px;\'></div>'
         });
         // 暫存繪圖結果
-        const graphs = [];
+        // const graphs = [];
+        // graphs.push(p.overlay);
+        // this.myGraphs = graphs;
         CSC.GISEvent.addListener(this.gisMap, 'draw_complete', (p) => {
           // 閃爍
           p.overlay.blink(2, 100, [1]);
-          console.log(JSON.stringify(p.overlay.toJson()));
+          // console.log(JSON.stringify(p.overlay.toJson()));
           // 畫完圖形後
           if (p.action === 'ADD') {
-            graphs.push(p.overlay);
             // 暫存圖形
-            this.myGraphs = graphs;
+            this.myGraphs.push(p.overlay);
 
             // 取得總面積
             if (this.geometryOptions.current !== 'line') {
@@ -941,14 +967,16 @@ export default {
             // 新增預定地
             this.createGeometryItemHandler();
             this.geometryOptions.current = '';
-            this.gisMap.drawingMethod(CSC.DrawingMethod.End);
+            this.gisMap.drawingMethod(CSC.DrawingMethod.Draw, { mode: CSC.GISOverlayType.NONE });
             this.unSave = true;
           }
 
           // 修改完成後
           if (p.action === 'SAVE') {
             this.myGraphs[this.saveIndex] = p.overlay;
-            this.geometryOptions.graphList[this.saveIndex].detail = p.overlay.getPath().getArea().toFixed(2);
+            if (this.myGraphs[this.saveIndex].type !== 'line') {
+              this.geometryOptions.graphList[this.saveIndex].detail = p.overlay.getPath().getArea().toFixed(2);
+            }
             this.geometryOptions.graphList[this.saveIndex].radius = p.overlay.measure[0].label;
             this.geometryOptions.graphList[this.saveIndex].controlBar = false;
           }
@@ -970,13 +998,14 @@ export default {
             if (p.intersects) {
               this.$swal({
                 icon: 'warning',
+                width: 402,
                 text: '新繪製建地有重疊',
                 confirmButtonText: '確定',
                 showCloseButton: true
               });
 
-              console.log(p.intersects.filter(function (x) { return x instanceof CSC.GISMarker && x.data; }).map(function (x) { return x.data.key; }));
-              console.log(p.intersects);
+              // console.log(p.intersects.filter(function (x) { return x instanceof CSC.GISMarker && x.data; }).map(function (x) { return x.data.key; }));
+              // console.log(p.intersects);
             }
           }
         });
@@ -1026,6 +1055,7 @@ export default {
 
               this.$swal({
                 icon: 'error',
+                width: 402,
                 text: '坐標資訊取得失敗',
                 confirmButtonText: '確定',
                 showCloseButton: true
@@ -1034,6 +1064,7 @@ export default {
           } else {
             this.$swal({
               icon: 'error',
+              width: 402,
               text: '您的瀏覽器的不支援取得坐標資訊',
               confirmButtonText: '確定',
               showCloseButton: true
@@ -1115,14 +1146,20 @@ export default {
       // 開啟測量
       this.gisMap.drawingMethod(CSC.DrawingMethod.Draw, { measure: true });
 
-      if (this.geometryOptions.current === 'rectangleLand' || this.geometryOptions.current === 'rect') {
-        this.gisMap.drawingMethod(CSC.DrawingMethod.Draw, { mode: CSC.GISOverlayType.ENVELOPE, fillOptions: { strokeWeight: 2 } });
-      } else if (this.geometryOptions.current === 'polygonLand' || this.geometryOptions.current === 'poly') {
-        this.gisMap.drawingMethod(CSC.DrawingMethod.Draw, { mode: CSC.GISOverlayType.POLYGON, fillOptions: { strokeWeight: 3 } });
-      } else if (this.geometryOptions.current === 'circleLand' || this.geometryOptions.current === 'circle') {
-        this.gisMap.drawingMethod(CSC.DrawingMethod.Draw, { mode: CSC.GISOverlayType.CIRCLE, fillOptions: { strokeWeight: 1 } });
+      if (this.geometryOptions.current === 'rectangleLand') {
+        this.gisMap.drawingMethod(CSC.DrawingMethod.Draw, { mode: CSC.GISOverlayType.ENVELOPE, fillOptions: { fillColor: '#8D2683' } });
+      } else if (this.geometryOptions.current === 'rect') {
+        this.gisMap.drawingMethod(CSC.DrawingMethod.Draw, { mode: CSC.GISOverlayType.ENVELOPE, fillOptions: { fillColor: '#06E4AF' } });
+      } else if (this.geometryOptions.current === 'polygonLand') {
+        this.gisMap.drawingMethod(CSC.DrawingMethod.Draw, { mode: CSC.GISOverlayType.POLYGON, fillOptions: { fillColor: '#8D2683' } });
+      } else if (this.geometryOptions.current === 'poly') {
+        this.gisMap.drawingMethod(CSC.DrawingMethod.Draw, { mode: CSC.GISOverlayType.POLYGON, fillOptions: { fillColor: '#06E4AF' } });
+      } else if (this.geometryOptions.current === 'circleLand') {
+        this.gisMap.drawingMethod(CSC.DrawingMethod.Draw, { mode: CSC.GISOverlayType.CIRCLE, fillOptions: { fillColor: '#8D2683' } });
+      } else if (this.geometryOptions.current === 'circle') {
+        this.gisMap.drawingMethod(CSC.DrawingMethod.Draw, { mode: CSC.GISOverlayType.CIRCLE, fillOptions: { fillColor: '#06E4AF' } });
       } else if (this.geometryOptions.current === 'line') {
-        this.gisMap.drawingMethod(CSC.DrawingMethod.Draw, { mode: CSC.GISOverlayType.LINESTRING, strokeOptions: { strokeWeight: 1 } });
+        this.gisMap.drawingMethod(CSC.DrawingMethod.Draw, { mode: CSC.GISOverlayType.LINESTRING, strokeOptions: { strokeWeight: 2 } });
       }
     },
     // * @幾何圖形：上一步
@@ -1132,18 +1169,18 @@ export default {
     // * @幾何圖形：取消
     cancelStepHandler () {
       this.gisMap.drawingMethod(CSC.DrawingMethod.Cancel);
-      this.gisMap.drawingMethod(CSC.DrawingMethod.End);
+      this.gisMap.drawingMethod(CSC.DrawingMethod.Draw, { mode: CSC.GISOverlayType.NONE });
     },
     // * @幾何圖形：編輯(鉛筆)
     modifyStepHandler (id) {
       const { graphList } = this.geometryOptions;
       const index = graphList.findIndex(item => item.id === id);
       // 找到要編輯的圖形
-      const overlay = this.myGraphs[index];
+      const editme = this.myGraphs[index];
       // 啟用編輯圖形
-      this.gisMap.drawingMethod(CSC.DrawingMethod.Modify, { overlay });
+      this.gisMap.drawingMethod(CSC.DrawingMethod.Modify, { overlay: editme });
       // 定位擴大的圖形範圍
-      this.gisMap.fitBounds(overlay.getEnvelope(), 1.25);
+      // this.gisMap.fitBounds(editme.getEnvelope(), 1.25);
       this.saveIndex = index;
     },
     // * @幾何圖形：按下預定地會定位至地圖
@@ -1152,7 +1189,21 @@ export default {
       const index = graphList.findIndex(item => item.id === id);
       // 找到要定位的圖形
       const overlay = this.myGraphs[index];
+      // 先把所有圖形顏色變預設
+      this.myGraphs.forEach((item) => {
+        if (item.type === 'rectangleLand' || item.type === 'circleLand' || item.type === 'polygonLand') {
+          item.setFillColor('#8D2683');
+        } else if (item.type === 'rect' || item.type === 'poly' || item.type === 'circle') {
+          item.setFillColor('#06E4AF');
+        }
+      });
+      // 要定位的那個圖形放大+變色
       this.gisMap.fitBounds(overlay.getEnvelope(), 1.25);
+      if (overlay.type === 'rectangleLand' || overlay.type === 'circleLand' || overlay.type === 'polygonLand') {
+        overlay.setFillColor('#FF7269');
+      } else if (overlay.type === 'rect' || overlay.type === 'poly' || overlay.type === 'circle') {
+        overlay.setFillColor('#FF03E7');
+      }
     },
     // * @幾何圖形：幾何圖形類別
     geometryTypesProvider (nameList) {
@@ -1162,12 +1213,17 @@ export default {
     geometryGraphProvider (nameList) {
       return this.geometryOptions.graphList.filter(item => nameList.includes(item.type));
     },
+    // * @幾何圖形：篩選幾何圖形資料(暫存的圖形)
+    myGraphsProvider (nameList) {
+      return this.myGraphs.filter(item => nameList.includes(item.type));
+    },
     // * @幾何圖形：刪除幾何圖形資料
     deleteGeometryItemHandler (id) {
       const { graphList } = this.geometryOptions;
       const index = graphList.findIndex(item => item.id === id);
       this.$swal({
         icon: 'warning',
+        width: 402,
         showCancelButton: true,
         confirmButtonText: '確定',
         cancelButtonText: '取消',
@@ -1181,12 +1237,25 @@ export default {
         }
       });
     },
+    // * @幾何圖形：刪除幾何圖形資料 (測量長度/面積)
+    deleteGeometryItemHandler2 (id) {
+      const { graphList } = this.geometryOptions;
+      const index = graphList.findIndex(item => item.id === id);
+      graphList.splice(index, 1);
+      // 刪除暫存中的圖形
+      this.gisMap.drawingMethod(CSC.DrawingMethod.Remove, { overlay: this.myGraphs.splice(index, 1)[0] });
+    },
     // * @幾何圖形：刪除所有幾何圖形資料
     deleteAllGeometryItemHandler (nameList) {
       const { graphList } = this.geometryOptions;
+      // clear,claer2 = graphList myGraphs 中去除目前自己所屬的type(新增預定or測量長度) 的資料後, 剩下的資料
       const clear = graphList.filter(item => !nameList.includes(item.type));
+      const clear2 = this.myGraphs.filter(item => !nameList.includes(item.type));
+      // killme = myGraphs中要刪除的資料
+      const killme = this.myGraphs.filter(item => nameList.includes(item.type));
       this.$swal({
         icon: 'warning',
+        width: 402,
         showCancelButton: true,
         confirmButtonText: '確定',
         cancelButtonText: '取消',
@@ -1195,11 +1264,33 @@ export default {
       }).then((result) => {
         if (result.value) {
           this.geometryOptions.graphList = clear;
-          this.myGraphs.length = 0;
-          this.gisMap.drawingMethod(CSC.DrawingMethod.Clear);
+          this.myGraphs = clear2;
+          // 刪除地圖上的圖形
+          killme.forEach((item) => {
+            this.gisMap.drawingMethod(CSC.DrawingMethod.Remove, { overlay: item });
+          });
+          console.log(this.myGraphs);
           this.unSave = false;
         }
       });
+    },
+    // * @幾何圖形：刪除所有幾何圖形資料 (測量長度/面積)
+    deleteAllGeometryItemHandler2 (nameList) {
+      const { graphList } = this.geometryOptions;
+      // clear,claer2 = graphList myGraphs 中去除目前自己所屬的type(新增預定or測量長度) 的資料後, 剩下的資料
+      const clear = graphList.filter(item => !nameList.includes(item.type));
+      const clear2 = this.myGraphs.filter(item => !nameList.includes(item.type));
+      // killme = myGraphs中要刪除的資料
+      const killme = this.myGraphs.filter(item => nameList.includes(item.type));
+
+      this.geometryOptions.graphList = clear;
+      this.myGraphs = clear2;
+      // 刪除地圖上的圖形
+      killme.forEach((item) => {
+        this.gisMap.drawingMethod(CSC.DrawingMethod.Remove, { overlay: item });
+      });
+      console.log(this.myGraphs);
+      this.unSave = false;
     },
     // * @幾何圖形：新增幾何圖形資料
     createGeometryItemHandler () {
@@ -1218,6 +1309,9 @@ export default {
         radius: this.circleRadius[this.circleRadius.length - 1]
       };
 
+      // 在暫存圖形中新增type屬性 值為line/circle/circleland...等
+      this.myGraphs[this.myGraphs.length - 1].type = current;
+      // 新增圖形資料
       amountCounter[category] += 1;
       graphList.push(result);
     },
@@ -1227,6 +1321,7 @@ export default {
       const myGraphs = this.myGraphs;
       this.$swal({
         icon: 'question',
+        width: 402,
         html: `確認新增${count}筆建物預定用地申請<br />確認後將跳轉建物預定地簽核作業`,
         showCancelButton: true,
         confirmButtonText: '確定',
@@ -1468,6 +1563,13 @@ export default {
           return a.applytime > b.applytime ? 1 : -1;
         });
       }
+    },
+    // * 畫面擷取
+    screenShotHandler () {
+      this.gisMap.layout((img) => {
+        console.log(img.src);
+        this.screenImgSrc = img.src;
+      });
     }
   },
   computed: {
@@ -1518,6 +1620,10 @@ export default {
 <style lang="scss" scoped>
 @import '~/assets/scss/utils/_utils.scss';
 
+.more-height {
+  height: 83px;
+}
+
 .app {
   width: 100%;
   height: 100%;
@@ -1563,7 +1669,7 @@ export default {
 
 .coordinates {
   width: 300px;
-  height: 60px;
+  min-height: 60px;
   padding: 7px;
   position: absolute;
   bottom: 10px;
@@ -1580,6 +1686,13 @@ export default {
   font-size: 12px;
 }
 
+.co_cube2 {
+  position: absolute;
+  top: 30px;
+  left: 15px;
+  font-size: 12px;
+}
+
 .co_cubeno {
   position: absolute;
   top: 8px;
@@ -1592,6 +1705,10 @@ export default {
   top: 30px;
   left: 15px;
   font-size: 12px;
+}
+
+.twd_push {
+  top: 52px;
 }
 
 // * 圖層工具的表格
@@ -1657,7 +1774,7 @@ export default {
 
 .layersTable__wrapper {
   width: 100%;
-  max-height: 360px;
+  // max-height: 360px;
   overflow-x: hidden;
   overflow-y: auto;
 }

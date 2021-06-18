@@ -1,7 +1,7 @@
 <template>
   <div
     class="wrapper"
-    :class="{ 'is-hidden': triggerHidden === true }"
+    :class="{ 'is-hidden': triggerHidden === true, 'chstyle': $store.state.Url === 'customLayer'}"
   >
     <Header-component />
 
@@ -89,6 +89,10 @@ export default {
     },
     accordionEnd (event) {
       event.style.height = '';
+    },
+    getUrlChange () {
+      const nowURL = window.location.href.split('/')[4];
+      this.nowURL = nowURL;
     }
   },
   computed: {
@@ -119,6 +123,10 @@ export default {
 
 <style lang="scss" scoped>
 @import '~/assets/scss/utils/_utils.scss';
+
+.chstyle {
+  height: auto !important;
+}
 
 .loading-mask {
   width: 100%;

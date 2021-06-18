@@ -34,7 +34,7 @@
               'is-desktop-hide': item.isDesktopHide === true
             }"
           >
-            <nuxt-link
+            <!-- <nuxt-link
               v-if="item.isNuxtLink === true"
               class="header__menu-link"
               :to="item.path"
@@ -43,9 +43,8 @@
               @mousedown.prevent
             >
               <span>{{ item.name }}</span>
-            </nuxt-link>
+            </nuxt-link> -->
             <a
-              v-else
               class="header__menu-link"
               :href="item.path"
               :class="item.classNameList.join('')"
@@ -108,7 +107,7 @@ export default {
       menuList: [
         {
           name: '文字設定',
-          path: '/setting',
+          path: 'setting',
           isNuxtLink: true,
           isMobileShow: false,
           isDesktopHide: false,
@@ -116,7 +115,7 @@ export default {
         },
         {
           name: '圖資更新',
-          path: '/customLayer',
+          path: 'customLayer',
           isNuxtLink: true,
           isMobileShow: false,
           isDesktopHide: false,
@@ -124,7 +123,7 @@ export default {
         },
         {
           name: '更新異動',
-          path: '/recentChange',
+          path: 'recentChange',
           isNuxtLink: true,
           isMobileShow: false,
           isDesktopHide: false,
@@ -156,7 +155,7 @@ export default {
         },
         {
           name: '返回GIS圖台',
-          path: '/map',
+          path: 'map',
           isNuxtLink: true,
           isMobileShow: true,
           isDesktopHide: true,
@@ -164,7 +163,8 @@ export default {
         }
       ],
       userID: '',
-      userName: ''
+      userName: '',
+      myURL: ''
     };
   },
   mounted () {
@@ -266,6 +266,14 @@ export default {
       // @ 才能判斷現在是否為登入狀態
       return this.$store.state.accessToken !== '';
     }
+  },
+  watch: {
+    // * 監聽路由變化 若有改變就重新整理
+    // '$route' (to, from) {
+    //   if (to === 'map') {
+    //     window.location.reload();
+    //   }
+    // }
   }
 };
 </script>

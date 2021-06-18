@@ -9,7 +9,8 @@ export const state = () => ({
   tutorialOpen: false,
   loadingMask: false,
   triggerHidden: false,
-  mobileSelectUP: false // *預設沒有上滑效果
+  mobileSelectUP: false, // *預設沒有上滑效果
+  Url: ''
 
 });
 
@@ -47,5 +48,8 @@ export const mutations = {
   // *控制上方MultipleSelectMobileList 和右側工具列消失
   SET_MOBILE_SELECT (state, payload) {
     state.mobileSelectUP = payload;
+  },
+  GET_NOW_URL (state, payload) {
+    state.Url = payload;
   }
 };

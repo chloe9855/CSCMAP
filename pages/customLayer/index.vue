@@ -23,38 +23,49 @@
             handle=".handle-btn"
             @end="changeHandler"
           >
-            <tr v-for="(rowsItem, index) of tablesData.rows" :key="rowsItem.id">
-              <td>{{ rowsItem['layer_index'] }}</td>
-              <td>{{ rowsItem['name'] }}</td>
-              <td>{{ rowsItem['update_time'] }}</td>
+            <tr v-for="(rowsItem, index) of tablesData.rows" :key="index">
+              <!-- <td>{{ rowsItem['fid'] }}</td> -->
+              <td>{{ index+1 }}</td>
+              <td>{{ rowsItem['title'] }}</td>
+              <td>{{ rowsItem['updateTime'] }}</td>
               <td>
                 <ColorPicker
-                  v-if="rowsItem['text_color'] !== ''"
-                  :color="rowsItem['text_color']"
+                  v-if="rowsItem['canColor'] === true"
+                  :color="rowsItem['color']"
                   :theme-normal="true"
-                  @update="(payload) => { rowsItem['text_color'] = payload; }"
+                  @update="(payload) => { rowsItem['color'] = payload; }"
                 />
               </td>
               <td>
                 <div>
-                  <a
+                  <!-- <a
                     href="javascript:;"
                     class="btn has-outline outline-color-blue-light size-small"
-                    :title="rowsItem['can_upadte'] === true ? '更新底圖' : '新增底圖'"
+                    :title="rowsItem['canUpdate'] === true ? '更新底圖' : '新增底圖'"
                     @mousedown.prevent
                   >
-                    <span>{{ rowsItem['can_upadte'] === true ? '更新底圖' : '新增底圖' }}</span>
+                    <span>{{ rowsItem['canUpdate'] === true ? '更新底圖' : '新增底圖' }}</span>
+                  </a> -->
+                  <a
+                    v-if="rowsItem['canUpdate'] === true"
+                    href="javascript:;"
+                    class="btn has-outline outline-color-blue-light size-small"
+                    :title="'更新底圖'"
+                    @click.stop="selectFileModal = true, nowFileFid = rowsItem['fid'] "
+                    @mousedown.prevent
+                  >
+                    <span>{{ rowsItem['canUpdate'] === true ? '更新底圖' : '' }}</span>
                   </a>
                 </div>
               </td>
               <td>
                 <div class="checkbox dataTable__checkbox">
                   <input
-                    :id="`visible_${rowsItem['layer_index']}_${index}`"
+                    :id="`visible_${rowsItem['fid']}_${index}`"
                     v-model="rowsItem['inUse']"
                     type="checkbox"
                   >
-                  <label :for="`visible_${rowsItem['layer_index']}_${index}`">啟用</label>
+                  <label :for="`visible_${rowsItem['fid']}_${index}`">啟用</label>
                 </div>
               </td>
               <td>
@@ -71,6 +82,7 @@
             href="javascript:;"
             class="btn color-white has-outline outline-color-default size-small"
             title="取消"
+            @click.stop="cancelHandler"
             @mousedown.prevent
           >
             <span>取消</span>
@@ -83,6 +95,63 @@
           >
             <span>儲存修改</span>
           </a>
+        </div>
+      </div>
+
+      <!-- 更新圖資的lightbox -->
+      <div v-if="selectFileModal === true" class="modal_wrapper">
+        <div class="modal">
+          <div class="close-modal" @click.stop="selectFileModal = false" />
+          <p class="p1">
+            請選擇您的檔案
+          </p>
+          <p class="p2">
+            檔案須符合中鋼方格座標
+          </p>
+          <label for="upfile" class="file-button">選擇檔案
+            <input
+              id="upfile"
+              type="file"
+              accept=".dxf"
+              style="display: none;"
+              @change="updateFileHandler()"
+            >
+          </label>
+        </div>
+      </div>
+
+      <div v-if="updateModal === true" class="modal_wrapper">
+        <div class="modal">
+          <div class="close-modal" @click.stop="updateModal = false" />
+          <div class="title-img">
+            <div class="title-img2" />
+            <div class="title-img3">
+              {{ fileName }}
+            </div>
+          </div>
+          <p class="p3">
+            更新中
+          </p>
+          <div class="bar" />
+        </div>
+      </div>
+
+      <div v-if="completeModal === true" class="modal_wrapper">
+        <div class="modal">
+          <div class="close-modal" @click.stop="completeModal = false" />
+          <div class="title-img">
+            <div class="title-img2" />
+            <div class="title-img3">
+              {{ fileName }}
+            </div>
+          </div>
+          <p class="p3">
+            更新完成
+          </p>
+          <div class="okpic" />
+          <div class="file-button" @click.stop="completeModal = false">
+            確認
+          </div>
         </div>
       </div>
     </div>
@@ -125,7 +194,14 @@ export default {
         ],
         rows: []
       },
-      isInit: false
+      isInit: false,
+      selectFileModal: false,
+      updateModal: false,
+      completeModal: false,
+      fileName: '',
+      base64File: '',
+      // 要更新的那個檔案編號
+      nowFileFid: ''
     };
   },
   components: {
@@ -134,13 +210,15 @@ export default {
   },
   mounted () {
     // 開啟 Loading 視窗
+    this.$store.commit('GET_NOW_URL', 'customLayer');
     this.$store.commit('CTRL_LOADING_MASK', true);
 
     // ? 用 setTimeout 模擬 ajax 完成的狀態給人看
     setTimeout(() => {
       // ! 取得圖層資料，這邊應該要用 ajax 抓資料回來
-      const _layers = require('~/static/_resources/defaultLayerList.json');
-      this.tablesData.rows = [..._layers.data];
+      // const _layers = require('~/static/_resources/defaultLayerList.json');
+      // this.tablesData.rows = [..._layers.data];
+      this.getDefaultLayer();
 
       // 關閉 Loading 視窗與開啟側邊選單
       this.$store.commit('CTRL_LOADING_MASK', false);
@@ -150,6 +228,75 @@ export default {
   methods: {
     // * 順序拖曳移動後會呼叫的事件
     changeHandler () {
+    },
+    getDefaultLayer () {
+      fetch('/csc2api/api/layer', {
+        method: 'GET',
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        })
+      }).then((response) => {
+        return response.json();
+      }).then((data) => {
+        this.tablesData.rows = data;
+        console.log(data);
+      }).catch((err) => {
+        console.log('錯誤:', err);
+      });
+    },
+    updateFileHandler () {
+      const newFile = document.getElementById('upfile').files[0];
+      this.fileName = newFile.name;
+      console.log(newFile);
+      this.getBase64Handler(newFile);
+    },
+    getBase64Handler (newFile) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(newFile);
+        reader.onload = () => {
+          console.log(reader.result);
+          resolve(reader.result);
+          this.base64File = reader.result;
+
+          this.selectFileModal = false;
+          this.updateModal = true;
+
+          this.uploadFileHandler();
+
+          setTimeout(() => {
+            this.updateModal = false;
+            this.completeModal = true;
+          }, 3000);
+          // 把圖層名稱更新為上傳的檔案名稱
+          this.tablesData.rows.forEach((item) => {
+            if (item.fid === this.nowFileFid) {
+              item.title = this.fileName;
+            }
+          });
+        };
+        reader.onerror = error => reject(error);
+      });
+    },
+    uploadFileHandler () {
+      const newArr = [];
+      newArr.push({ fid: this.nowFileFid, contentType: 'application/dxf', content: this.base64File });
+      fetch('/csc2api/api/layer', {
+        method: 'PATCH',
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        }),
+        body: JSON.stringify(newArr)
+      }).then((response) => {
+        return response;
+      }).then((data) => {
+        console.log(data);
+      }).catch((err) => {
+        console.log('錯誤:', err);
+      });
+    },
+    cancelHandler () {
+      window.location.reload();
     }
   }
 };
@@ -158,6 +305,108 @@ export default {
 <style lang="scss" scoped>
 @import '~/assets/scss/utils/_utils.scss';
 @import '~/assets/scss/_article.scss';
+
+.modal_wrapper {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.2);
+  z-index: 9998;
+  cursor: default;
+}
+
+.modal {
+  width: 430px;
+  padding: 30px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  text-align: center;
+  background-color: #fff;
+  border-radius: 10px;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  flex-direction: column;
+}
+
+.close-modal {
+  width: 35px;
+  height: 35px;
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  background: url('~/assets/img/icon/close_icon.svg') no-repeat center/contain;
+  cursor: pointer;
+}
+
+.p1 {
+  margin-top: 39px;
+  font-size: 18px;
+  margin-bottom: 7px;
+}
+
+.p2 {
+  font-size: 18px;
+  color: red;
+}
+
+.file-button {
+  width: 130px;
+  padding: 6px;
+  margin: 26px 0 18px;
+  font-size: 16px;
+  color: #fff;
+  background-color: #408bc5;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.title-img {
+  width: 220px;
+  padding: 5px;
+  display: flex;
+  justify-content: space-evenly;
+  color: #408bc5;
+  background-color: #e4f4ff;
+  border-radius: 10px;
+}
+
+.title-img2 {
+  width: 24px;
+  height: 24px;
+  margin-right: -15px;
+  background: url('~/assets/img/icon/save-icon.svg') no-repeat center/contain;
+}
+
+.title-img3 {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.p3 {
+  margin-top: 42px;
+  font-size: 25px;
+  font-weight: bold;
+  color: #165f88;
+}
+
+.bar {
+  width: 236px;
+  height: 12px;
+  margin: 10px 0 20px;
+  background: url('~/assets/img/icon/bar-new.svg') no-repeat center/contain;
+}
+
+.okpic {
+  width: 25px;
+  height: 25px;
+  background: url('~/assets/img/icon/ok-buttton.svg') no-repeat center/contain;
+}
 
 .content {
   padding: 30px 20px;

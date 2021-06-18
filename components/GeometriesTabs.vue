@@ -9,7 +9,7 @@
           class="geometry-tabs__btn"
           :class="buttonClassProvider(typeItem.id)"
           :title="typeItem.name"
-          @click.stop="$emit('selectType', typeItem.id),$emit('allTypeList', typesIdList)"
+          @click.stop="$emit('selectType', typeItem.id),$emit('allTypeList', typesIdList),hideEditMode()"
           @mouseenter="caption = typeItem.name"
           @mouseleave="caption = ''"
           @mousedown.prevent
@@ -78,7 +78,7 @@
                         href="javascript:;"
                         class="geometry-list__btn icon-edit"
                         title="編輯"
-                        @click.stop="graphItem.controlBar = !graphItem.controlBar,$emit('modify', graphItem.id)"
+                        @click.stop="graphItem.controlBar = !graphItem.controlBar,editItemHandler(graphItem.id),$emit('modify', graphItem.id)"
                         @mousedown.prevent
                       />
                       <a
@@ -148,10 +148,16 @@
         >確定</a>
       </div>
       <p
-        v-if="graphList.length <= 0"
+        v-if="graphList.length <= 0 && !typesIdList.includes('line','rect','poly','circle')"
         class="notice-tips"
       >
         尚未新增預定用地
+      </p>
+      <p
+        v-if="graphList.length <= 0 && !typesIdList.includes('rectangleLand', 'polygonLand', 'circleLand')"
+        class="notice-tips"
+      >
+        尚未測量
       </p>
     </div>
   </div>
@@ -178,9 +184,19 @@ export default {
     buttonClassProvider (id) {
       return `icon-${id} ${this.current === id ? 'current' : ''}`;
     },
+    // * 單數列背景是灰色 用$nextTick確保DOM已渲染完成後 才繼續進行下面動作
     setItemColor () {
+      this.$nextTick(() => {
+        this.graphList.forEach((item, index) => {
+          if (index % 2 === 0) {
+            document.querySelector(`.switch-bg-${item.id}`).style.backgroundColor = '#f2f2f2';
+          }
+        });
+      });
+    },
+    setItemColor2 () {
       this.graphList.forEach((item, index) => {
-        if (index % 2 !== 0) {
+        if (index % 2 === 0) {
           document.querySelector(`.switch-bg-${item.id}`).style.backgroundColor = '#f2f2f2';
         }
       });
@@ -192,8 +208,22 @@ export default {
       this.graphList.forEach((item) => {
         document.querySelector(`.switch-bg-${item.id}`).style.backgroundColor = '';
       });
-      this.setItemColor();
+      this.setItemColor2();
       document.querySelector(`.switch-bg-${id}`).style.backgroundColor = '#FFF2CE';
+    },
+    // * 一次只能編輯一個圖形
+    editItemHandler (id) {
+      this.graphList.forEach((item) => {
+        if (item.id !== id) {
+          item.controlBar = false;
+        }
+      });
+    },
+    // * 按下新增用地時 會關閉其它所有編輯狀態
+    hideEditMode () {
+      this.graphList.forEach((item) => {
+        item.controlBar = false;
+      });
     }
   },
   computed: {
@@ -205,6 +235,14 @@ export default {
     // * 向量圖形 ID 列表
     typesIdList () {
       return this.typesList.map(item => item.id);
+    }
+  },
+  watch: {
+    graphList: {
+      handler () {
+        this.setItemColor();
+      },
+      deep: true
     }
   }
 };
@@ -457,7 +495,7 @@ export default {
 }
 
 .gogoli {
-  padding: 10px;
+  padding: 6px 10px;
 }
 
 .geometry-list__main {

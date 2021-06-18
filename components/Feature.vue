@@ -81,8 +81,10 @@
       </li>
       <li v-if="screenWidth > 1023">
         <a
-          href="javascript:;"
+          download="cscMap.png"
+          :href="screenSrc"
           class="feature__btn icon-screen-capture"
+          @click.stop="$emit('screenShot')"
           @mousedown.prevent
         >
           <span>畫面擷取</span>
@@ -102,6 +104,7 @@
         <a
           href="javascript:;"
           class="feature__btn icon-zoom-in"
+          @click.stop="$emit('zoomIn')"
           @mousedown.prevent
         >
           <span>放大</span>
@@ -111,6 +114,7 @@
         <a
           href="javascript:;"
           class="feature__btn icon-zoom-out"
+          @click.stop="$emit('zoomOut')"
           @mousedown.prevent
         >
           <span>縮小</span>
@@ -129,7 +133,8 @@ export default {
   },
   props: {
     current: String,
-    iconcolor: Boolean
+    iconcolor: Boolean,
+    screenSrc: String
   },
   methods: {
     // * 設定拖曳選單開啟/關閉

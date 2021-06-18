@@ -308,6 +308,7 @@ export default {
         if (KEYWORD === '') {
           this.$swal({
             text: '請輸入方格圖號',
+            width: 402,
             confirmButtonText: '確定',
             showCloseButton: true
           });
@@ -334,6 +335,7 @@ export default {
       if (keyword.split(',').length > 3) {
         this.$swal({
           text: '輸入過多圖號，將造成系統不穩定',
+          width: 402,
           confirmButtonText: '確定',
           showCloseButton: true
         });
@@ -347,6 +349,7 @@ export default {
       if (result === false) {
         this.$swal({
           text: '請輸入正確的方格圖號格式',
+          width: 402,
           confirmButtonText: '確定',
           showCloseButton: true
         });
@@ -377,6 +380,7 @@ export default {
         if (KEYWORD === '') {
           this.$swal({
             text: '請輸入方格圖號',
+            width: 402,
             confirmButtonText: '確定',
             showCloseButton: true
           });

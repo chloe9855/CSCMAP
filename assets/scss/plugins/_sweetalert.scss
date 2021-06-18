@@ -43,9 +43,11 @@
 }
 
 .swal2-popup.swal2-toast .swal2-icon {
-  width: 2em;
-  height: 2em;
-  min-width: 2em;
+  // width: 2em;
+  // height: 2em;
+  // min-width: 2em;
+  width: 50px;
+  height: 50px;
   margin: 0;
 }
 
@@ -63,21 +65,25 @@
 }
 
 .swal2-popup.swal2-toast .swal2-icon.swal2-success .swal2-success-ring {
-  width: 2em;
-  height: 2em;
+  width: 50px;
+  height: 50px;
 }
 
 .swal2-popup.swal2-toast .swal2-icon.swal2-error [class^='swal2-x-mark-line'] {
-  width: 1.375em;
-  top: 0.875em;
+  // width: 1.375em;
+  // top: 0.875em;
+  width: 2em;
+  top: 23px;
 }
 
 .swal2-popup.swal2-toast .swal2-icon.swal2-error [class^='swal2-x-mark-line'][class$='left'] {
-  left: 0.3125em;
+  // left: 0.3125em;
+  left: 0.5625em;
 }
 
 .swal2-popup.swal2-toast .swal2-icon.swal2-error [class^='swal2-x-mark-line'][class$='right'] {
-  right: 0.3125em;
+  // right: 0.3125em;
+  right: 0.5em;
 }
 
 .swal2-popup.swal2-toast .swal2-actions {
@@ -696,8 +702,10 @@
 }
 
 .swal2-icon {
-  width: 5em;
-  height: 5em;
+  // width: 5em;
+  // height: 5em;
+  width: 50px;
+  height: 50px;
   margin: 1.25em auto 1.875em;
   justify-content: center;
   position: relative;
@@ -717,7 +725,8 @@
 .swal2-icon .swal2-icon-content {
   display: flex;
   align-items: center;
-  font-size: 3.75em;
+  // font-size: 3.75em;
+  font-size: 2.75em;
 }
 
 .swal2-icon.swal2-error {
@@ -731,22 +740,22 @@
 }
 
 .swal2-icon.swal2-error [class^='swal2-x-mark-line'] {
-  width: 2.9375em;
+  width: 2em;
   height: 0.3125em;
   display: block;
   position: absolute;
-  top: 2.3125em;
+  top: 23px;
   background-color: #f27474;
   border-radius: 0.125em;
 }
 
 .swal2-icon.swal2-error [class^='swal2-x-mark-line'][class$='left'] {
-  left: 1.0625em;
+  left: 0.5625em;
   transform: rotate(45deg);
 }
 
 .swal2-icon.swal2-error [class^='swal2-x-mark-line'][class$='right'] {
-  right: 1em;
+  right: 0.5em;
   transform: rotate(-45deg);
 }
 

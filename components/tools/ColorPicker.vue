@@ -115,8 +115,10 @@ export default {
 
 .colorPicker__picker {
   position: absolute;
-  top: 100%;
-  right: 0;
+  bottom: 20px;
+  // top: 100%;
+  // right: 0;
+  left: 150px;
   z-index: 100;
 }
 
