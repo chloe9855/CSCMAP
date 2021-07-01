@@ -1,5 +1,5 @@
 <template>
-  <header class="header" :class="{ 'theme-simple': themeFilterHandler }">
+  <header class="header" :class="{ 'theme-simple': themeFilterHandler , 'hetyle': $store.state.Url === 'customLayer', 'mobstyle': $store.state.Url === 'welcomePage'}">
     <div class="header__container">
       <div class="header__heading">
         <nuxt-link
@@ -25,7 +25,7 @@
         </nuxt-link>
       </div>
       <div class="header__content">
-        <ul class="header__menu-list">
+        <ul v-if="pageName !== 'index' && pageName !== 'admin'" class="header__menu-list">
           <li
             v-for="item of menuFilterHandler"
             :key="item.name"
@@ -106,7 +106,7 @@ export default {
     return {
       menuList: [
         {
-          name: '文字設定',
+          name: '建物名稱設定',
           path: 'setting',
           isNuxtLink: true,
           isMobileShow: false,
@@ -162,13 +162,79 @@ export default {
           classNameList: []
         }
       ],
+      menuList2: [
+        {
+          name: 'ERP建物資訊',
+          path: '#',
+          isNuxtLink: false,
+          isMobileShow: false,
+          isDesktopHide: false,
+          classNameList: []
+        },
+        {
+          name: '業務負責人',
+          path: '#',
+          isNuxtLink: false,
+          isMobileShow: true,
+          isDesktopHide: false,
+          classNameList: []
+        },
+        {
+          name: '使用說明',
+          path: 'javascript:;',
+          isNuxtLink: false,
+          isMobileShow: false,
+          isDesktopHide: false,
+          classNameList: ['tutorial-btn']
+        },
+        {
+          name: '返回GIS圖台',
+          path: 'map',
+          isNuxtLink: true,
+          isMobileShow: true,
+          isDesktopHide: true,
+          classNameList: []
+        }
+      ],
+      menuList3: [
+        {
+          name: '業務負責人',
+          path: '#',
+          isNuxtLink: false,
+          isMobileShow: true,
+          isDesktopHide: false,
+          classNameList: []
+        },
+        {
+          name: '使用說明',
+          path: 'javascript:;',
+          isNuxtLink: false,
+          isMobileShow: false,
+          isDesktopHide: false,
+          classNameList: ['tutorial-btn']
+        },
+        {
+          name: '返回GIS圖台',
+          path: 'map',
+          isNuxtLink: true,
+          isMobileShow: true,
+          isDesktopHide: true,
+          classNameList: []
+        }
+      ],
       userID: '',
       userName: '',
-      myURL: ''
+      myURL: '',
+      // * 使用者權限角色
+      myRole: '',
+      // * 查詢載入方格圖權限
+      canSearchGrid: null
     };
   },
   mounted () {
     this.getUserData();
+    this.getUserRole();
+    this.getGridAuthority();
   },
   methods: {
     // * 控制 menu 選單開啟/關閉
@@ -209,9 +275,9 @@ export default {
     },
     // * 獲取登入資料
     getUserData () {
-      fetch('/csc2api/api/SignOnStatus', {
+      fetch('/CSCMap/api/SignOnStatus', {
         method: 'GET',
-        credentials: 'include',
+        // credentials: 'include',
         headers: new Headers({
           'Content-Type': 'application/json'
         })
@@ -225,6 +291,40 @@ export default {
       }).catch((err) => {
         console.log('錯誤:', err);
         console.log(err.status);
+      });
+    },
+    // * 取得使用者權限角色
+    getUserRole () {
+      fetch('/csc2api/api/proxy?url=https://eas.csc.com.tw/mhb/rest/mhbe/Role/213801?_format=json', {
+        method: 'GET',
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        })
+      }).then((response) => {
+        return response.json();
+      }).then((data) => {
+        this.myRole = data;
+        this.$store.commit('GET_USER_ROLE', data);
+        console.log(this.myRole);
+      }).catch((err) => {
+        console.log('錯誤:', err);
+      });
+    },
+    // * 查詢載入方格圖權限 (回傳 true(有權限) or false(無權限))
+    getGridAuthority () {
+      fetch('/csc2api/api/proxy?url=http://eas.csc.com.tw/mhb/rest/mhbe/LoadGridAuth/190199?_format=json', {
+        method: 'GET',
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        })
+      }).then((response) => {
+        return response.json();
+      }).then((data) => {
+        this.canSearchGrid = data;
+        this.$store.commit('GET_GRID_ACCESS', data);
+        console.log(this.canSearchGrid);
+      }).catch((err) => {
+        console.log('錯誤:', err);
       });
     }
   },
@@ -250,8 +350,8 @@ export default {
     },
     // * 判斷目前頁面欲顯示的 menu 選單項目
     menuFilterHandler () {
-      const name = this.$route.name;
-      return (name === 'index' || name === 'admin') ? [] : this.menuList;
+      // return (this.myRole === 1) ? this.menuList : (this.myRole === 2) ? this.menuList2 : (this.myRole === 3) ? this.menuList3 : '';
+      return this.menuList;
     },
     // * 判斷目前頁面是否需要有「返回GIS圖台按鈕」
     backmapBtnVisibleHandler () {
@@ -265,6 +365,9 @@ export default {
       // @ 實際上要 call API 去驗證這組 token 是否有效
       // @ 才能判斷現在是否為登入狀態
       return this.$store.state.accessToken !== '';
+    },
+    pageName () {
+      return this.$route.name;
     }
   },
   watch: {
@@ -281,11 +384,21 @@ export default {
 <style lang="scss" scoped>
 @import '~/assets/scss/utils/_utils.scss';
 
+.mobstyle {
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+}
+
+.hetyle {
+  position: static !important;
+}
+
 .header {
   width: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
+  // position: absolute;
+  // top: 0;
+  // left: 0;
   background-color: $color-blue;
   z-index: 7000;
 

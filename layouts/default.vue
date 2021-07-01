@@ -1,7 +1,7 @@
 <template>
   <div
     class="wrapper"
-    :class="{ 'is-hidden': triggerHidden === true, 'chstyle': $store.state.Url === 'customLayer'}"
+    :class="{ 'is-hidden': triggerHidden === true, 'abstyle': $store.state.Url === 'customLayer'}"
   >
     <Header-component />
 
@@ -126,6 +126,10 @@ export default {
 
 .chstyle {
   height: auto !important;
+}
+
+.abstyle {
+  overflow: visible !important;
 }
 
 .loading-mask {

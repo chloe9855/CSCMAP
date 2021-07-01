@@ -25,7 +25,7 @@
       <div v-if="coldCube.x !== ''" class="co_cube2">
         冷三方格座標({{ coldCube.x }}, {{ coldCube.y }})
       </div>
-      <div class="co_cubeno">
+      <div v-if="CubeNo !== undefined" class="co_cubeno">
         {{ cubeName }}: {{ CubeNo }}
       </div>
       <div class="co_TWD" :class="{'twd_push': coldCube.x !== ''}">
@@ -37,143 +37,65 @@
     <div v-if="geometryMeasurer.aimpoint === true" class="aimpoint" />
 
     <!-- ↓↓ 在地圖API裡面需要用到的DOM -->
-    <!-- <div
-      v-if="screenWidth > 1023"
-      :style="'width: 365px; position: absolute; top: 100px; right: 100px;'"
-    >
-      <div class="building__item theme-in-map">
-        <div class="building__title has-icon icon-type-yu">
-          第三冷主變電站
-        </div>
-        <div class="building__body">
-          <div class="building__content">
-            <p class="has-icon icon-building">
-              <strong>各棟名稱</strong>第三冷主變電站123
-            </p>
-            <p class="has-icon icon-people">
-              <strong>用地申請單位/人員</strong>W51/劉小華
-            </p>
-            <p class="has-icon icon-license">
-              <strong>用地登錄時間</strong>2019-11-26 18:00:36
-            </p>
+    <div :style="'display: none;'">
+      <SingleCluster-component
+        :item="singleClusterInfo"
+        :my-type="singleClusterType"
+        @click-detail="singleErpDetail"
+      />
+
+      <!-- <div
+        id="meme1"
+        :style="'width: 370px; border-radius: 10px;padding: 7px;background: white;'"
+      >
+        <div class="building__item theme-in-map">
+          <div
+            class="building__title has-icon"
+            :class="`icon-type-${item.status}`"
+          >
+            第三冷主變電站
           </div>
-          <a href="javascript:;" title="看詳細" class="read-more-btn">看詳細</a>
+          <div class="building__body">
+            <div class="building__content">
+              <p class="has-icon icon-building">
+                <strong>各棟名稱</strong>{{ wowy }}
+              </p>
+              <p class="has-icon icon-people">
+                <strong>用地申請單位/人員</strong>W51/劉小華
+              </p>
+              <p class="has-icon icon-license">
+                <strong>用地登錄時間</strong>2019-11-26 18:00:36
+              </p>
+            </div>
+            <a href="javascript:;" title="看詳細" class="read-more-btn">看詳細</a>
+          </div>
+          <div class="building__tag-group">
+            <span class="building__tag icon-error">房屋稅籍</span><span class="building__tag icon-checked">工廠登記</span><span class="building__tag icon-checked">優惠減免</span><span class="building__tag icon-checked">保存登記</span>
+          </div>
         </div>
-        <div class="building__tag-group">
-          <span class="building__tag icon-error">房屋稅籍</span><span class="building__tag icon-checked">工廠登記</span><span class="building__tag icon-checked">優惠減免</span><span class="building__tag icon-checked">保存登記</span>
-        </div>
-      </div>
-    </div> -->
+      </div> -->
+    </div>
 
     <!-- 在 .building__item 添加 is-open 這個 class，選單項目就會展開 -->
-    <!-- <div
-      v-if="screenWidth > 1023"
-      :style="'width: 365px; position: absolute; top: 250px; right: 100px;'"
-    >
-      <div class="infowindow">
-        <div class="infowindow__title">
-          建物列表
-        </div>
-        <div class="infowindow__content theme-scrollbar">
-          <div class="building__item theme-in-map">
-            <div class="building__title has-icon icon-type-yu">
-              第三冷主變電站
-            </div>
-            <div class="building__article">
-              <div class="building__body">
-                <div class="building__content">
-                  <p class="has-icon icon-building">
-                    <strong>各棟名稱</strong>第三冷主變電站123
-                  </p>
-                  <p class="has-icon icon-people">
-                    <strong>用地申請單位/人員</strong>W51/劉小華
-                  </p>
-                  <p class="has-icon icon-license">
-                    <strong>用地登錄時間</strong>2019-11-26 18:00:36
-                  </p>
-                </div>
-                <a href="javascript:;" title="看詳細" class="read-more-btn">看詳細</a>
-              </div>
-              <div class="building__tag-group">
-                <span class="building__tag icon-error">房屋稅籍</span><span class="building__tag icon-checked">工廠登記</span><span class="building__tag icon-checked">優惠減免</span><span class="building__tag icon-checked">保存登記</span>
-              </div>
-            </div>
+    <div :style="'display: none;'">
+      <div
+        id="meme2"
+        :style="'width: 370px; border-radius: 10px;padding: 0px 4px 6px; background: white; height: 176px; overflow: hidden; margin: -12px 0px 5px;'"
+      >
+        <div class="infowindow">
+          <div class="infowindow__title">
+            建物列表
           </div>
-          <div class="building__item theme-in-map">
-            <div class="building__title has-icon icon-type-jiun">
-              第三冷主變電站
-            </div>
-            <div class="building__article">
-              <div class="building__body">
-                <div class="building__content">
-                  <p class="has-icon icon-building">
-                    <strong>各棟名稱</strong>第三冷主變電站123
-                  </p>
-                  <p class="has-icon icon-people">
-                    <strong>用地申請單位/人員</strong>W51/劉小華
-                  </p>
-                  <p class="has-icon icon-license">
-                    <strong>用地登錄時間</strong>2019-11-26 18:00:36
-                  </p>
-                </div>
-                <a href="javascript:;" title="看詳細" class="read-more-btn">看詳細</a>
-              </div>
-              <div class="building__tag-group">
-                <span class="building__tag icon-error">房屋稅籍</span><span class="building__tag icon-checked">工廠登記</span><span class="building__tag icon-checked">優惠減免</span><span class="building__tag icon-checked">保存登記</span>
-              </div>
-            </div>
-          </div>
-          <div class="building__item theme-in-map">
-            <div class="building__title has-icon icon-type-shin">
-              第三冷主變電站
-            </div>
-            <div class="building__article">
-              <div class="building__body">
-                <div class="building__content">
-                  <p class="has-icon icon-building">
-                    <strong>各棟名稱</strong>第三冷主變電站123
-                  </p>
-                  <p class="has-icon icon-people">
-                    <strong>用地申請單位/人員</strong>W51/劉小華
-                  </p>
-                  <p class="has-icon icon-license">
-                    <strong>用地登錄時間</strong>2019-11-26 18:00:36
-                  </p>
-                </div>
-                <a href="javascript:;" title="看詳細" class="read-more-btn">看詳細</a>
-              </div>
-              <div class="building__tag-group">
-                <span class="building__tag icon-error">房屋稅籍</span><span class="building__tag icon-checked">工廠登記</span><span class="building__tag icon-checked">優惠減免</span><span class="building__tag icon-checked">保存登記</span>
-              </div>
-            </div>
-          </div>
-          <div class="building__item theme-in-map">
-            <div class="building__title has-icon icon-type-yu">
-              第三冷主變電站
-            </div>
-            <div class="building__article">
-              <div class="building__body">
-                <div class="building__content">
-                  <p class="has-icon icon-building">
-                    <strong>各棟名稱</strong>第三冷主變電站123
-                  </p>
-                  <p class="has-icon icon-people">
-                    <strong>用地申請單位/人員</strong>W51/劉小華
-                  </p>
-                  <p class="has-icon icon-license">
-                    <strong>用地登錄時間</strong>2019-11-26 18:00:36
-                  </p>
-                </div>
-                <a href="javascript:;" title="看詳細" class="read-more-btn">看詳細</a>
-              </div>
-              <div class="building__tag-group">
-                <span class="building__tag icon-error">房屋稅籍</span><span class="building__tag icon-checked">工廠登記</span><span class="building__tag icon-checked">優惠減免</span><span class="building__tag icon-checked">保存登記</span>
-              </div>
-            </div>
+          <div ref="mycontent" class="infowindow__content theme-scrollbar">
+            <MultiCluster-component
+              :mycluster="multiClusterInfo"
+              @click-detail="singleErpDetail"
+              @scroll-top="scrollTopHandler"
+            />
           </div>
         </div>
       </div>
-    </div> -->
+    </div>
     <!-- ↑↑ 在地圖API裡面需要用到的DOM -->
 
     <!-- 左側的搜尋選單 -->
@@ -219,6 +141,7 @@
       :current="activeWindow"
       :iconcolor="switchBgColor"
       :screen-src="screenImgSrc"
+      :cluster-bg="addClusterBg"
       @select="payload => activeWindow = payload"
       @setPositionAlert="ctrlPositionAlert"
       @hideTagBar="hideTagBarCtrl"
@@ -229,6 +152,21 @@
       @zoomOut="gisMap.ZoomOut()"
       @screenShot="screenShotHandler"
     />
+
+    <a id="myShot" download="cscMap.png" :href="screenImgSrc" style="display: none;" @mousedown.prevent>shot</a>
+
+    <!-- ERP 視窗（單筆點擊查詢結果） -->
+    <transition
+      name="popup-slide"
+      mode="out-in"
+    >
+      <ClusterErpBox-component
+        v-if="screenWidth < 1024 && $store.state.myErpCluster === true"
+        :current-key="singleClusterKey"
+        :clus-data="singleClusterInfo"
+        @close="clusRows[clusRows.length - 1].selected = false"
+      />
+    </transition>
 
     <!-- ERP 視窗（建物搜尋結果） -->
     <transition
@@ -369,7 +307,7 @@
         :key="'measurePopup'"
         :name="'測量距離/面積'"
         :icon-name="'icon-measure'"
-        @close="activeWindow = ''"
+        @close="closeMeasurePopupBox"
         @showBar="showTagBarCtrl"
       >
         <div class="navtabs">
@@ -394,7 +332,7 @@
               </div>
               <div
                 v-if="geometryMeasurer.current === 'point'"
-                class="row is-flex-center"
+                class="row is-flex-center go-margi"
               >
                 <a href="javascript:;" class="links-btn" title="完成">完成</a>
                 <a href="javascript:;" class="links-btn" title="複製坐標">複製坐標</a>
@@ -403,29 +341,75 @@
               </div>
               <div
                 v-if="geometryMeasurer.current === 'line'"
-                class="row is-flex-center"
               >
-                <a href="javascript:;" class="circle-btn icon-comeback" title="返回">
-                  <span>返回</span>
-                </a>
-                <a href="javascript:;" class="links-btn" title="完成">完成</a>
-                <a href="javascript:;" class="circle-btn icon-increase" title="新增">
-                  <span>新增</span>
-                </a>
-                <a href="javascript:;" class="links-btn color-red" title="重新繪製">重新繪製</a>
+                <p>總長 {{ lineSum.toFixed(2) }} 公里</p>
+                <div v-if="drawModeLine === true" class="row is-flex-center">
+                  <a
+                    href="javascript:;"
+                    class="circle-btn icon-comeback"
+                    title="返回"
+                    @click.stop="backStepHandler"
+                  >
+                    <span>返回</span>
+                  </a>
+                  <a
+                    href="javascript:;"
+                    class="links-btn"
+                    title="完成"
+                    @click.stop="finishHandler"
+                  >完成</a>
+                  <a
+                    href="javascript:;"
+                    class="circle-btn icon-increase"
+                    title="新增"
+                    @click.stop="drawLineHandler"
+                  >
+                    <span>新增</span>
+                  </a>
+                </div>
+                <a
+                  v-if="drawModeLine === false"
+                  href="javascript:;"
+                  class="links-btn color-red"
+                  title="重新繪製"
+                  @click.stop="clearLineHandler"
+                >重新繪製</a>
               </div>
               <div
                 v-if="geometryMeasurer.current === 'surface'"
-                class="row is-flex-center"
               >
-                <a href="javascript:;" class="circle-btn icon-comeback" title="返回">
-                  <span>返回</span>
-                </a>
-                <a href="javascript:;" class="links-btn" title="完成">完成</a>
-                <a href="javascript:;" class="circle-btn icon-increase" title="新增">
-                  <span>新增</span>
-                </a>
-                <a href="javascript:;" class="links-btn color-red" title="重新繪製">重新繪製</a>
+                <p>總面積 {{ areaSum }} 平方公尺</p>
+                <div v-if="drawModeArea === true" class="row is-flex-center">
+                  <a
+                    href="javascript:;"
+                    class="circle-btn icon-comeback"
+                    title="返回"
+                    @click.stop="backStepHandler"
+                  >
+                    <span>返回</span>
+                  </a>
+                  <a
+                    href="javascript:;"
+                    class="links-btn"
+                    title="完成"
+                    @click.stop="finishHandler2"
+                  >完成</a>
+                  <a
+                    href="javascript:;"
+                    class="circle-btn icon-increase"
+                    title="新增"
+                    @click.stop="drawAreaHandler"
+                  >
+                    <span>新增</span>
+                  </a>
+                </div>
+                <a
+                  v-if="drawModeArea === false"
+                  href="javascript:;"
+                  class="links-btn color-red"
+                  title="重新繪製"
+                  @click.stop="clearAreaHandler"
+                >重新繪製</a>
               </div>
             </div>
           </div>
@@ -492,6 +476,7 @@
                       <ViewCheckbox
                         :id="layerItem.fid"
                         :visible="layerItem.visible"
+                        :file="layerItem.myLayerFile"
                         @change="layerVisibleHandler"
                       />
                     </td>
@@ -499,6 +484,7 @@
                       <OpacityController
                         :id="layerItem.fid"
                         :value="layerItem.opacity"
+                        :file="layerItem.myLayerFile"
                         @update="updateLayerOpacities"
                       />
                     </td>
@@ -517,7 +503,7 @@
                           href="javascript:;"
                           class="btn color-light-blue size-small has-front-icon icon-location"
                           title="定位"
-                          @click.stop="setLayerPositionHandler(layerItem.fid)"
+                          @click.stop="setLayerPositionHandler(layerItem.fid, layerItem.myLayerFile)"
                           @mousedown.prevent
                         >
                           <span>定位</span>
@@ -526,7 +512,7 @@
                           href="javascript:;"
                           class="btn color-light-blue size-small has-front-icon icon-delete"
                           title="移除"
-                          @click.stop="deleteLayerHandler(layerItem.fid)"
+                          @click.stop="deleteLayerHandler(layerItem.fid, layerItem.myLayerFile)"
                           @mousedown.prevent
                         >
                           <span>移除</span>
@@ -553,7 +539,7 @@
               href="javascript:;"
               class="btn color-blue has-front-icon icon-add-layer size-small"
               title="新增圖層"
-              @click.stop="addLayerHandler"
+              @click.stop="selectFileModal = true"
               @mousedown.prevent
             >
               <span>新增圖層</span>
@@ -594,6 +580,7 @@
                 <ViewCheckbox
                   :id="layerItem.fid"
                   :visible="layerItem.visible"
+                  :file="layerItem.myLayerFile"
                   @change="layerVisibleHandler"
                 />
               </td>
@@ -601,6 +588,7 @@
                 <OpacityController
                   :id="layerItem.fid"
                   :value="layerItem.opacity"
+                  :file="layerItem.myLayerFile"
                   @update="updateLayerOpacities"
                 />
               </td>
@@ -617,6 +605,111 @@
       </PopupBox-component>
     </transition>
 
+    <!-- 畫面截圖的lightbox -->
+    <div v-if="screenShotModal === true" class="modal_wrapper">
+      <div class="modal">
+        <p class="p3 screen-modal">
+          檔案下載中，請稍後
+        </p>
+      </div>
+    </div>
+
+    <!-- 加入圖層的lightbox -->
+    <div v-if="selectFileModal === true" class="modal_wrapper">
+      <div class="modal">
+        <div class="close-modal" @click.stop="selectFileModal = false" />
+        <p class="p1">
+          請選擇您的DXF檔案
+        </p>
+        <p class="p2">
+          上傳檔案大小以2MB為限，<br>如超過將使系統運作不穩！
+        </p>
+        <label for="upfile" class="file-button">選擇檔案
+          <input
+            id="upfile"
+            type="file"
+            accept=".dxf"
+            style="display: none;"
+            @change="updateFileHandler()"
+          >
+        </label>
+      </div>
+    </div>
+
+    <div v-if="over2Modal === true" class="modal_wrapper">
+      <div class="modal">
+        <div class="close-modal" @click.stop="over2Modal = false" />
+        <p class="p1">
+          檔案已超過2MB，加入圖層會使系統<br>運作不穩，請問是否繼續執行？
+        </p>
+        <div class="flex-group">
+          <div class="file-button-cancel" @click.stop="over2Modal = false, nowFile = '', selectFileModal = true">
+            取消
+          </div>
+          <div class="file-button" @click.stop="continueUpload">
+            確定
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="over8Modal === true" class="modal_wrapper">
+      <div class="modal">
+        <div class="close-modal" @click.stop="over8Modal = false" />
+        <div class="forbidden" />
+        <p class="p2 add8">
+          檔案大小超過8MB
+        </p>
+        <p class="p2 add8">
+          請重新選擇您的DXF檔案
+        </p>
+        <label for="upfile" class="file-button">選擇檔案
+          <input
+            id="upfile"
+            type="file"
+            accept=".dxf"
+            style="display: none;"
+            @change="updateFileHandler()"
+          >
+        </label>
+      </div>
+    </div>
+
+    <div v-if="updateModal === true" class="modal_wrapper">
+      <div class="modal">
+        <div class="close-modal" @click.stop="updateModal = false" />
+        <div class="title-img">
+          <div class="title-img2" />
+          <div class="title-img3">
+            {{ fileName }}
+          </div>
+        </div>
+        <p class="p3">
+          更新中
+        </p>
+        <div class="bar" />
+      </div>
+    </div>
+
+    <div v-if="completeModal === true" class="modal_wrapper">
+      <div class="modal">
+        <div class="close-modal" @click.stop="completeModal = false" />
+        <div class="title-img">
+          <div class="title-img2" />
+          <div class="title-img3">
+            {{ fileName }}
+          </div>
+        </div>
+        <p class="p3">
+          上傳完成
+        </p>
+        <div class="okpic" />
+        <div class="file-button" @click.stop="completeModal = false">
+          確認
+        </div>
+      </div>
+    </div>
+
     <!-- 我的位置視窗 -->
     <transition
       name="popup-slide"
@@ -625,6 +718,11 @@
       <PositionAlert-component
         v-if="positionAlert.isOpen === true"
         :reference="positionAlert.reference"
+        :csc="myCsc"
+        :twd="myTwd"
+        :cubeno="myCubeNo"
+        :cubename="myCubeName"
+        :cold="myCold"
         @control="ctrlPositionAlert"
       />
     </transition>
@@ -645,6 +743,9 @@ import ErpContentBox from '~/components/ErpContentBox';
 import BuildingList from '~/components/BuildingList';
 import OpacityController from '~/components/tools/OpacityController';
 import ViewCheckbox from '~/components/tools/ViewCheckbox';
+import SingleCluster from '~/components/SingleCluster';
+import MultiCluster from '~/components/MultiCluster';
+import ClusterErpBox from '~/components/ClusterErpBox';
 
 export default {
   data () {
@@ -795,6 +896,12 @@ export default {
         // 準心
         aimpoint: false
       },
+      // * 幾何繪圖的控制欄（行動版） 線段總長
+      lineSum: 0,
+      areaSum: 0,
+      drawModeLine: true,
+      drawModeArea: true,
+      drawPoint: '',
       // * 建物搜尋條件選項 建物狀態all
       structureCondition: {},
       // * 建物搜尋條件選項 建物類型all
@@ -844,12 +951,62 @@ export default {
       gisMap: '',
       // * 控制球標顯示/隱藏變數
       markerVisible: true,
+      addClusterBg: false,
       // * 圖北切換
       switchOptions: '',
       // * 圖北切換icon背景色
       switchBgColor: false,
       // * 畫面截圖url
-      screenImgSrc: ''
+      screenImgSrc: '',
+      screenShotModal: false,
+      // * 加入圖層視窗
+      selectFileModal: false,
+      updateModal: false,
+      completeModal: false,
+      over2Modal: false,
+      over8Modal: false,
+      nowFile: {},
+      fileName: '',
+      myLayer: {},
+      singleErpModal: false,
+      multiErpModal: true,
+      // 球標假資料
+      clusterInfo: [],
+      // * 單筆/多筆球標查詢
+      singleClusterInfo: '',
+      singleClusterType: '',
+      multiClusterInfo: [],
+      singleClusterKey: '',
+      // 展開多筆清單
+      openList: false,
+      // * @ 我的位置
+      // * 方格座標
+      myCsc: {
+        x: '',
+        y: ''
+      },
+      // * 方格圖號
+      myCubeNo: '',
+      // * TWD座標
+      myTwd: {
+        x: '',
+        y: ''
+      },
+      myCold: {
+        x: '',
+        y: ''
+      },
+      myCubeName: '',
+      // * @ 單筆點擊球標陣列
+      clusRows: [],
+      // * 使用者權限角色
+      myRole: '',
+      // * 查詢載入方格圖權限
+      canSearchGrid: null,
+      // * 我的位置
+      bluep: '',
+      bluepAll: [],
+      pGISSymbo: ''
     };
   },
   components: {
@@ -864,12 +1021,17 @@ export default {
     'PositionNavtabs-component': PositionNavtabs,
     'ErpContentBox-component': ErpContentBox,
     'BuildingList-component': BuildingList,
+    'SingleCluster-component': SingleCluster,
+    'MultiCluster-component': MultiCluster,
+    'ClusterErpBox-component': ClusterErpBox,
     OpacityController,
     ViewCheckbox
   },
   mounted () {
     this.getDefaultData();
     this.$store.commit('GET_NOW_URL', 'map');
+
+    this.structureType[0] = 'test';
   },
   beforeDestroy () {
     clearTimeout(this.positionAlert.timer);
@@ -883,13 +1045,19 @@ export default {
       // ? 用 setTimeout 模擬 ajax 完成的狀態給人看
       setTimeout(() => {
         // ! 取得建物搜尋條件，這邊應該要用 ajax 抓資料回來
-        this.getStructureType();
+        this.getStructureType(); // ! 在.209要用這行 (正式資料)
+        // this.structureType = require('~/static/_resources/TESTstructure.json'); // ! 在.209這行註解
+
         this.structureCondition = require('~/static/_resources/structureStatus.json');
 
         // ! 取得預設圖層，這邊應該要用 ajax 抓資料回來
         this.getDefaultLayer();
         // const _layers = require('~/static/_resources/defaultLayerList.json');
         // this.layerOptions.layerList = [..._layers.data];
+
+        // ! 取得球標資料，這邊應該要用 ajax 抓資料回來
+        const cluster = require('~/static/_resources/test.json');
+        this.clusterInfo = [...cluster.data];
 
         // 關閉 Loading 視窗與開啟側邊選單
         this.$store.commit('CTRL_LOADING_MASK', false);
@@ -927,9 +1095,73 @@ export default {
           }
         });
 
-        CSC.GISEvent.addListener(map, 'markerclick', function (e) {
-          console.log(e.markers.length);
+        // * 單筆/群聚點擊查詢
+        CSC.GISEvent.addListener(map, 'markerclick', (e) => {
+          console.log(e.markers);
+          e.mouseEvent.stopPropagation();
+          if (e.markers.length <= 10 && e.markers.length > 1 && this.screenWidth > 1023) {
+            const infoMulti = document.getElementById('meme2');
+            const newArr = [];
+            e.markers.forEach((item) => {
+              newArr.push(item.data.key);
+            });
+            const multiKey = newArr.join(',');
+            this.getMultiCluster(multiKey);
+
+            // 關閉單筆點擊的變色
+            this.clusRows.forEach((item) => {
+              item.selected = false;
+            });
+
+            this.gisMap.showInformation(
+              e.center,
+              infoMulti,
+              {}
+            );
+          } else if (e.markers.length === 1 && this.screenWidth > 1023) {
+            // const eMarker = [];
+            this.clusRows.push(e.markers[0]);
+            // 只有最新的那筆(目前點的)球標會變色
+            this.clusRows.forEach((item) => {
+              item.selected = false;
+            });
+            this.clusRows[this.clusRows.length - 1].selected = true;
+
+            const infoBox = document.getElementById('meme1');
+            const singleKey = e.markers[0].data.key;
+            this.getSingleCluster(singleKey);
+            this.singleClusterType = e.markers[0].data.type;
+
+            // 開啟訊息視窗
+            this.gisMap.showInformation(
+              e.center, // 訊息視窗位置
+              // e.markers.map((m) => { return m.data.key; }).join('<br />'),
+              infoBox, // 訊息內容
+              {}
+            );
+          } else if (e.markers.length === 1 && this.screenWidth < 1024 && this.searchResult.list.structure.length <= 0) {
+            this.clusRows.push(e.markers[0]);
+            // 只有最新的那筆(目前點的)球標會變色
+            this.clusRows.forEach((item) => {
+              item.selected = false;
+            });
+            this.clusRows[this.clusRows.length - 1].selected = true;
+
+            // 抓key值
+            this.singleClusterKey = e.markers[0].data.key;
+            this.getSingleCluster(this.singleClusterKey);
+            this.$store.commit('ERP_CLUSTER_BOX', true);
+          } else {
+            // 關閉訊息視窗
+            this.gisMap.showInformation();
+          }
         });
+
+        // * 監聽單筆點擊 關閉視窗
+        CSC.GISEvent.addListener(this.gisMap, 'informationclosed', (e) => {
+          this.clusRows[this.clusRows.length - 1].selected = false;
+        });
+
         // 設定球標顯示
         this.gisMap.setupMarker({ visible: true });
         // 設定圖層顯示、透明度
@@ -942,9 +1174,6 @@ export default {
           tipSkin: '<div class=\'contentArea\' style=\'background-color:blanchedalmond;color:coral;border-radius:5px;\'></div>'
         });
         // 暫存繪圖結果
-        // const graphs = [];
-        // graphs.push(p.overlay);
-        // this.myGraphs = graphs;
         CSC.GISEvent.addListener(this.gisMap, 'draw_complete', (p) => {
           // 閃爍
           p.overlay.blink(2, 100, [1]);
@@ -955,13 +1184,38 @@ export default {
             this.myGraphs.push(p.overlay);
 
             // 取得總面積
-            if (this.geometryOptions.current !== 'line') {
+            if (this.geometryOptions.current !== 'line' && this.geometryMeasurer.current !== 'line') {
               this.totalArea.push(p.overlay.getPath().getArea().toFixed(2));
             }
 
             // 取得圓半徑
-            if (this.geometryOptions.current === 'circleLand' || this.geometryOptions.current === 'circle' || this.geometryOptions.current === 'line') {
+            if (this.geometryOptions.current === 'circleLand' || this.geometryOptions.current === 'circle' || this.geometryOptions.current === 'line' || this.geometryMeasurer.current === 'line') {
               this.circleRadius.push(p.overlay.measure[0].label);
+            }
+
+            // 鎖點測量 線段長度
+            if (this.geometryMeasurer.current === 'line') {
+              this.lineSum = 0;
+              console.log(p.overlay);
+              p.overlay.measure.forEach((item) => {
+                const unit = item.label.substring(item.label.length - 2, item.label.length - 1);
+                let value;
+                if (unit === 'k') {
+                  value = parseFloat(item.label.substring(0, item.label.length - 2));
+                } else {
+                  value = parseFloat(item.label.substring(0, item.label.length - 1)) / 1000;
+                }
+                console.log(value);
+                this.lineSum += value;
+              });
+            }
+
+            if (this.geometryMeasurer.current === 'surface') {
+              this.areaSum = p.overlay.getPath().getArea().toFixed(2);
+            }
+
+            if (this.geometryMeasurer.current === 'surface' || this.geometryMeasurer.current === 'line' || this.geometryMeasurer.current === 'point') {
+              this.measurerHandler();
             }
 
             // 新增預定地
@@ -969,6 +1223,9 @@ export default {
             this.geometryOptions.current = '';
             this.gisMap.drawingMethod(CSC.DrawingMethod.Draw, { mode: CSC.GISOverlayType.NONE });
             this.unSave = true;
+
+            //  手機版點線面測量
+            // this.measurerHandler();
           }
 
           // 修改完成後
@@ -1044,6 +1301,51 @@ export default {
             window.navigator.geolocation.getCurrentPosition((data) => {
               this.positionAlert.reference.latitude = data.coords.latitude;
               this.positionAlert.reference.longitude = data.coords.longitude;
+              const lat = data.coords.latitude;
+              const lon = data.coords.longitude;
+              console.log(lat + ',' + lon);
+              // 中鋼坐標
+              const corTrans = CSC.CoordTrans('EPSG4326', 'CSC', { x: lon, y: lat });
+
+              console.log(CSC.CoordTrans('EPSG4326', 'CSC', { x: lon, y: lat }));
+              console.log(corTrans.x);
+
+              // TWD&方格坐標 (中鋼坐標=換算出來的方格坐標)
+              console.log(this.gisMap.coordinateInfo(CSC.CoordTrans('EPSG4326', 'CSC', { x: lon, y: lat })));
+              this.myCsc.x = this.gisMap.coordinateInfo(corTrans).CSC.x.toFixed(2);
+              this.myCsc.y = this.gisMap.coordinateInfo(corTrans).CSC.y.toFixed(2);
+              this.myTwd.x = this.gisMap.coordinateInfo(corTrans).TWD97.x.toFixed(2);
+              this.myTwd.y = this.gisMap.coordinateInfo(corTrans).TWD97.y.toFixed(2);
+              if (this.gisMap.coordinateInfo(corTrans).GridNO !== undefined) {
+                this.myCubeNo = this.gisMap.coordinateInfo(corTrans).GridNO;
+              }
+
+              if (typeof this.gisMap.coordinateInfo(corTrans).CRM !== 'undefined') {
+                this.myCold.x = this.gisMap.coordinateInfo(corTrans).CRM.x.toFixed(2);
+                this.myCold.y = this.gisMap.coordinateInfo(corTrans).CRM.y.toFixed(2);
+                this.myCubeName = '冷三方格圖號';
+              } else {
+                this.myCubeName = '方格圖號';
+                this.myCold.x = '';
+                this.myCold.y = '';
+              }
+
+              // this.bluep = new CSC.GISMarker(this.gisMap, (corTrans), null, new CSC.GISSymbol({ symbolStyle: CSC.GISSymbolStyle.CIRCLE, xPixel: 20, yPixel: 20, strokeColor: '#0000FF', fillColor: '#0000FF' }));
+              this.bluep = new CSC.GISMarker(this.gisMap, corTrans, null, this.pGISSymbo); // 用幾何圖形建立標記點
+
+              this.bluepAll.push(this.bluep);
+              if (this.bluepAll.length > 1) {
+                this.gisMap.drawingMethod(CSC.DrawingMethod.Remove, { overlay: this.bluepAll.splice(0, 1)[0] });
+              }
+
+              this.addSymbo();
+
+              this.bluep.setFlat(true);
+              this.bluep.setIcon(this.pGISSymbo);
+
+              // this.bluep = new CSC.GISMarker(this.gisMap, (corTrans), null, new CSC.GISImage(require('~/assets/img/circle-pos.svg'), new CSC.GISSize(23, 23), corTrans, corTrans));
+
+              this.gisMap.setCenter(corTrans);
 
               this.CONSOLE('【我的位置】根據瀏覽器位置調整坐標資訊');
               this.positionAlert.isOpen = true;
@@ -1084,12 +1386,17 @@ export default {
       this.positionAlert.reference.longitude = 0;
     },
     // * 圖層顯示或隱藏
-    layerVisibleHandler ($event, id) {
-      this.gisMap.setupLayer({ fid: id, visible: $event });
-      console.log(`id ${id} 是否顯示 ${$event}`);
+    layerVisibleHandler ($event, id, file) {
+      if (this.layerOptions.current === 'local') {
+        this.gisMap.setupLayer({ fid: id, visible: $event });
+        console.log(`id ${id} 是否顯示 ${$event}`);
+      } else if (this.layerOptions.current === 'addition') {
+        console.log(file);
+        this.gisMap.setupLayer({ layer: file, visible: $event });
+      }
     },
     // * @圖層切換調整：修改透明度數值
-    updateLayerOpacities (id, value) {
+    updateLayerOpacities (id, value, file) {
       /*
         當透明度控制器（@OpacityController）的資料更新時
         同步更新對應項目的資料
@@ -1097,19 +1404,29 @@ export default {
       // const { layerList } = this.layerOptions;
       // const index = layerList.findIndex(item => item.id === id);
       // layerList[index].opacity = value;
-      console.log(`id ${id}  value ${value}`);
-      this.gisMap.setupLayer({ fid: id, opacity: value });
+      if (this.layerOptions.current === 'local') {
+        this.gisMap.setupLayer({ fid: id, opacity: value });
+        console.log(`id ${id}  value ${value}`);
+      } else if (this.layerOptions.current === 'addition') {
+        console.log(file);
+        this.gisMap.setupLayer({ layer: file, opacity: value });
+      }
     },
     // * @圖層切換調整：刪除圖層
-    deleteLayerHandler (id) {
+    deleteLayerHandler (id, file) {
       const { layerList } = this.layerOptions;
       const index = layerList.findIndex(item => item.id === id);
       layerList.splice(index, 1);
+
+      if (this.layerOptions.current === 'addition') {
+        this.gisMap.removeLayer(file);
+      }
     },
     // * @圖層切換調整：圖層定位
-    setLayerPositionHandler (id) {
+    setLayerPositionHandler (id, file) {
       // 根據 id 去 this.layerOptions.layerList 取得對應的資料更新地圖
       this.CONSOLE('【圖層調整】根據所選的圖層項目調整地圖定位');
+      this.gisMap.setupLayer({ layer: file, bounds: 1.25 });
     },
     // * @圖層切換調整：資料篩選
     switchLayerProvider (currentName) {
@@ -1121,6 +1438,51 @@ export default {
         return item.type === currentName && item.inUse === true;
       });
     },
+    // ? @圖層切換調整：新增圖層 上傳檔案
+    updateFileHandler () {
+      this.over8Modal = false;
+      const newFile = document.getElementById('upfile').files[0];
+      const fileSize = document.getElementById('upfile').files[0].size;
+      this.nowFile = newFile;
+      this.fileName = newFile.name;
+      console.log(this.nowFile);
+      if (fileSize <= 2097152) {
+        this.selectFileModal = false;
+        this.updateModal = true;
+        this.gisMap.appendDXF(newFile, (lyr) => {
+          window.dxfLayer = lyr;
+          this.myLayer = lyr;
+          console.log(lyr);
+          // 確定上面都做完後才會執行下面的
+          setTimeout(() => {
+            this.addLayerHandler();
+            this.updateModal = false;
+            this.completeModal = true;
+          }, 500);
+        });
+      } else if (fileSize > 2097152 && fileSize <= 8388608) {
+        this.selectFileModal = false;
+        this.over2Modal = true;
+      } else if (fileSize > 8388608) {
+        this.selectFileModal = false;
+        this.over8Modal = true;
+      }
+    },
+    continueUpload () {
+      this.over2Modal = false;
+      this.updateModal = true;
+      this.gisMap.appendDXF(this.nowFile, (lyr) => {
+        window.dxfLayer = lyr;
+        this.myLayer = lyr;
+        console.log(lyr);
+
+        setTimeout(() => {
+          this.updateModal = false;
+          this.addLayerHandler();
+          this.completeModal = true;
+        }, 500);
+      });
+    },
     // ? @圖層切換調整：新增圖層
     addLayerHandler () {
       // ! 新增圖層的功能是檔案上傳匯入的，這邊先做一個假的模擬
@@ -1129,12 +1491,13 @@ export default {
       this.CONSOLE('【圖層調整】這邊需要讓使用者上傳圖層資料');
 
       const _layer = {
-        id: `layer_${this.GET_RESOURCE_ID()}`,
-        name: '111',
+        fid: `layer_${this.GET_RESOURCE_ID()}`,
+        title: this.fileName,
         type: 'addition',
-        visible: false,
-        opacity: 10,
-        inUse: true
+        visible: true,
+        opacity: 0,
+        inUse: true,
+        myLayerFile: this.myLayer
       };
 
       this.layerOptions.layerList.push(_layer);
@@ -1309,7 +1672,7 @@ export default {
         radius: this.circleRadius[this.circleRadius.length - 1]
       };
 
-      // 在暫存圖形中新增type屬性 值為line/circle/circleland...等
+      // * 在暫存圖形中新增type屬性 值為line/circle/circleland...等
       this.myGraphs[this.myGraphs.length - 1].type = current;
       // 新增圖形資料
       amountCounter[category] += 1;
@@ -1411,7 +1774,7 @@ export default {
     },
     // * 選取建物項目，地圖移動至對應坐標
     focusBuildingHandler (payload) {
-      this.searchResult.currentBuilding = payload.id;
+      this.searchResult.currentBuilding = payload.key;
       this.CONSOLE('【建物搜尋】地圖移動到所選取的建物坐標位置');
     },
     // * @方格圖：刪除方格圖層
@@ -1447,8 +1810,10 @@ export default {
       if (this.positionAlert.isOpen === true) { return; }
       if (this.$store.state.menuOpen === true) { return; }
 
-      const result = !this.$store.state.triggerHidden;
-      this.$store.commit('SET_TRIGGER_HIDDEN', result);
+      // const result = !this.$store.state.triggerHidden;
+      // this.$store.commit('SET_TRIGGER_HIDDEN', result);
+      const result = !this.$store.state.mobileSelectUP;
+      this.$store.commit('SET_MOBILE_SELECT', result);
     },
     // 手機版點擊右側地圖工具列的 圖層工具、坐標定位、測量距離/面積時 上方TAG列和右側工具列會滑動消失
     hideTagBarCtrl () {
@@ -1501,7 +1866,7 @@ export default {
     },
     // * 取得預設圖層API
     getDefaultLayer () {
-      fetch('/csc2api/api/layer', {
+      fetch('/CSCMap/api/layer', {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -1512,6 +1877,7 @@ export default {
         // 在撈回的data中新增屬性type 其值為local
         data.forEach((item, index, array) => {
           item.type = 'local';
+          item.myLayerFile = '';
         });
         this.layerOptions.layerList = data;
         console.log(this.layerOptions.layerList);
@@ -1566,10 +1932,109 @@ export default {
     },
     // * 畫面擷取
     screenShotHandler () {
+      this.screenShotModal = true;
       this.gisMap.layout((img) => {
         console.log(img.src);
         this.screenImgSrc = img.src;
+
+        setTimeout(() => {
+          document.getElementById('myShot').click();
+          this.screenShotModal = false;
+        }, 1000);
       });
+    },
+    getSingleCluster (mykey) {
+      // 一期 f3 api 1
+      // https://eas.csc.com.tw/mhb/rest/mhbe/getBuildingByKey/00004-01?_format=json
+      const cluster = require('~/static/_resources/single.json');
+      this.singleClusterInfo = cluster.data[0];
+    },
+    getMultiCluster (mykey) {
+      // 一期 f3 api 3
+      // https://eas.csc.com.tw/mhb/rest/mhbe/getBuildingByKey/00004-01,00004-02?_format=json
+      const cluster = require('~/static/_resources/multi.json');
+      this.multiClusterInfo = cluster.data;
+    },
+    addSymbo () {
+      this.pGISSymbo = new CSC.GISSymbol();
+      this.pGISSymbo.symbolStyle = CSC.GISSymbolStyle.CIRCLE;
+      this.pGISSymbo.xPixel = 15;
+      this.pGISSymbo.yPixel = 15;
+      this.pGISSymbo.fillColor = '#4286f5'; // #0095EB
+      this.pGISSymbo.fillOpacity = 1;
+      this.pGISSymbo.strokeWeight = 3;
+      this.pGISSymbo.strokeOpacity = 0.4;
+      this.pGISSymbo.strokeColor = '#FFFFFF';
+      this.pGISSymbo.anchor.x = 32;
+      this.pGISSymbo.anchor.y = 32;
+      this.pGISSymbo.rotation = 0;
+    },
+    scrollTopHandler (key) {
+      const index = this.multiClusterInfo.findIndex(item => item.key === key);
+      console.log(index);
+
+      this.$nextTick(() => {
+        const result = index < 1 ? 0 : (index * 35);
+        this.$refs.mycontent.scrollTop = result;
+        console.log(result);
+      });
+    },
+    // * 鎖點測量: 線測量
+    drawLineHandler () {
+      this.gisMap.drawingMethod(CSC.DrawingMethod.Draw, { measure: true, mode: CSC.GISOverlayType.LINESTRING, strokeOptions: { strokeWeight: 2 } });
+
+      // 取得地圖中心坐標資訊
+      const coordinfo = this.gisMap.coordinateInfo(this.gisMap.getCenter());
+      console.log(coordinfo);
+      console.log(this.gisMap.gridInfo(coordinfo.GridNO));
+
+      // 加入地圖中心至已啟用的繪圖操作
+      this.gisMap.drawingMethod(CSC.DrawingMethod.Push, { point: this.gisMap.getCenter() });
+    },
+    finishHandler () {
+      this.gisMap.drawingMethod(CSC.DrawingMethod.End);
+      this.drawModeLine = false;
+    },
+    clearLineHandler () {
+      const index = this.myGraphs.findIndex(item => item.type === 'line');
+      console.log(index);
+      this.gisMap.drawingMethod(CSC.DrawingMethod.Remove, { overlay: this.myGraphs.splice(index, 1)[0] });
+      this.lineSum = 0;
+      this.drawModeLine = true;
+    },
+    // * 鎖點測量: 面測量
+    drawAreaHandler () {
+      this.gisMap.drawingMethod(CSC.DrawingMethod.Draw, { measure: true, mode: CSC.GISOverlayType.POLYGON, fillOptions: { fillColor: '#06E4AF', strokeWeight: 2 } });
+      const coordinfo = this.gisMap.coordinateInfo(this.gisMap.getCenter());
+      this.gisMap.drawingMethod(CSC.DrawingMethod.Push, { point: this.gisMap.getCenter() });
+    },
+    finishHandler2 () {
+      this.gisMap.drawingMethod(CSC.DrawingMethod.End);
+      this.myGraphs.forEach((item) => {
+        if (item.type === 'surface') {
+          item.setFillColor('#06E4AF');
+        }
+      });
+      this.drawModeArea = false;
+    },
+    clearAreaHandler () {
+      const index = this.myGraphs.findIndex(item => item.type === 'surface');
+      console.log(index);
+      this.gisMap.drawingMethod(CSC.DrawingMethod.Remove, { overlay: this.myGraphs.splice(index, 1)[0] });
+      this.areaSum = 0;
+      this.drawModeArea = true;
+    },
+    measurerHandler () {
+      // * 在暫存圖形中新增type屬性 值為point/line/surface...等
+      this.myGraphs[this.myGraphs.length - 1].type = this.geometryMeasurer.current;
+    },
+    closeMeasurePopupBox () {
+      this.activeWindow = '';
+      this.gisMap.drawingMethod(CSC.DrawingMethod.Clear);
+      this.lineSum = 0;
+      this.areaSum = 0;
+      this.drawModeLine = true;
+      this.drawModeArea = true;
     }
   },
   computed: {
@@ -1593,6 +2058,13 @@ export default {
         this.geometryMeasurer.aimpoint = true;
       } else {
         this.geometryMeasurer.aimpoint = false;
+      }
+    },
+    markerVisible (value) {
+      if (value === false) {
+        this.addClusterBg = true;
+      } else {
+        this.addClusterBg = false;
       }
     },
     // * 這邊用 watch 監聽資料的變化，也可以改用別種方式來做
@@ -1620,13 +2092,178 @@ export default {
 <style lang="scss" scoped>
 @import '~/assets/scss/utils/_utils.scss';
 
+// table.layersTable tr td:nth-child(2) {
+//   width: 60px !important;
+// }
+
+// table.layersTable tr td:nth-child(1) {
+//   width: 60px !important;
+// }
+
+.go-margi {
+  margin-bottom: -10px !important;
+}
+
+.triangle {
+  width: 37.5px;
+  height: 37px;
+  position: absolute;
+  bottom: -25px;
+  left: 5px;
+  background: url('~/assets/img/icon/triangle-icon.svg') no-repeat center/contain;
+}
+
+.close-icon {
+  width: 11px;
+  height: 11px;
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  background: url('~/assets/img/icon/map-closebutton.svg') no-repeat center/contain;
+}
+
+.modal_wrapper {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.2);
+  z-index: 9998;
+  cursor: default;
+}
+
+.modal {
+  width: 430px;
+  padding: 30px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  text-align: center;
+  background-color: #fff;
+  border-radius: 10px;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  flex-direction: column;
+}
+
+.close-modal {
+  width: 35px;
+  height: 35px;
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  background: url('~/assets/img/icon/close_icon.svg') no-repeat center/contain;
+  cursor: pointer;
+}
+
+.p1 {
+  margin-top: 39px;
+  font-size: 18px;
+  margin-bottom: 7px;
+}
+
+.p2 {
+  font-size: 18px;
+  color: red;
+}
+
+.file-button {
+  width: 118px;
+  padding: 10px 6px;
+  margin: 26px 0 18px;
+  font-size: 16px;
+  color: #fff;
+  background-color: #408bc5;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.file-button-cancel {
+  width: 118px;
+  padding: 10px 6px;
+  margin: 26px 0 18px;
+  font-size: 16px;
+  color: #454141;
+  background-color: #fff;
+  border: 1px solid #d0d0d0;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.title-img {
+  padding: 5px;
+  display: flex;
+  justify-content: space-evenly;
+  color: #408bc5;
+  background-color: #e4f4ff;
+  border-radius: 10px;
+}
+
+.title-img2 {
+  width: 24px;
+  height: 24px;
+  margin-right: 6px;
+  background: url('~/assets/img/icon/save-icon.svg') no-repeat center/contain;
+}
+
+.title-img3 {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.p3 {
+  margin-top: 42px;
+  font-size: 25px;
+  font-weight: bold;
+  color: #165f88;
+}
+
+.screen-modal {
+  margin-top: 23px;
+}
+
+.bar {
+  width: 236px;
+  height: 12px;
+  margin: 10px 0 20px;
+  background: url('~/assets/img/icon/bar-new.svg') no-repeat center/contain;
+}
+
+.okpic {
+  width: 25px;
+  height: 25px;
+  background: url('~/assets/img/icon/ok-buttton.svg') no-repeat center/contain;
+}
+
+.forbidden {
+  width: 38px;
+  height: 34.6px;
+  margin: 10px 0;
+  background: url('~/assets/img/icon/forbid.svg') no-repeat center/contain;
+}
+
+.flex-group {
+  width: 250px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.add8 {
+  margin-bottom: 5px;
+}
+
 .more-height {
   height: 83px;
 }
 
 .app {
   width: 100%;
-  height: 100%;
+  height: calc(100% - 60px);
+  // height: 100%;
   position: relative;
   overflow: hidden;
   background-color: $color-black;
@@ -1636,9 +2273,9 @@ export default {
 #CSCMap {
   width: 100%;
   height: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
+  // position: absolute;
+  // top: 60px;
+  // left: 0;
   overflow: hidden;
   z-index: 0;
 
@@ -1716,14 +2353,22 @@ export default {
 .layersTable {
   th,
   td {
-    width: 115px;
+    // width: 115px;
 
     &:first-child {
-      width: auto;
+      // width: auto;
+    }
+
+    &:nth-child(1) {
+      max-width: 81px !important;
     }
 
     &:nth-child(2) {
-      width: 75px;
+      max-width: 60px;
+    }
+
+    &:nth-child(3) {
+      max-width: 69px !important;
     }
   }
 
@@ -1766,6 +2411,7 @@ export default {
 
 .layersTable__btn {
   color: inherit;
+  word-wrap: break-word;
 }
 
 .layersTable__row {

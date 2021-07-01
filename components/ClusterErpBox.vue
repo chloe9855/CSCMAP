@@ -7,12 +7,6 @@
     }"
   >
     <div
-      v-if="modeType === ''"
-      class="slideup-tips"
-      :class="{ 'is-hidden': isHidden }"
-      @click.stop="isHidden = !isHidden"
-    />
-    <div
       v-if="modeType === 'current'"
       class="slideup-tips is-hidden"
       @click.stop="setModeDetailHandler"
@@ -28,8 +22,8 @@
           <a
             href="javascript:;"
             class="back-btn"
-            title="返回搜尋結果"
-            @click.stop="backToNormalModeHandler"
+            title="關閉視窗"
+            @click.stop="$store.state.myErpCluster = false, $emit('close')"
             @mousedown.prevent
           />
         </div>
@@ -37,29 +31,18 @@
           <a
             href="javascript:;"
             class="back-btn"
-            title="返回搜尋結果"
-            @click.stop="backToNormalModeHandler"
+            title="關閉視窗"
+            @click.stop="$store.state.myErpCluster = false, $emit('close')"
             @mousedown.prevent
           />
-        </div>
-        <div v-else class="row is-space-between">
-          <label class="erpcontent__title">搜尋結果</label>
-          <a
-            href="javascript:;"
-            class="links-btn"
-            title="清除全部"
-            @click.stop="$emit('close')"
-            @mousedown.prevent
-          >清除全部</a>
         </div>
       </div>
 
       <div ref="content" class="erpcontent__content">
         <BuildingItem-component
           v-if="modeType === 'current'"
-          :item="currentItem"
+          :item="clusData"
           :detail-btn="false"
-          @click-block="setCurrentItemHandler"
         />
 
         <div
@@ -67,7 +50,7 @@
           class="erpcontent__detail"
         >
           <BuildingItem-component
-            :item="currentItem"
+            :item="clusData"
             :detail-btn="false"
           />
           <div class="navtabs">
@@ -154,21 +137,12 @@
             </div>
           </div>
         </div>
-
-        <BuildingList-component
-          v-else
-          :items-list="itemsList"
-          :current-id="currentId"
-          :detail-btn="false"
-          @click-block="setCurrentItemHandler"
-        />
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import BuildingList from '~/components/BuildingList';
 import BuildingItem from '~/components/BuildingItem';
 import ErpLicenseDetail from '~/components/ErpLicenseDetail';
 import ErpAssetDetail from '~/components/ErpAssetDetail';
@@ -203,57 +177,44 @@ export default {
     };
   },
   components: {
-    'BuildingList-component': BuildingList,
     'BuildingItem-component': BuildingItem,
     'ErpLicenseDetail-component': ErpLicenseDetail,
     'ErpAssetDetail-component': ErpAssetDetail
   },
   props: {
-    itemsList: Array,
-    currentId: String
+    currentKey: String,
+    clusData: Object
   },
   created () {
     this.setDefaultDetailType();
+  },
+  mounted () {
+    this.modeType = 'current';
+    this.$store.commit('SET_MOBILE_SELECT', true);
   },
   methods: {
     // * 預設先選詳細資料頁籤的第一個
     setDefaultDetailType () {
       this.detailTypeCurrent = this.detailTypeList[0].id;
     },
-    // * 從搜尋結果中選取一筆
-    setCurrentItemHandler (payload) {
-      // ? 打一個事件至上層，控制地圖API去移動至目前選取的標的
-      this.$emit('map-focus', payload);
-      this.currentItem = payload;
-      this.modeType = 'current';
-      this.$store.commit('SET_MOBILE_SELECT', true);
-      this.getMyKey();
-    },
-    // * 返回搜尋結果
-    backToNormalModeHandler () {
-      this.currentItem = {};
-      this.modeType = '';
-      this.$store.commit('SET_MOBILE_SELECT', false);
-
-      // 滾動條移動到目前選取的項目的位置
-      if (this.currentId !== '') {
-        const index = this.itemsList.findIndex(item => item.key === this.currentId);
-
-        this.$nextTick(() => {
-          const result = index < 1 ? 0 : (index * 142);
-          this.$refs.content.scrollTop = result;
-        });
-      }
-    },
+    // // * 從搜尋結果中選取一筆
+    // setCurrentItemHandler (payload) {
+    //   // ? 打一個事件至上層，控制地圖API去移動至目前選取的標的
+    //   this.$emit('map-focus', payload);
+    //   this.currentItem = payload;
+    //   this.modeType = 'current';
+    //   this.$store.commit('SET_MOBILE_SELECT', true);
+    //   this.getMyKey();
+    // },
     // * 介面設定為 detail 模式
     setModeDetailHandler () {
       this.modeType = 'detail';
       this.getDetailData();
       this.CONSOLE('【ERP介面】根據所選項目取得建物的詳細資訊');
     },
-    // * 先切割每筆資料的key值 (到'-'符號之前)
+    // * 先切割此資料的key值 (到'-'符號之前)
     getMyKey () {
-      const newArr = this.currentItem.key.split('-');
+      const newArr = this.currentKey.split('-');
       this.myKey = newArr[0];
     },
     // * 根據所選項目取得建物的詳細資訊

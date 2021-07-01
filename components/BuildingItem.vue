@@ -37,12 +37,13 @@
         v-if="detailBtn === true"
         href="javascript:;"
         class="read-more-btn"
+        :class="{ 'hide-role' : $store.state.myUserRole === 3 }"
         title="看詳細"
         @click.stop="$emit('click-detail', item)"
         @mousedown.prevent
       >看詳細</a>
     </div>
-    <div class="building__tag-group">
+    <div class="building__tag-group" :class="{ 'hide-role' : $store.state.myUserRole === 3 }">
       <span
         class="building__tag"
         :class="item.tax === 'true' ? 'icon-checked' : 'icon-error'"
@@ -101,5 +102,9 @@ export default {
 
 <style lang="scss" scoped>
 @import '~/assets/scss/utils/_utils.scss';
+
+.hide-role {
+  display: none !important;
+}
 
 </style>

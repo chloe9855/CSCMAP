@@ -8,7 +8,7 @@ export default {
     }
   },
   router: {
-    base: '/cscmap2/'
+    base: '/CSCMap/'
   },
   generate: {
     fallback: false,

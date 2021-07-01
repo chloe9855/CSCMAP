@@ -10,7 +10,11 @@ export const state = () => ({
   loadingMask: false,
   triggerHidden: false,
   mobileSelectUP: false, // *預設沒有上滑效果
-  Url: ''
+  Url: '',
+  erpBoxOpen: false,
+  myUserRole: '',
+  gridRole: null,
+  myErpCluster: false
 
 });
 
@@ -51,5 +55,18 @@ export const mutations = {
   },
   GET_NOW_URL (state, payload) {
     state.Url = payload;
+  },
+  GO_ERP_CURRENT_MODE (state, payload) {
+    state.erpBoxOpen = payload;
+  },
+  GET_USER_ROLE (state, payload) {
+    state.myUserRole = payload;
+  },
+  GET_GRID_ACCESS (state, payload) {
+    state.gridRole = payload;
+  },
+  // * 單筆群聚點擊查詢 無其它搜尋內容 出現的ERP BOX
+  ERP_CLUSTER_BOX (state, payload) {
+    state.myErpCluster = payload;
   }
 };

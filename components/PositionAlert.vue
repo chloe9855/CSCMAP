@@ -15,7 +15,19 @@
           />
         </div>
         <div class="msgbox__content">
-          <div v-text="contentHandler" />
+          <!-- <div v-text="contentHandler" /> -->
+          <div class="top">
+            <p>方格坐標 ({{ csc.x }}, {{ csc.y }})</p>
+            <p v-if="cold.x !== ''">
+              冷三方格坐標 ({{ cold.x }}, {{ cold.y }})
+            </p>
+            <p>
+              {{ cubename }} {{ cubeno }}
+            </p>
+          </div>
+          <div>
+            TWD97 ({{ twd.x }}, {{ twd.y }})
+          </div>
         </div>
       </div>
     </div>
@@ -25,7 +37,12 @@
 <script>
 export default {
   props: {
-    reference: Object
+    reference: Object,
+    csc: Object,
+    twd: Object,
+    cubeno: Number,
+    cubename: String,
+    cold: Object
   },
   computed: {
     contentHandler () {
@@ -108,6 +125,10 @@ export default {
   @include min-width(map-get($desktop, sm)) {
     padding: 15px 25px;
   }
+
+  // .top {
+  //   display: flex;
+  // }
 }
 
 </style>

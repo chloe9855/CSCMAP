@@ -29,6 +29,7 @@
         <a
           href="javascript:;"
           class="feature__btn icon-cluster-switch"
+          :class="{ 'add-cluster-bg': clusterBg === true }"
           @click.stop="$emit('hideCluster')"
           @mousedown.prevent
         >
@@ -81,8 +82,6 @@
       </li>
       <li v-if="screenWidth > 1023">
         <a
-          download="cscMap.png"
-          :href="screenSrc"
           class="feature__btn icon-screen-capture"
           @click.stop="$emit('screenShot')"
           @mousedown.prevent
@@ -134,7 +133,8 @@ export default {
   props: {
     current: String,
     iconcolor: Boolean,
-    screenSrc: String
+    screenSrc: String,
+    clusterBg: Boolean
   },
   methods: {
     // * 設定拖曳選單開啟/關閉
@@ -182,6 +182,11 @@ $btn-color: #eff2f6;
     right: 20px;
     transform: translateY(-50%);
   }
+}
+
+.add-cluster-bg {
+  background-color: #408bc5 !important;
+  background-image: url('~/assets/img/icon/icon-cluster-switch_white.svg') !important;
 }
 
 //右滑消失效果
@@ -344,6 +349,7 @@ $btn-color: #eff2f6;
       &:hover,
       &:focus {
         background-image: url('~/assets/img/icon/icon-screen-capture_white.svg');
+        cursor: pointer;
       }
     }
 

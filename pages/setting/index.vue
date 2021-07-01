@@ -216,7 +216,7 @@ export default {
           },
           {
             id: 'is_visible',
-            name: '是否顯示',
+            name: '篩選顯示狀態',
             sort: true
           }
         ],

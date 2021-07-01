@@ -127,7 +127,9 @@ $icon-size: map-get($font-size, base) * 1.6;
   }
 
   &.is-flex-center {
-    justify-content: center;
+    // justify-content: center;
+    justify-content: space-evenly;
+    // margin-bottom: -10px;
   }
 
   &.has-padding {
@@ -327,8 +329,10 @@ $icon-size: map-get($font-size, base) * 1.6;
 // * ==========================================================================
 
 .notice-tips {
-  margin-top: 2rem;
-  margin-bottom: 2rem;
+  // margin-top: 2rem;
+  // margin-bottom: 2rem;
+  margin-top: 16px;
+  margin-bottom: 5px;
   text-align: center;
 }
 

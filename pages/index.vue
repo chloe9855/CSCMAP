@@ -8,6 +8,7 @@
         <a
           href="javascript:;"
           class="guide-service__enter-btn icon-map"
+          :class="{ 'hide-role' : $store.state.myUserRole === 4 }"
           title="進入圖台"
           @mousedown.prevent
           @click="loginHandler"
@@ -65,6 +66,19 @@ export default {
       }
     };
   },
+  mounted () {
+    this.$store.commit('GET_NOW_URL', 'welcomePage');
+
+    if (this.$store.state.myUserRole === 4) {
+      this.$swal({
+        icon: 'error',
+        width: 402,
+        text: '您無權登入',
+        confirmButtonText: '確定',
+        showCloseButton: true
+      });
+    }
+  },
   methods: {
     loginHandler () {
       if (this.$store.state.accessToken === '') { // 如果沒登入
@@ -106,6 +120,10 @@ export default {
 // * ==========================================================================
 // * 進入圖台與建物資訊按鈕
 // * ==========================================================================
+
+.hide-role {
+  display: none !important;
+}
 
 .guide-service__enter-group {
   display: flex;

@@ -110,19 +110,19 @@
   @at-root .infowindow .building__item & {
     padding-right: 10px;
 
-    &::after {
-      content: '';
-      width: 0;
-      height: 0;
-      display: block;
-      position: absolute;
-      top: calc((100% - 6px) / 2);
-      right: 0;
-      border-style: solid;
-      border-width: 6px 5px 0;
-      border-color: $color-black transparent transparent;
-      z-index: 1;
-    }
+    // &::after {
+    //   content: '';
+    //   width: 0;
+    //   height: 0;
+    //   display: block;
+    //   position: absolute;
+    //   top: calc((100% - 6px) / 2);
+    //   right: 0;
+    //   border-style: solid;
+    //   border-width: 6px 5px 0;
+    //   border-color: $color-black transparent transparent;
+    //   z-index: 1;
+    // }
   }
 
   @at-root .infowindow .building__item.is-open &::after {
@@ -135,7 +135,7 @@
   display: none;
 
   @at-root .infowindow .building__item.is-open & {
-    display: block;
+    // display: block;
   }
 }
 

@@ -5,7 +5,7 @@
         顯示 {{ resultNumber }} 筆結果
       </p>
       <div class="query-window__info-feature">
-        <div class="query-window__info-column">
+        <div class="query-window__info-column" :class="{ 'hide-role' : $store.state.myUserRole === 3 }">
           <a
             href="javascript:;"
             class="btn size-full has-front-icon icon-back"
@@ -57,6 +57,10 @@ export default {
 
 <style lang="scss" scoped>
 @import '~/assets/scss/utils/_utils.scss';
+
+.hide-role {
+  display: none !important;
+}
 
 .query-window__info {
   display: none;

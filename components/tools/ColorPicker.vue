@@ -36,7 +36,7 @@ export default {
   data () {
     return {
       bodySelector: null,
-      colorValue: '',
+      // colorValue: '',
       pickerCtrl: false
     };
   },
@@ -69,6 +69,16 @@ export default {
       this.pickerCtrl = false;
     }
   },
+  computed: {
+    colorValue: {
+      get () {
+        return this.color;
+      },
+      set (value) {
+        this.$emit('update', value);
+      }
+    }
+  },
   watch: {
     pickerCtrl (value) {
       if (value) {
@@ -76,10 +86,10 @@ export default {
       } else {
         this.bodySelector.removeEventListener('click', this.closePickerHandler);
       }
-    },
-    colorValue (value) {
-      this.$emit('update', value);
     }
+    // colorValue (value) {
+    //   this.$emit('update', value);
+    // }
   }
 };
 </script>

@@ -67,7 +67,8 @@ export default {
 //上滑消失效果
 .slide-up {
   transition: ease-in-out 0.5s;
-  transform: translateY(-300%);
+  // transform: translateY(-300%);
+  transform: translateY(-700%);
 }
 
 .mobile-multiple-select__list {

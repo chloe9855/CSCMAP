@@ -27,7 +27,11 @@
               <!-- <td>{{ rowsItem['fid'] }}</td> -->
               <td>{{ index+1 }}</td>
               <td>{{ rowsItem['title'] }}</td>
-              <td>{{ rowsItem['updateTime'] }}</td>
+              <td
+                v-if="rowsItem['updateTime'] !== ''"
+              >
+                {{ transDate(rowsItem['updateTime']) }}
+              </td>
               <td>
                 <ColorPicker
                   v-if="rowsItem['canColor'] === true"
@@ -82,15 +86,17 @@
             href="javascript:;"
             class="btn color-white has-outline outline-color-default size-small"
             title="取消"
-            @click.stop="cancelHandler"
+            @click.stop="getDefaultLayer"
             @mousedown.prevent
           >
             <span>取消</span>
           </a>
           <a
             href="javascript:;"
-            class="btn size-small"
+            class="save-btn"
+            :class="{'add-orange': orangeSaveButton === true }"
             title="儲存修改"
+            @click.stop="saveAllHandler"
             @mousedown.prevent
           >
             <span>儲存修改</span>
@@ -201,7 +207,11 @@ export default {
       fileName: '',
       base64File: '',
       // 要更新的那個檔案編號
-      nowFileFid: ''
+      nowFileFid: '',
+      newRows: '',
+      // 有修改時按鈕變橘色
+      orangeSaveButton: false,
+      oldValue: []
     };
   },
   components: {
@@ -230,7 +240,7 @@ export default {
     changeHandler () {
     },
     getDefaultLayer () {
-      fetch('/csc2api/api/layer', {
+      fetch('/CSCMap/api/layer', {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -239,6 +249,7 @@ export default {
         return response.json();
       }).then((data) => {
         this.tablesData.rows = data;
+        this.oldValue = _.cloneDeep(data);
         console.log(data);
       }).catch((err) => {
         console.log('錯誤:', err);
@@ -250,6 +261,7 @@ export default {
       console.log(newFile);
       this.getBase64Handler(newFile);
     },
+    // * @ 把圖層檔案轉成base64字串
     getBase64Handler (newFile) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -257,31 +269,45 @@ export default {
         reader.onload = () => {
           console.log(reader.result);
           resolve(reader.result);
-          this.base64File = reader.result;
+          // base64字串去掉前置詞
+          const new64 = reader.result.split(',')[1];
+          this.base64File = new64;
 
           this.selectFileModal = false;
           this.updateModal = true;
 
           this.uploadFileHandler();
 
+          // 確定上面都做完後才會執行下面的非同步函式
           setTimeout(() => {
             this.updateModal = false;
             this.completeModal = true;
           }, 3000);
-          // 把圖層名稱更新為上傳的檔案名稱
+          // 把圖層名稱更新為上傳的檔案名稱 + 增加更新時間
           this.tablesData.rows.forEach((item) => {
             if (item.fid === this.nowFileFid) {
               item.title = this.fileName;
+              item.updateTime = this.transDate(new Date());
             }
           });
         };
         reader.onerror = error => reject(error);
       });
     },
+    // * @ 更新圖層
     uploadFileHandler () {
       const newArr = [];
-      newArr.push({ fid: this.nowFileFid, contentType: 'application/dxf', content: this.base64File });
-      fetch('/csc2api/api/layer', {
+      this.tablesData.rows.forEach((item) => {
+        newArr.push({ fid: item.fid });
+      });
+
+      const index = this.tablesData.rows.findIndex(item => item.fid === this.nowFileFid);
+      newArr[index].contentType = 'application/dxf';
+      newArr[index].content = this.base64File;
+      newArr[index].title = this.fileName;
+
+      // newArr.push({ fid: this.nowFileFid, contentType: 'application/dxf', content: this.base64File, title: this.fileName });
+      fetch('../api/layer', {
         method: 'PATCH',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -295,8 +321,68 @@ export default {
         console.log('錯誤:', err);
       });
     },
-    cancelHandler () {
-      window.location.reload();
+    // * @ 儲存修改全部
+    saveAllHandler () {
+      const newArr = this.tablesData.rows;
+      this.newRows = newArr;
+      fetch('../api/layer', {
+        method: 'PATCH',
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        }),
+        body: JSON.stringify(this.newRows)
+      }).then((response) => {
+        return response;
+      }).then((data) => {
+        console.log(data);
+
+        this.$swal({
+          width: 402,
+          text: '儲存成功',
+          imageUrl: require('~/assets/img/success.png'),
+          imageWidth: 70,
+          imageHeight: 70,
+          confirmButtonText: '確定',
+          showCloseButton: true
+        });
+
+        this.orangeSaveButton = false;
+      }).catch((err) => {
+        console.log('錯誤:', err);
+      });
+    },
+    transDate (tdate) {
+      if (tdate == null) { return; };
+      const mydate = new Date(tdate);
+      let dd = mydate.getDate();
+      let mm = mydate.getMonth() + 1;
+      const yyyy = mydate.getFullYear();
+      const hh = mydate.getHours();
+      const min = mydate.getMinutes();
+      const ss = mydate.getSeconds();
+      if (dd < 10) {
+        dd = '0' + dd;
+      }
+      if (mm < 10) {
+        mm = '0' + mm;
+      }
+      const date = yyyy + '-' + mm + '-' + dd + ' ' + ' ' + hh + ':' + min + ':' + ss;
+
+      return date;
+    }
+  },
+  watch: {
+    'tablesData.rows': {
+      handler (value) {
+        const neww = JSON.stringify(value);
+        const oldd = JSON.stringify(this.oldValue);
+        if (neww !== oldd) {
+          this.orangeSaveButton = true;
+        } else {
+          this.orangeSaveButton = false;
+        }
+      },
+      deep: true
     }
   }
 };
@@ -305,6 +391,27 @@ export default {
 <style lang="scss" scoped>
 @import '~/assets/scss/utils/_utils.scss';
 @import '~/assets/scss/_article.scss';
+
+.add-orange {
+  color: #f08300 !important;
+  background-color: #fff !important;
+  border: 1px #f08300 solid !important;
+}
+
+.save-btn {
+  min-width: 85px;
+  padding: 5px 11px;
+  margin-right: 0;
+  display: inline-block;
+  font-size: 14px;
+  text-align: center;
+  color: #fff;
+  background-color: #408bc5;
+  border: 1px #408bc5 solid;
+  border-radius: 5px;
+  vertical-align: top;
+  line-height: 1.6em;
+}
 
 .modal_wrapper {
   width: 100%;
@@ -379,7 +486,7 @@ export default {
 .title-img2 {
   width: 24px;
   height: 24px;
-  margin-right: -15px;
+  margin-right: 6px;
   background: url('~/assets/img/icon/save-icon.svg') no-repeat center/contain;
 }
 
@@ -409,7 +516,8 @@ export default {
 }
 
 .content {
-  padding: 30px 20px;
+  // padding: 30px 20px;
+  padding: 0 20px 30px;
   margin-top: 60px;
 }
 

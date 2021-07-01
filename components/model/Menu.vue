@@ -56,11 +56,17 @@
 export default {
   data () {
     return {
-      userName: ''
+      userName: '',
+      // * 使用者權限角色
+      myRole: '',
+      // * 查詢載入方格圖權限
+      canSearchGrid: null
     };
   },
   mounted () {
     this.getUserData();
+    this.getUserRole();
+    this.getGridAuthority();
   },
   methods: {
     // * 登出
@@ -72,9 +78,9 @@ export default {
     },
     // * 獲取登入資料
     getUserData () {
-      fetch('/csc2api/api/SignOnStatus', {
+      fetch('/CSCMap/api/SignOnStatus', {
         method: 'GET',
-        credentials: 'include',
+        // credentials: 'include',
         headers: new Headers({
           'Content-Type': 'application/json'
         })
@@ -105,6 +111,40 @@ export default {
       if (redirectQS) {
         window.location = 'https://cs.csc.com.tw/qss/ec/qssec';
       }
+    },
+    // * 取得使用者權限角色
+    getUserRole () {
+      fetch('/csc2api/api/proxy?url=https://eas.csc.com.tw/mhb/rest/mhbe/Role/213801?_format=json', {
+        method: 'GET',
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        })
+      }).then((response) => {
+        return response.json();
+      }).then((data) => {
+        this.myRole = data;
+        this.$store.commit('GET_USER_ROLE', data);
+        console.log(this.myRole);
+      }).catch((err) => {
+        console.log('錯誤:', err);
+      });
+    },
+    // * 查詢載入方格圖權限 (回傳 true(有權限) or false(無權限))
+    getGridAuthority () {
+      fetch('/csc2api/api/proxy?url=http://eas.csc.com.tw/mhb/rest/mhbe/LoadGridAuth/190199?_format=json', {
+        method: 'GET',
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        })
+      }).then((response) => {
+        return response.json();
+      }).then((data) => {
+        this.canSearchGrid = data;
+        this.$store.commit('GET_GRID_ACCESS', data);
+        console.log(this.canSearchGrid);
+      }).catch((err) => {
+        console.log('錯誤:', err);
+      });
     }
   },
   computed: {

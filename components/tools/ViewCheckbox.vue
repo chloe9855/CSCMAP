@@ -4,7 +4,7 @@
       :id="`view-check_${id}`"
       :checked="visible"
       type="checkbox"
-      @change="$emit('change', $event.target.checked, id)"
+      @change="$emit('change', $event.target.checked, id, file)"
     >
     <label :for="`view-check_${id}`" />
   </div>
@@ -14,7 +14,8 @@
 export default {
   props: {
     id: String,
-    visible: Boolean
+    visible: Boolean,
+    file: Object
   }
 };
 </script>

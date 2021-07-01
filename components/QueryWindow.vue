@@ -420,7 +420,8 @@ export default {
   width: 100%;
   display: flex;
   position: absolute;
-  top: 60px;
+  // top: 60px;
+  top: 0;
   left: 0;
   z-index: 6000;
   flex-direction: column;

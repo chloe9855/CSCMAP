@@ -21,7 +21,8 @@
 
 .infowindow__content {
   width: 100%;
-  max-height: 110px;
+  max-height: 130px;
   overflow-x: hidden;
   overflow-y: auto;
+  scroll-behavior: smooth;
 }

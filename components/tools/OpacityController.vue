@@ -25,7 +25,8 @@ export default {
   },
   props: {
     id: String,
-    value: Number
+    value: Number,
+    file: Object
   },
   created () {
     this.opacity = this.value;
@@ -50,7 +51,7 @@ export default {
   },
   watch: {
     opacity (value) {
-      this.$emit('update', this.id, value);
+      this.$emit('update', this.id, value, this.file);
     }
   }
 };
