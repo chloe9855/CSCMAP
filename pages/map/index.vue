@@ -177,6 +177,7 @@
         v-if="screenWidth < 1024 && searchResult.types === 'structure'"
         :items-list="searchResult.list.structure"
         :current-id="searchResult.currentBuilding"
+        :clus-data="singleClusterInfo"
         @close="clearSearchResultAndCondition"
         @map-focus="focusBuildingHandler"
       />
@@ -1151,6 +1152,18 @@ export default {
             this.singleClusterKey = e.markers[0].data.key;
             this.getSingleCluster(this.singleClusterKey);
             this.$store.commit('ERP_CLUSTER_BOX', true);
+          } else if (e.markers.length === 1 && this.screenWidth < 1024 && this.searchResult.list.structure.length > 0) {
+            this.clusRows.push(e.markers[0]);
+            // 只有最新的那筆(目前點的)球標會變色
+            this.clusRows.forEach((item) => {
+              item.selected = false;
+            });
+            this.clusRows[this.clusRows.length - 1].selected = true;
+
+            // 抓key值
+            this.singleClusterKey = e.markers[0].data.key;
+            this.getSingleCluster(this.singleClusterKey);
+            this.$store.commit('ERP_CLUSTER_BOX_RECORD', true);
           } else {
             // 關閉訊息視窗
             this.gisMap.showInformation();

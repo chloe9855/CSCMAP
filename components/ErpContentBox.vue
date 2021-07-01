@@ -210,10 +210,17 @@ export default {
   },
   props: {
     itemsList: Array,
-    currentId: String
+    currentId: String,
+    clusData: Object
   },
   created () {
     this.setDefaultDetailType();
+  },
+  mounted () {
+    if (this.$store.state.myErpClusterMore === true) {
+      this.currentItem = this.clusData;
+      this.modeType = 'current';
+    }
   },
   methods: {
     // * 預設先選詳細資料頁籤的第一個

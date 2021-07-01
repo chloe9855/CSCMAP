@@ -14,7 +14,8 @@ export const state = () => ({
   erpBoxOpen: false,
   myUserRole: '',
   gridRole: null,
-  myErpCluster: false
+  myErpCluster: false,
+  myErpClusterMore: false
 
 });
 
@@ -68,5 +69,9 @@ export const mutations = {
   // * 單筆群聚點擊查詢 無其它搜尋內容 出現的ERP BOX
   ERP_CLUSTER_BOX (state, payload) {
     state.myErpCluster = payload;
+  },
+  // * 單筆群聚點擊查詢 有其它搜尋內容 出現的ERP BOX
+  ERP_CLUSTER_BOX_RECORD (state, payload) {
+    state.myErpClusterMore = payload;
   }
 };
