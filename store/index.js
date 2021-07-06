@@ -15,7 +15,8 @@ export const state = () => ({
   myUserRole: '',
   gridRole: null,
   myErpCluster: false,
-  myErpClusterMore: false
+  myErpClusterMore: false,
+  cancelDrag: false
 
 });
 
@@ -54,15 +55,18 @@ export const mutations = {
   SET_MOBILE_SELECT (state, payload) {
     state.mobileSelectUP = payload;
   },
+  // * 取得目前頁面名字
   GET_NOW_URL (state, payload) {
     state.Url = payload;
   },
   GO_ERP_CURRENT_MODE (state, payload) {
     state.erpBoxOpen = payload;
   },
+  // * 取得使用者角色
   GET_USER_ROLE (state, payload) {
     state.myUserRole = payload;
   },
+  // * 取得方格圖載入權限
   GET_GRID_ACCESS (state, payload) {
     state.gridRole = payload;
   },
@@ -73,5 +77,9 @@ export const mutations = {
   // * 單筆群聚點擊查詢 有其它搜尋內容 出現的ERP BOX
   ERP_CLUSTER_BOX_RECORD (state, payload) {
     state.myErpClusterMore = payload;
+  },
+  // *
+  CANCEL_INPUT_DRAG (state, payload) {
+    state.cancelDrag = payload;
   }
 };

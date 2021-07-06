@@ -30,14 +30,14 @@
           <div class="fieldset row-column">
             <InputContentListener
               v-model="reference.gridPosition.x"
-              :placeholder="`輸入${searchTypeName}方格X坐標`"
+              :placeholder="`輸入方格X坐標`"
               :is-password="false"
             />
           </div>
           <div class="fieldset row-column">
             <InputContentListener
               v-model="reference.gridPosition.y"
-              :placeholder="`輸入${searchTypeName}方格Y坐標`"
+              :placeholder="`輸入方格Y坐標`"
               :is-password="false"
             />
           </div>
@@ -60,7 +60,7 @@
           </div>
         </div>
 
-        <div v-if="options.current !== 2" class="row is-flex-end">
+        <!-- <div v-if="options.current !== 2" class="row is-flex-end">
           <div class="type-control">
             <div class="type-control__item">
               <input
@@ -87,7 +87,7 @@
               </label>
             </div>
           </div>
-        </div>
+        </div> -->
 
         <div class="row is-flex-center">
           <div class="btn-group">

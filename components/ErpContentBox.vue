@@ -86,7 +86,7 @@
               </a>
             </div>
             <div class="navtabs__body">
-              <div v-if="detailTypeCurrent === 0" class="navtabs__content">
+              <div v-if="detailTypeCurrent === 0" class="navtabs__content go-pad">
                 <p><strong>工程名稱</strong> {{ buildingData.projectName }}</p>
                 <p><strong>建築物形式</strong> {{ buildingData.structure }}</p>
                 <p><strong>建物用途</strong> {{ buildingData.category }}</p>
@@ -105,7 +105,7 @@
                 <p><strong>施工主辦單位</strong> {{ buildingData.workDept }}</p>
                 <p><strong>施工廠商</strong> {{ buildingData.workVendor }}</p>
               </div>
-              <div v-if="detailTypeCurrent === 1" class="navtabs__content">
+              <div v-if="detailTypeCurrent === 1" class="navtabs__content go-pad">
                 <p><strong>建照編號</strong> {{ licenseData.permitNo }}</p>
                 <p><strong>建照編號備註</strong> {{ licenseData.permitMemo }}</p>
                 <p><strong>使照編號</strong> {{ licenseData.useNo }}</p>
@@ -128,7 +128,7 @@
                   </li>
                 </ul>
               </div>
-              <div v-if="detailTypeCurrent === 2" class="navtabs__content">
+              <div v-if="detailTypeCurrent === 2" class="navtabs__content go-pad">
                 <p class="add_icon">
                   <img class="mipic" :src="changePic3" @click="picToggler3">
                   <strong>資產資料</strong>
@@ -332,6 +332,10 @@ export default {
 
 <style lang="scss" scoped>
 @import '~/assets/scss/utils/_utils.scss';
+
+.go-pad {
+  padding: 14px 33px !important;
+}
 
 .erpcontent {
   width: 100%;

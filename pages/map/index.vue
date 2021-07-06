@@ -1,5 +1,5 @@
 <template>
-  <div class="app">
+  <div class="app" :class="{ 'hide-mee': $store.state.triggerHidden === true }">
     <div
       id="CSCMap"
       @mousemove="getMousePositionHandler"
@@ -20,10 +20,10 @@
       <!-- <div>滑鼠相對於地圖的 X 坐標：{{ mousePosition.x }}</div>
       <div>滑鼠相對於地圖的 Y 坐標：{{ mousePosition.y }}</div> -->
       <div class="co_cube">
-        方格座標({{ coordinatesCube.x }}, {{ coordinatesCube.y }})
+        方格座標(X{{ coordinatesCube.x }}, Y{{ coordinatesCube.y }})
       </div>
       <div v-if="coldCube.x !== ''" class="co_cube2">
-        冷三方格座標({{ coldCube.x }}, {{ coldCube.y }})
+        冷三方格座標(X{{ coldCube.x }}, Y{{ coldCube.y }})
       </div>
       <div v-if="CubeNo !== undefined" class="co_cubeno">
         {{ cubeName }}: {{ CubeNo }}
@@ -34,7 +34,7 @@
     </div>
 
     <!-- 行動版幾何繪圖的準心 -->
-    <div v-if="geometryMeasurer.aimpoint === true" class="aimpoint" />
+    <div v-if="geometryMeasurer.aimpoint === true || pointMeasurer.aimpoint === true" class="aimpoint" />
 
     <!-- ↓↓ 在地圖API裡面需要用到的DOM -->
     <div :style="'display: none;'">
@@ -100,7 +100,7 @@
 
     <!-- 左側的搜尋選單 -->
     <QueryWindow-component
-      v-if="structureType.length > 0"
+      v-if="structureCondition.length > 0"
       ref="queryWindow"
       :open="queryWindowOpen"
       :condition="structureCondition"
@@ -299,6 +299,134 @@
       </template>
     </DragBox-component>
 
+    <!-- 手機版點測量 -->
+    <transition
+      name="popup-slide"
+      mode="out-in"
+    >
+      <PopupBoxPoint-component
+        v-if="ctrlPopupBoxVisible('mobileMeasureWindow')"
+        :key="'measurePointPopup'"
+        :name="'點測量結果'"
+        :icon-name="'icon-pointback'"
+        @close="closeMeasurePopupBox"
+        @showBar="showTagBarCtrl"
+        @back="backAllMeasure"
+      >
+        <div class="navtabs">
+          <div class="navtabs__header">
+            <a
+              v-for="typeItem of pointMeasurer.typeList"
+              :key="typeItem.id"
+              href="javascript:;"
+              class="navtabs__btn"
+              :class="{ 'current': pointMeasurer.current === typeItem.id }"
+              :title="typeItem.name"
+              @click.stop="pointMeasurer.current = typeItem.id"
+              @mousedown.prevent
+            >
+              <span>{{ typeItem.name }}</span>
+            </a>
+          </div>
+          <div class="navtabs__body vv1">
+            <div class="navtabs__content mea-mob">
+              <div
+                v-if="pointMeasurer.current === 'cscXy'"
+                class="row is-flex-center go-margi"
+                :style="'display: block !important;'"
+              >
+                <div id="copycsc3">
+                  <p>
+                    X{{ pointCscXy.x.toFixed(2) }} , Y{{ pointCscXy.y.toFixed(2) }}
+                  </p>
+                  <br>
+                  <p v-if="pointColdXy.x !== ''">
+                    (冷三坐標 X{{ pointColdXy.x.toFixed(2) }} , Y{{ pointColdXy.y.toFixed(2) }})
+                  </p>
+                </div>
+
+                <div class="clone-container" :style="'margin-bottom: 10px !important;'">
+                  <div class="clone-block" @click.stop="copyCoord('copycsc3')">
+                    <div class="clone-pic1" />
+                    <div class="clone-name1">
+                      複製
+                    </div>
+                  </div>
+                  <div class="clone-block" @click.stop="dxfUpload">
+                    <div class="clone-pic2" :class="{ 'dxf-bg': haveUploaded === true }" />
+                    <div class="clone-name2" :class="{ 'dxf-fo': haveUploaded === true }">
+                      方格圖
+                    </div>
+                  </div>
+                  <div class="clone-block">
+                    <div class="clone-pic3" />
+                    <div class="clone-name3" @click.stop="backAllMeasure">
+                      重繪
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                v-if="pointMeasurer.current === 'cscNo'"
+              >
+                <p id="copyno">
+                  {{ pointCscNo }}
+                </p>
+                <div class="clone-container">
+                  <div class="clone-block" @click.stop="copyCoord('copyno')">
+                    <div class="clone-pic1" />
+                    <div class="clone-name1">
+                      複製
+                    </div>
+                  </div>
+                  <div class="clone-block" @click.stop="dxfUpload">
+                    <div class="clone-pic2" :class="{ 'dxf-bg': haveUploaded === true }" />
+                    <div class="clone-name2" :class="{ 'dxf-fo': haveUploaded === true }">
+                      方格圖
+                    </div>
+                  </div>
+                  <div class="clone-block">
+                    <div class="clone-pic3" />
+                    <div class="clone-name3" @click.stop="backAllMeasure">
+                      重繪
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                v-if="pointMeasurer.current === 'twdXy'"
+              >
+                <p id="copytwd">
+                  X{{ pointTwdXy.x.toFixed(2) }} , Y{{ pointTwdXy.y.toFixed(2) }}
+                </p>
+                <div class="clone-container">
+                  <div class="clone-block" @click.stop="copyCoord('copytwd')">
+                    <div class="clone-pic1" />
+                    <div class="clone-name1">
+                      複製
+                    </div>
+                  </div>
+                  <div class="clone-block" @click.stop="dxfUpload">
+                    <div class="clone-pic2" :class="{ 'dxf-bg': haveUploaded === true }" />
+                    <div class="clone-name2" :class="{ 'dxf-fo': haveUploaded === true }">
+                      方格圖
+                    </div>
+                  </div>
+                  <div class="clone-block">
+                    <div class="clone-pic3" />
+                    <div class="clone-name3" @click.stop="backAllMeasure">
+                      重繪
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </PopupBoxPoint-component>
+    </transition>
+
+    <!-- 手機版點/線/面測量 -->
     <transition
       name="popup-slide"
       mode="out-in"
@@ -327,7 +455,7 @@
             </a>
           </div>
           <div class="navtabs__body">
-            <div class="navtabs__content">
+            <div class="navtabs__content mea-mob">
               <div class="notice-tips">
                 <p>{{ geometryMeasurerDiscription }}</p>
               </div>
@@ -335,10 +463,9 @@
                 v-if="geometryMeasurer.current === 'point'"
                 class="row is-flex-center go-margi"
               >
-                <a href="javascript:;" class="links-btn" title="完成">完成</a>
-                <a href="javascript:;" class="links-btn" title="複製坐標">複製坐標</a>
-                <a href="javascript:;" class="links-btn color-light-blue" title="匯入方格圖">匯入方格圖</a>
-                <a href="javascript:;" class="links-btn color-red" title="重新繪製">重新繪製</a>
+                <a href="javascript:;" class="links-btn" title="完成" @click.stop="okHandler">
+                  完成
+                </a>
               </div>
               <div
                 v-if="geometryMeasurer.current === 'line'"
@@ -711,6 +838,50 @@
       </div>
     </div>
 
+    <!-- 手機版 點測量 視窗 -->
+    <div v-if="gisWarnModal === true" class="modal_wrapper">
+      <div class="modal ww1">
+        <div class="close-modal" @click.stop="gisWarnModal = false" />
+        <p class="ww2">
+          GIS測量坐標值僅供參考，
+        </p>
+        <p>
+          不得作證明文件使用。
+        </p>
+        <div class="file-button ww3" @click.stop="drawPointHandler">
+          確定
+        </div>
+      </div>
+    </div>
+
+    <!-- 手機版 點測量 複製視窗 -->
+    <div v-if="copyOkModal === true" class="modal_wrapper">
+      <div class="modal ww5" :style="'width: 345px !important;'">
+        <div class="copyok" />
+        <div v-if="pointMeasurer.current === 'cscXy'">
+          <p>
+            X{{ pointCscXy.x.toFixed(2) }} , Y{{ pointCscXy.y.toFixed(2) }}
+          </p>
+          <p v-if="pointColdXy.x !== ''">
+            (冷三坐標 X{{ pointColdXy.x.toFixed(2) }} , Y{{ pointColdXy.y.toFixed(2) }})
+          </p>
+        </div>
+        <div v-if="pointMeasurer.current === 'cscNo'">
+          <p>
+            {{ pointCscNo }}
+          </p>
+        </div>
+        <div v-if="pointMeasurer.current === 'twdXy'">
+          <p>
+            X{{ pointTwdXy.x.toFixed(2) }} , Y{{ pointTwdXy.y.toFixed(2) }}
+          </p>
+        </div>
+        <p>
+          複製成功
+        </p>
+      </div>
+    </div>
+
     <!-- 我的位置視窗 -->
     <transition
       name="popup-slide"
@@ -747,6 +918,7 @@ import ViewCheckbox from '~/components/tools/ViewCheckbox';
 import SingleCluster from '~/components/SingleCluster';
 import MultiCluster from '~/components/MultiCluster';
 import ClusterErpBox from '~/components/ClusterErpBox';
+import PopupBoxPoint from '~/components/PopupBoxPoint';
 
 export default {
   data () {
@@ -897,14 +1069,56 @@ export default {
         // 準心
         aimpoint: false
       },
+      // * 點測量的控制欄（行動版）
+      measurePointBox: false,
+      mobPoint: '',
+      haveUploaded: false,
+      gisWarnModal: false,
+      copyOkModal: false,
+      pointMeasurer: {
+        // 目前選取的圖形類別
+        current: 'cscXy',
+        // 圖形類別
+        typeList: [
+          {
+            id: 'cscXy',
+            name: '方格坐標'
+          },
+          {
+            id: 'cscNo',
+            name: '方格圖號'
+          },
+          {
+            id: 'twdXy',
+            name: 'TWD97'
+          }
+        ],
+        // 準心
+        aimpoint: false
+      },
       // * 幾何繪圖的控制欄（行動版） 線段總長
       lineSum: 0,
       areaSum: 0,
       drawModeLine: true,
       drawModeArea: true,
       drawPoint: '',
+      // * 幾何繪圖的控制欄（行動版） 點測量
+      pointCscNo: '',
+      pointCscXy: {
+        x: '',
+        y: ''
+      },
+      pointTwdXy: {
+        x: '',
+        y: ''
+      },
+      pointColdXy: {
+        x: '',
+        y: ''
+      },
       // * 建物搜尋條件選項 建物狀態all
-      structureCondition: {},
+      mymy: '',
+      structureCondition: [],
       // * 建物搜尋條件選項 建物類型all
       structureType: [],
       // * 建物搜尋 使用者搜尋時所選擇的關鍵字、建物狀態、建物類型
@@ -1007,7 +1221,9 @@ export default {
       // * 我的位置
       bluep: '',
       bluepAll: [],
-      pGISSymbo: ''
+      pGISSymbo: '',
+      markerImg: '',
+      markerImgAll: []
     };
   },
   components: {
@@ -1025,14 +1241,13 @@ export default {
     'SingleCluster-component': SingleCluster,
     'MultiCluster-component': MultiCluster,
     'ClusterErpBox-component': ClusterErpBox,
+    'PopupBoxPoint-component': PopupBoxPoint,
     OpacityController,
     ViewCheckbox
   },
   mounted () {
     this.getDefaultData();
     this.$store.commit('GET_NOW_URL', 'map');
-
-    this.structureType[0] = 'test';
   },
   beforeDestroy () {
     clearTimeout(this.positionAlert.timer);
@@ -1046,10 +1261,11 @@ export default {
       // ? 用 setTimeout 模擬 ajax 完成的狀態給人看
       setTimeout(() => {
         // ! 取得建物搜尋條件，這邊應該要用 ajax 抓資料回來
-        this.getStructureType(); // ! 在.209要用這行 (正式資料)
-        // this.structureType = require('~/static/_resources/TESTstructure.json'); // ! 在.209這行註解
+        this.getStructureType();
 
-        this.structureCondition = require('~/static/_resources/structureStatus.json');
+        // this.structureCondition = require('~/static/_resources/structureStatus.json');
+        this.mymy = require('~/static/_resources/structureStatus.json');
+        this.structureCondition = this.mymy.data;
 
         // ! 取得預設圖層，這邊應該要用 ajax 抓資料回來
         this.getDefaultLayer();
@@ -1078,6 +1294,11 @@ export default {
         // * 引入地圖api
         const map = new CSC.GISOnlineMap(document.getElementById('CSCMap'), { autoLoad: true });
         this.gisMap = map;
+
+        CSC.GISEvent.addListener(map, 'click', () => {
+          this.mapClickHandler();
+        });
+
         // 滑鼠坐標
         CSC.GISEvent.addListener(map, 'mousemove', (e) => {
           this.coordinatesCube.x = map.coordinateInfo(e.point).CSC.x.toFixed(2);
@@ -1252,7 +1473,7 @@ export default {
           }
 
           // 偵測是否有沒被送出的預定地資料 + 偵測繪製預定用地是否重疊
-          if (!this.myTypeList.includes('line', 'rect', 'poly', 'circle')) {
+          if (!this.myTypeList.includes('line', 'rect', 'poly', 'circle') && this.screenWidth > 1023) {
             // 監聽儲存狀態
             window.addEventListener('beforeunload', (e) => {
               if (this.unSave === true) {
@@ -1302,7 +1523,102 @@ export default {
     },
     // * @坐標查詢：控制地圖API，移動至對應的坐標查詢
     setPositionHandler () {
-      console.warn('【坐標查詢】根據輸入的坐標，移動至對應的坐標查詢');
+      // TWD定位
+      if (this.positionOptions.current === 2) {
+        const reg = /^(-?(?:[0-9])*(?:\.[0-9]+)?)$/;
+        const result1 = reg.test(this.positionOptions.twdPosition.x);
+        const result2 = reg.test(this.positionOptions.twdPosition.y);
+
+        if (result1 === false || result2 === false || this.positionOptions.twdPosition.x === '' || this.positionOptions.twdPosition.y === '') {
+          this.$swal({
+            text: '輸入格式有誤，請輸入數字',
+            width: 402,
+            confirmButtonText: '確定',
+            showCloseButton: true
+          });
+        } else {
+          const myTwd = CSC.CoordTrans('EPSG3826', 'CSC', { x: this.positionOptions.twdPosition.x, y: this.positionOptions.twdPosition.y });
+          const imgUrl = require('~/assets/img/point-po.svg');
+
+          this.gisMap.setCenter(myTwd);
+          this.markerImg = new CSC.GISMarker(this.gisMap, myTwd, null, new CSC.GISImage(imgUrl, new CSC.GISSize(26, 35)));
+          this.markerImg.setFlat(true);
+
+          // 放大
+          const myArr = [{ x: myTwd.x + 50, y: myTwd.y + 50 }, { x: myTwd.x + 50, y: myTwd.y - 50 }, { x: myTwd.x - 50, y: myTwd.y - 50 }, { x: myTwd.x - 50, y: myTwd.y + 50 }];
+          this.gisMap.fitBounds(new CSC.GISEnvelope(myArr), 1.25);
+        }
+      } else if (this.positionOptions.current === 0) {
+        // 方格圖號定位
+        const reg = /^((-?|\+?)?[0-9]{4},){0,3}?((-?|\+?)?[0-9]{4})$/;
+        const result = reg.test(this.positionOptions.gridNumber);
+        const gridNum = this.positionOptions.gridNumber;
+        if (result === false) {
+          this.$swal({
+            text: '輸入格式有誤，請輸入數字',
+            width: 402,
+            confirmButtonText: '確定',
+            showCloseButton: true
+          });
+          return;
+        }
+
+        if ((gridNum >= 2835 && gridNum <= 2864) || (gridNum >= -435 && gridNum <= 2835) || (gridNum >= -464 && gridNum <= -435) || (gridNum >= -464 && gridNum <= 2864) || (gridNum >= 6590 && gridNum <= 6599) || (gridNum >= 5299 && gridNum <= 6599) || (gridNum >= 5290 && gridNum <= 5299) || (gridNum >= 5290 && gridNum <= 6590)) {
+          this.gisMap.fitBounds(new CSC.GISEnvelope(this.gisMap.gridInfo(this.positionOptions.gridNumber).CSC), 1.25);
+          console.log(this.gisMap.gridInfo(this.positionOptions.gridNumber));
+        } else {
+          this.$swal({
+            text: '方格圖號錯誤，請重新輸入',
+            width: 402,
+            confirmButtonText: '確定',
+            showCloseButton: true
+          });
+        }
+      } else if (this.positionOptions.current === 1) {
+        // 方格坐標定位
+        const cscX = this.positionOptions.gridPosition.x;
+        const cscY = this.positionOptions.gridPosition.y;
+        const imgUrl = require('~/assets/img/point-po.svg');
+
+        const reg = /^(-?(?:[0-9])*(?:\.[0-9]+)?)$/;
+        const result1 = reg.test(cscX);
+        const result2 = reg.test(cscY);
+        if (result1 === false || result2 === false || cscX === '' || cscY === '') {
+          this.$swal({
+            text: '輸入格式有誤，請輸入數字',
+            width: 402,
+            confirmButtonText: '確定',
+            showCloseButton: true
+          });
+        } else if ((cscX >= -500 && cscX <= 2800) && (cscY >= 3400 && cscY <= 6400)) {
+          const myCsc = new CSC.GISPoint(cscX, cscY);
+
+          this.gisMap.setCenter(myCsc);
+          this.markerImg = new CSC.GISMarker(this.gisMap, myCsc, null, new CSC.GISImage(imgUrl, new CSC.GISSize(26, 35)));
+          this.markerImg.setFlat(true);
+
+          // 放大
+          const myArr2 = [{ x: myCsc.x + 50, y: myCsc.y + 50 }, { x: myCsc.x + 50, y: myCsc.y - 50 }, { x: myCsc.x - 50, y: myCsc.y - 50 }, { x: myCsc.x - 50, y: myCsc.y + 50 }];
+          this.gisMap.fitBounds(new CSC.GISEnvelope(myArr2), 1.25);
+        } else {
+          // 超出的一律當冷三 把他輸入的坐標當冷三 先轉成中鋼方格坐標
+          const myCold = CSC.CoordTrans('3CRM', 'CSC', { x: cscX, y: cscY });
+          if ((myCold.x >= 1500 && myCold.x <= 2800) && (myCold.y > 6400 && myCold.y <= 7300)) {
+            this.gisMap.setCenter(myCold);
+            this.markerImg = new CSC.GISMarker(this.gisMap, myCold, null, new CSC.GISImage(imgUrl, new CSC.GISSize(26, 35)));
+            this.markerImg.setFlat(true);
+
+            // 放大
+            const myArr3 = [{ x: myCold.x + 50, y: myCold.y + 50 }, { x: myCold.x + 50, y: myCold.y - 50 }, { x: myCold.x - 50, y: myCold.y - 50 }, { x: myCold.x - 50, y: myCold.y + 50 }];
+            this.gisMap.fitBounds(new CSC.GISEnvelope(myArr3), 1.25);
+          }
+        }
+      }
+
+      this.markerImgAll.push(this.markerImg);
+      if (this.markerImgAll.length > 1) {
+        this.gisMap.drawingMethod(CSC.DrawingMethod.Remove, { overlay: this.markerImgAll.splice(0, 1)[0] });
+      }
     },
     // * @我的位置：控制視窗開啟/關閉
     ctrlPositionAlert (payload) {
@@ -1343,22 +1659,24 @@ export default {
                 this.myCold.y = '';
               }
 
-              // this.bluep = new CSC.GISMarker(this.gisMap, (corTrans), null, new CSC.GISSymbol({ symbolStyle: CSC.GISSymbolStyle.CIRCLE, xPixel: 20, yPixel: 20, strokeColor: '#0000FF', fillColor: '#0000FF' }));
-              this.bluep = new CSC.GISMarker(this.gisMap, corTrans, null, this.pGISSymbo); // 用幾何圖形建立標記點
+              // 定位
+              this.gisMap.setCenter(corTrans);
+              if (this.bluep !== '') {
+                this.bluep.destroy();
+              }
+
+              const imgUrl = require('~/assets/img/mycircle.svg');
+              this.bluep = new CSC.GISMarker(this.gisMap, (corTrans), null, new CSC.GISImage(imgUrl, new CSC.GISSize(20, 20), corTrans, new CSC.GISPoint(10, 10)));
+              // this.bluep = new CSC.GISMarker(this.gisMap, corTrans, null, this.pGISSymbo); // 用幾何圖形建立標記點
 
               this.bluepAll.push(this.bluep);
               if (this.bluepAll.length > 1) {
                 this.gisMap.drawingMethod(CSC.DrawingMethod.Remove, { overlay: this.bluepAll.splice(0, 1)[0] });
               }
 
-              this.addSymbo();
-
               this.bluep.setFlat(true);
-              this.bluep.setIcon(this.pGISSymbo);
-
-              // this.bluep = new CSC.GISMarker(this.gisMap, (corTrans), null, new CSC.GISImage(require('~/assets/img/circle-pos.svg'), new CSC.GISSize(23, 23), corTrans, corTrans));
-
-              this.gisMap.setCenter(corTrans);
+              // this.addSymbo();
+              // this.bluep.setIcon(this.pGISSymbo);
 
               this.CONSOLE('【我的位置】根據瀏覽器位置調整坐標資訊');
               this.positionAlert.isOpen = true;
@@ -1710,7 +2028,7 @@ export default {
             newArr.push({ building: { key: '' }, geometry: item.toJson() });
           });
 
-          fetch('/csc2api/api/proxy?url=https://eas.csc.com.tw/mhb/rest/mhbe/Building', {
+          fetch('/csc2api/api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/Building', {
             method: 'POST',
             headers: new Headers({
               'Content-Type': 'application/json'
@@ -1823,10 +2141,11 @@ export default {
       if (this.positionAlert.isOpen === true) { return; }
       if (this.$store.state.menuOpen === true) { return; }
 
-      // const result = !this.$store.state.triggerHidden;
-      // this.$store.commit('SET_TRIGGER_HIDDEN', result);
-      const result = !this.$store.state.mobileSelectUP;
-      this.$store.commit('SET_MOBILE_SELECT', result);
+      const result = !this.$store.state.triggerHidden;
+      this.$store.commit('SET_TRIGGER_HIDDEN', result);
+
+      // const result = !this.$store.state.mobileSelectUP;
+      // this.$store.commit('SET_MOBILE_SELECT', result);
     },
     // 手機版點擊右側地圖工具列的 圖層工具、坐標定位、測量距離/面積時 上方TAG列和右側工具列會滑動消失
     hideTagBarCtrl () {
@@ -1858,7 +2177,7 @@ export default {
     },
     // * 取得建物類型資料 F3 API
     getStructureType () {
-      fetch('/csc2api/api/proxy?url=https://eas.csc.com.tw/mhb/rest/mhbe/BuildingType?_format=json', {
+      fetch('/csc2api/api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/BuildingType?_format=json', {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -1900,7 +2219,7 @@ export default {
     },
     // * 取得建物搜尋結果 F3 API
     getSearchResult () {
-      fetch(`/csc2api/api/proxy?url=${encodeURIComponent(`https://eas.csc.com.tw/mhb/rest/mhbe/BuildingList?_format=json&Keyword=${this.searchSelected.keyword}&Status=${this.searchSelected.status}&Type=${this.searchSelected.types}`)}`, {
+      fetch(`/csc2api/api/proxy?url=${encodeURIComponent(`https://east.csc.com.tw/eas/mhb/rest/mhbe/BuildingList?_format=json&Keyword=${this.searchSelected.keyword}&Status=${this.searchSelected.status}&Type=${this.searchSelected.types}`)}`, {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -1958,13 +2277,13 @@ export default {
     },
     getSingleCluster (mykey) {
       // 一期 f3 api 1
-      // https://eas.csc.com.tw/mhb/rest/mhbe/getBuildingByKey/00004-01?_format=json
+      // https://east.csc.com.tw/eas/mhb/rest/mhbe/getBuildingByKey/00004-01?_format=json
       const cluster = require('~/static/_resources/single.json');
       this.singleClusterInfo = cluster.data[0];
     },
     getMultiCluster (mykey) {
       // 一期 f3 api 3
-      // https://eas.csc.com.tw/mhb/rest/mhbe/getBuildingByKey/00004-01,00004-02?_format=json
+      // https://east.csc.com.tw/eas/mhb/rest/mhbe/getBuildingByKey/00004-01,00004-02?_format=json
       const cluster = require('~/static/_resources/multi.json');
       this.multiClusterInfo = cluster.data;
     },
@@ -1978,10 +2297,11 @@ export default {
       this.pGISSymbo.strokeWeight = 3;
       this.pGISSymbo.strokeOpacity = 0.4;
       this.pGISSymbo.strokeColor = '#FFFFFF';
-      this.pGISSymbo.anchor.x = 32;
-      this.pGISSymbo.anchor.y = 32;
+      this.pGISSymbo.anchor.x = 30;
+      this.pGISSymbo.anchor.y = 30;
       this.pGISSymbo.rotation = 0;
     },
+
     scrollTopHandler (key) {
       const index = this.multiClusterInfo.findIndex(item => item.key === key);
       console.log(index);
@@ -2041,13 +2361,100 @@ export default {
       // * 在暫存圖形中新增type屬性 值為point/line/surface...等
       this.myGraphs[this.myGraphs.length - 1].type = this.geometryMeasurer.current;
     },
+    // * 關閉 手機版 測量點線面視窗
     closeMeasurePopupBox () {
       this.activeWindow = '';
+      this.mobPoint.destroy();
+      // this.measurePointBox = false;
       this.gisMap.drawingMethod(CSC.DrawingMethod.Clear);
+      this.pointMeasurer.current = 'cscXy';
+      this.haveUploaded = false;
       this.lineSum = 0;
       this.areaSum = 0;
       this.drawModeLine = true;
       this.drawModeArea = true;
+      this.pointCscNo = '';
+      this.pointCscXy.x = '';
+      this.pointCscXy.y = '';
+      this.pointTwdXy.x = '';
+      this.pointTwdXy.y = '';
+      this.pointColdXy.x = '';
+      this.pointColdXy.y = '';
+    },
+    // * 返回所有測量視窗 & 重繪
+    backAllMeasure () {
+      this.mobPoint.destroy();
+      // this.measurePointBox = false;
+      this.activeWindow = 'measureWindow';
+      this.pointMeasurer.current = 'cscXy';
+      this.haveUploaded = false;
+      this.pointCscNo = '';
+      this.pointCscXy.x = '';
+      this.pointCscXy.y = '';
+      this.pointTwdXy.x = '';
+      this.pointTwdXy.y = '';
+      this.pointColdXy.x = '';
+      this.pointColdXy.y = '';
+    },
+    okHandler () {
+      this.gisWarnModal = true;
+    },
+    // * 鎖點測量: 點測量 (按下確認視窗中的確定後)
+    drawPointHandler () {
+      this.gisMap.drawingMethod(CSC.DrawingMethod.Draw, { measure: true });
+      // 定位+畫圖
+      const mypo = this.gisMap.coordinateInfo(this.gisMap.getCenter());
+      const position = new CSC.GISPoint(mypo.CSC.x, mypo.CSC.y);
+
+      const imgUrl = require('~/assets/img/cir-po.svg');
+      this.mobPoint = new CSC.GISMarker(this.gisMap, this.gisMap.getCenter(), null, new CSC.GISImage(imgUrl, new CSC.GISSize(20, 20), this.gisMap.getCenter(), new CSC.GISPoint(10, 10)));
+
+      // 寫入坐標資料
+      this.mobPoint.setFlat(true);
+      this.pointCscNo = mypo.GridNO;
+      this.pointCscXy.x = mypo.CSC.x;
+      this.pointCscXy.y = mypo.CSC.y;
+      this.pointTwdXy.x = mypo.TWD97.x;
+      this.pointTwdXy.y = mypo.TWD97.y;
+      if (typeof mypo.CRM !== 'undefined') {
+        this.pointColdXy.x = mypo.CRM.x;
+        this.pointColdXy.y = mypo.CRM.y;
+      }
+
+      this.gisWarnModal = false;
+      // this.activeWindow = '';
+      // this.measurePointBox = true;
+      this.activeWindow = 'mobileMeasureWindow';
+    },
+    dxfUpload () {
+      this.haveUploaded = true;
+      fetch('/CSCMap/api/DXFLoader', {
+        method: 'POST',
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        }),
+        body: JSON.stringify(`GridNOs[0]: ${this.pointCscNo}`)
+      }).then((response) => {
+        return response;
+      }).then((data) => {
+        console.log(data);
+      }).catch((err) => {
+        console.log('錯誤:', err);
+      });
+    },
+    copyCoord (id) {
+      const str = document.getElementById(id);
+      window.getSelection().selectAllChildren(str);
+      document.execCommand('copy');
+      if (this.pointMeasurer.current === 'cscNo' && this.pointCscNo === 'undefined') {
+        this.copyOkModal = false;
+      } else {
+        this.copyOkModal = true;
+      }
+
+      setTimeout(() => {
+        this.copyOkModal = false;
+      }, 600);
     }
   },
   computed: {
@@ -2072,6 +2479,12 @@ export default {
       } else {
         this.geometryMeasurer.aimpoint = false;
       }
+
+      if (value === 'mobileMeasureWindow' && this.screenWidth < 1024) {
+        this.pointMeasurer.aimpoint = true;
+      } else {
+        this.pointMeasurer.aimpoint = false;
+      }
     },
     markerVisible (value) {
       if (value === false) {
@@ -2080,6 +2493,13 @@ export default {
         this.addClusterBg = false;
       }
     },
+    // measurePointBox (value) {
+    //   if (value === true) {
+    //     this.pointMeasurer.aimpoint = true;
+    //   } else {
+    //     this.pointMeasurer.aimpoint = false;
+    //   }
+    // },
     // * 這邊用 watch 監聽資料的變化，也可以改用別種方式來做
     'geometryOptions.current' (value) {
       if (value !== '') {
@@ -2112,6 +2532,86 @@ export default {
 // table.layersTable tr td:nth-child(1) {
 //   width: 60px !important;
 // }
+
+.dxf-bg {
+  height: 30px;
+  background: url('~/assets/img/icon/white-upload.svg') no-repeat center center/contain !important;
+}
+
+.dxf-fo {
+  color: rgba(64, 139, 197, 0.5) !important;
+}
+
+.ww5 {
+  p {
+    margin-bottom: -8px;
+    margin-top: 20px;
+  }
+}
+
+.copyok {
+  width: 46px;
+  height: 46px;
+  background: url('~/assets/img/icon/copy-ok.svg') no-repeat center center/contain;
+}
+
+.vv1 {
+  padding: 17px 0 6px !important;
+}
+
+.ww1 {
+  width: 345px !important;
+  height: 200px !important;
+
+  p {
+    margin-bottom: 0;
+  }
+}
+
+.ww2 {
+  margin-top: 20px;
+}
+
+.ww3 {
+  width: 108px;
+}
+
+.clone-container {
+  margin-top: 12px;
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.clone-name1 {
+  color: #408bc5;
+}
+
+.clone-name2 {
+  color: #408bc5;
+}
+
+.clone-name3 {
+  color: #d37672;
+}
+
+.clone-pic1 {
+  height: 31px;
+  background: url('~/assets/img/icon/clone1.svg') no-repeat center center/contain;
+}
+
+.clone-pic2 {
+  height: 30px;
+  background: url('~/assets/img/icon/clone2.svg') no-repeat center center/contain;
+}
+
+.clone-pic3 {
+  height: 30px;
+  background: url('~/assets/img/icon/clone3.svg') no-repeat center center/contain;
+}
+
+.mea-mob {
+  text-align: center !important;
+}
 
 .go-margi {
   margin-bottom: -10px !important;
@@ -2275,12 +2775,19 @@ export default {
 
 .app {
   width: 100%;
-  height: calc(100% - 60px);
+  height: calc(100% - 60px) !important;
   // height: 100%;
-  position: relative;
+  position: relative !important;
   overflow: hidden;
   background-color: $color-black;
   z-index: 0;
+}
+
+.hide-mee {
+  height: 100% !important;
+  position: absolute !important;
+  top: 0;
+  left: 0;
 }
 
 #CSCMap {
@@ -2292,14 +2799,14 @@ export default {
   overflow: hidden;
   z-index: 0;
 
-  iframe {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    outline: none;
-  }
+  // iframe {
+  //   width: 100%;
+  //   height: 100%;
+  //   position: absolute;
+  //   top: 0;
+  //   left: 0;
+  //   outline: none;
+  // }
 }
 
 // * 手機版測量工具的準心
@@ -2310,6 +2817,8 @@ export default {
   position: absolute;
   top: 0;
   left: 0;
+  // top: 5px;
+  // left: 5px;
   background: url('~/assets/img/aimpoint.png') no-repeat center/55%;
   z-index: 4000;
   pointer-events: none;

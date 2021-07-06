@@ -254,13 +254,13 @@ export default {
   },
   props: {
     open: Boolean,
-    condition: Object,
+    condition: Array,
     buildtype: Array,
     resultType: String
   },
   created () {
     this.structure.types.options = this.buildtype;
-    this.structure.status.options = this.condition.data;
+    this.structure.status.options = this.condition;
     this.structure.status.selected = this.structure.status.options[0];
 
     // * 如果是從首頁點擊「方格圖載入」，搜尋類型切換成「方格」
@@ -429,7 +429,8 @@ export default {
 
   @include min-width(map-get($desktop, sm)) {
     width: 375px;
-    height: calc(100% - 60px);
+    // height: calc(100% - 60px);
+    height: 100%;
     transition: transform 0.4s;
     transform: translateX(-100%);
 

@@ -42,6 +42,15 @@ export default {
   mounted () {
     const draggable = this.$refs.dragbox;
     this.initInteract(draggable);
+
+    draggable.addEventListener('mousemove', (e) => {
+      if (this.$store.state.cancelDrag === true) {
+        this.container.unset(); // 使拖曳功能失效
+        console.log('ww');
+      } else if (this.$store.state.cancelDrag === false) {
+        this.initInteract(draggable); // 重新啟用拖曳功能
+      }
+    });
   },
   beforeDestroy () {
     this.container.unset();
@@ -56,9 +65,18 @@ export default {
           endOnly: true
         },
         autoScroll: true,
+        // onstart: this.startMe,
         onmove: this.dragMoveListener,
         onend: this.dragEndListener
       });
+    },
+    startMe (event) {
+      if (this.$store.state.cancelDrag === true) {
+        this.container.unset();
+        console.log('ww');
+      } else if (this.$store.state.cancelDrag === false) {
+        // this.initInteract(this.$refs.dragbox);
+      }
     },
     // * 拖曳事件與更新坐標
     dragMoveListener (event) {
@@ -79,6 +97,13 @@ export default {
       target.style.cursor = 'grab';
     }
   }
+  // watch: {
+  //   container (value) {
+  //     if (this.$store.state.cancelDrag === false) {
+  //       this.initInteract(this.$refs.dragbox);
+  //     }
+  //   }
+  // }
 };
 </script>
 

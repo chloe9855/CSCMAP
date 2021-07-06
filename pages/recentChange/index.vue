@@ -111,8 +111,8 @@
       </div>
     </div>
     <div class="article__content">
-      <div class="article__wrap theme-scrollbar">
-        <div class="dataTable__wrapper theme-scrollbar">
+      <div class="article__wrap theme-scrollbar gogo">
+        <div class="dataTable__wrapper theme-scrollbar no-mar">
           <table class="dataTable">
             <thead>
               <tr>
@@ -139,15 +139,15 @@
             </thead>
             <tbody>
               <tr v-for="rowsItem of tablesData.rows" :key="rowsItem.id">
-                <td>{{ rowsItem['project_name'] }}</td>
-                <td>{{ rowsItem['serial_number'] }}</td>
-                <td>{{ rowsItem['building_license'] }}</td>
-                <td>{{ rowsItem['use_license'] }}</td>
-                <td>{{ rowsItem['building_status'] }}</td>
-                <td>{{ rowsItem['user'] }}</td>
-                <td>{{ rowsItem['update_time'] }}</td>
+                <td>{{ rowsItem['project'] }}</td>
+                <td>{{ rowsItem['key'] }}</td>
+                <td>{{ rowsItem['permitNo'] }}</td>
+                <td>{{ rowsItem['useNo'] }}</td>
+                <td>{{ rowsItem['status'] }}</td>
+                <td>{{ rowsItem['changeName'] }}</td>
+                <td>{{ rowsItem['changeTime'] }}</td>
                 <td>
-                  <div v-if="rowsItem['is_HELIX_update'] === true">
+                  <div v-if="rowsItem['helix'] === true">
                     <a
                       href="javascript:;"
                       class="btn is-disabled size-small"
@@ -183,7 +183,7 @@
           </table>
         </div>
 
-        <div class="row is-space-between">
+        <!-- <div class="row is-space-between">
           <div>第 1 - 10 筆，共 75 筆</div>
           <div class="pagination">
             <a
@@ -217,6 +217,42 @@
               v-text="'>'"
             />
           </div>
+        </div> -->
+      </div>
+
+      <div class="row is-space-between page">
+        <div>第 1 - 10 筆，共 75 筆</div>
+        <div class="pagination">
+          <a
+            href="javascript:;"
+            class="pagination__side-btn"
+            title="上一頁"
+            @click.stop="pagesideClickHandler(false)"
+            @mousedown.prevent
+            v-text="'<'"
+          />
+          <div class="pagination__content">
+            <span v-if="pagination.total > 3 && pagination.current > (3 - 1)">...</span>
+            <a
+              v-for="value of paginationHandler"
+              :key="value"
+              href="javascript:;"
+              class="pagination__btn"
+              :class="{ 'current': value === pagination.current }"
+              :title="`第${value}頁`"
+              @click.stop="pagination.current = value"
+              @mousedown.prevent
+            >{{ value }}</a>
+            <span v-if="pagination.total > 3 && pagination.current < (pagination.total - 1)">...</span>
+          </div>
+          <a
+            href="javascript:;"
+            class="pagination__side-btn"
+            title="下一頁"
+            @click.stop="pagesideClickHandler(true)"
+            @mousedown.prevent
+            v-text="'>'"
+          />
         </div>
       </div>
     </div>
@@ -315,70 +351,47 @@ export default {
       tablesData: {
         columns: [
           {
-            id: 'project_name',
+            id: 'project',
             name: '工程名稱',
             sort: true
           },
           {
-            id: 'serial_number',
+            id: 'key',
             name: '管理序號',
             sort: true
           },
           {
-            id: 'building_license',
+            id: 'permitNo',
             name: '建照編號',
             sort: true
           },
           {
-            id: 'use_license',
+            id: 'useNo',
             name: '使照編號',
             sort: true
           },
           {
-            id: 'building_status',
+            id: 'status',
             name: '建物狀態',
             sort: true
           },
           {
-            id: 'user',
+            id: 'changeName',
             name: '更新人',
             sort: true
           },
           {
-            id: 'update_time',
+            id: 'changeTime',
             name: '更新時間',
             sort: true
           },
           {
-            id: 'update_HELIX',
+            id: 'helix',
             name: 'HELIX更新',
             sort: true
           }
         ],
-        rows: [
-          {
-            id: '123456',
-            project_name: '熱軋鋼捲倉庫1',
-            serial_number: '00392-01',
-            building_license: '(99)0017號',
-            use_license: '高雄使字(100)789456',
-            building_status: '使照取得',
-            user: 'V89/小宇',
-            update_time: '2019/08/25 10:00:00',
-            is_HELIX_update: true
-          },
-          {
-            id: '123457',
-            project_name: '熱軋鋼捲倉庫2',
-            serial_number: '00392-01',
-            building_license: '(99)0017號',
-            use_license: '高雄使字(100)789456',
-            building_status: '使照取得',
-            user: 'V89/小宇',
-            update_time: '2019/08/25 10:00:00',
-            is_HELIX_update: false
-          }
-        ]
+        rows: []
       },
       // * 頁次項目（根據這幾個參數，呼叫對應的頁面與渲染資料）
       pagination: {
@@ -391,6 +404,9 @@ export default {
   },
   components: {
     InputContentListener
+  },
+  mounted () {
+    this.getRawData();
   },
   methods: {
     // * 表格升序
@@ -410,7 +426,7 @@ export default {
     // * 點擊功能按鈕
     clickButtonHandler (isDestroy, id) {
       const index = this.tablesData.rows.findIndex(item => item.id === id);
-      this.tablesData.rows[index].is_HELIX_update = true;
+      this.tablesData.rows[index].helix = true;
 
       if (isDestroy === true) {
         this.CONSOLE('註銷');
@@ -447,6 +463,22 @@ export default {
       for (let i = 0; i < this.reference.helixUpdate.length; i++) {
         this.reference.helixUpdate[i].isChecked = false;
       }
+    },
+    // * 取得預設資料
+    getRawData () {
+      fetch('/CSCMap/api/Change?project=&status=', {
+        method: 'GET',
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        })
+      }).then((response) => {
+        return response.json();
+      }).then((data) => {
+        this.tablesData.rows = data;
+        console.log(data);
+      }).catch((err) => {
+        console.log('錯誤:', err);
+      });
     }
   },
   computed: {
@@ -480,6 +512,18 @@ export default {
 <style lang="scss" scoped>
 @import '~/assets/scss/utils/_utils.scss';
 @import '~/assets/scss/_article.scss';
+
+.page {
+  margin-top: 32px !important;
+}
+
+.gogo {
+  height: 88% !important;
+}
+
+.no-mar {
+  margin-top: 0 !important;
+}
 
 h2 {
   margin-top: 1rem;
