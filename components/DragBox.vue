@@ -32,7 +32,8 @@ export default {
     return {
       container: null,
       screenX: 0,
-      screenY: 0
+      screenY: 0,
+      goCancel: true
     };
   },
   props: {
@@ -47,8 +48,11 @@ export default {
       if (this.$store.state.cancelDrag === true) {
         this.container.unset(); // 使拖曳功能失效
         console.log('ww');
-      } else if (this.$store.state.cancelDrag === false) {
+        this.goCancel = false;
+      }
+      if (this.$store.state.cancelDrag === false && this.goCancel === false) {
         this.initInteract(draggable); // 重新啟用拖曳功能
+        this.goCancel = true;
       }
     });
   },

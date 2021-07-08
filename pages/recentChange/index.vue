@@ -10,7 +10,7 @@
               href="javascript:;"
               class="asideNavtabs__btn"
               :class="{ 'current': navtabs.current === typeItem.id }"
-              @click.stop="navtabs.current = typeItem.id"
+              @click.stop="navtabs.current = typeItem.id, reference.searchKeyword = ''"
               @mousedown.prevent
             >
               <span>{{ typeItem.name }}</span>
@@ -82,7 +82,7 @@
             :key="checkbox.id"
             class="option-btn checkbox"
           >
-            <input :id="`helix-update-chk_${checkbox.id}`" v-model="checkbox.isChecked" type="checkbox">
+            <input :id="`helix-update-chk_${checkbox.id}`" v-model="checkbox.isChecked" type="checkbox" @click="selectMe(`helix-update-chk_${checkbox.id}`)">
             <label :for="`helix-update-chk_${checkbox.id}`">{{ checkbox.name }}</label>
           </div>
         </div>
@@ -102,6 +102,7 @@
               href="javascript:;"
               class="btn has-back-icon icon-search size-small"
               title="搜尋"
+              @click.stop="searchHandler"
               @mousedown.prevent
             >
               <span>搜尋</span>
@@ -137,17 +138,17 @@
                 </th>
               </tr>
             </thead>
-            <tbody>
-              <tr v-for="rowsItem of tablesData.rows" :key="rowsItem.id">
+            <tbody v-if="tablesData.rows !== '無資料'">
+              <tr v-for="rowsItem of tablesData.rows" :key="rowsItem.fid">
                 <td>{{ rowsItem['project'] }}</td>
                 <td>{{ rowsItem['key'] }}</td>
                 <td>{{ rowsItem['permitNo'] }}</td>
                 <td>{{ rowsItem['useNo'] }}</td>
-                <td>{{ rowsItem['status'] }}</td>
+                <td>{{ checkStatus(rowsItem['status']) }}</td>
                 <td>{{ rowsItem['changeName'] }}</td>
                 <td>{{ rowsItem['changeTime'] }}</td>
                 <td>
-                  <div v-if="rowsItem['helix'] === true">
+                  <div v-if="rowsItem['helix'] === 'True'">
                     <a
                       href="javascript:;"
                       class="btn is-disabled size-small"
@@ -162,7 +163,7 @@
                       href="javascript:;"
                       class="btn has-outline outline-color-blue-light size-small"
                       title="更新"
-                      @click.stop="clickButtonHandler(false, rowsItem.id)"
+                      @click.stop="clickButtonHandler(false, rowsItem.fid)"
                       @mousedown.prevent
                     >
                       <span>更新</span>
@@ -171,7 +172,7 @@
                       href="javascript:;"
                       class="btn size-small"
                       title="註銷"
-                      @click.stop="clickButtonHandler(true, rowsItem.id)"
+                      @click.stop="clickButtonHandler(true, rowsItem.fid)"
                       @mousedown.prevent
                     >
                       <span>註銷</span>
@@ -180,44 +181,14 @@
                 </td>
               </tr>
             </tbody>
+
+            <tbody v-else>
+              <div :style="'position: absolute; left: 47%; top: 48%;'">
+                查無匹配結果
+              </div>
+            </tbody>
           </table>
         </div>
-
-        <!-- <div class="row is-space-between">
-          <div>第 1 - 10 筆，共 75 筆</div>
-          <div class="pagination">
-            <a
-              href="javascript:;"
-              class="pagination__side-btn"
-              title="上一頁"
-              @click.stop="pagesideClickHandler(false)"
-              @mousedown.prevent
-              v-text="'<'"
-            />
-            <div class="pagination__content">
-              <span v-if="pagination.total > 3 && pagination.current > (3 - 1)">...</span>
-              <a
-                v-for="value of paginationHandler"
-                :key="value"
-                href="javascript:;"
-                class="pagination__btn"
-                :class="{ 'current': value === pagination.current }"
-                :title="`第${value}頁`"
-                @click.stop="pagination.current = value"
-                @mousedown.prevent
-              >{{ value }}</a>
-              <span v-if="pagination.total > 3 && pagination.current < (pagination.total - 1)">...</span>
-            </div>
-            <a
-              href="javascript:;"
-              class="pagination__side-btn"
-              title="下一頁"
-              @click.stop="pagesideClickHandler(true)"
-              @mousedown.prevent
-              v-text="'>'"
-            />
-          </div>
-        </div> -->
       </div>
 
       <div class="row is-space-between page">
@@ -423,16 +394,118 @@ export default {
       const formDate = new Date(formDateList[0], formDateList[1] - 1, formDateList[2]);
       return date < formDate;
     },
-    // * 點擊功能按鈕
-    clickButtonHandler (isDestroy, id) {
-      const index = this.tablesData.rows.findIndex(item => item.id === id);
-      this.tablesData.rows[index].helix = true;
+    // * 點擊更新or註銷功能按鈕
+    clickButtonHandler (isDestroy, myFid) {
+      // const index = this.tablesData.rows.findIndex(item => item.fid === myFid);
+      // this.tablesData.rows[index].helix = true;
 
+      // 註銷
       if (isDestroy === true) {
-        this.CONSOLE('註銷');
-      } else {
-        this.CONSOLE('更新');
+        this.$swal({
+          icon: 'warning',
+          width: 402,
+          showCancelButton: true,
+          confirmButtonText: '確定',
+          cancelButtonText: '取消',
+          text: '您是否要放棄本次更新，轉為已更新？'
+        }).then((result) => {
+          if (result.value) {
+            this.$swal({
+              icon: 'warning',
+              width: 402,
+              showCancelButton: true,
+              confirmButtonText: '確定',
+              cancelButtonText: '取消',
+              html: '注意！轉為已更新，<br />則該筆更新圖形將被永久刪除，無法回復！'
+            }).then((result) => {
+              if (result.value) {
+                this.destroyHandler(myFid);
+              }
+            });
+          }
+        });
       }
+
+      // 更新
+      if (isDestroy === false) {
+        this.$swal({
+          icon: 'warning',
+          width: 402,
+          showCancelButton: true,
+          confirmButtonText: '確定',
+          cancelButtonText: '取消',
+          text: '您是否要回寫更新HELIX圖形？'
+        }).then((result) => {
+          if (result.value) {
+            this.$swal({
+              icon: 'warning',
+              width: 402,
+              showCancelButton: true,
+              confirmButtonText: '確定',
+              cancelButtonText: '取消',
+              html: '注意！更新圖形將取代HELIX原有圖型，<br />是否確定覆蓋，更新後無法還原'
+            }).then((result) => {
+              if (result.value) {
+                this.updateHandler(myFid);
+              }
+            });
+          }
+        });
+      }
+    },
+    // * 註銷helix
+    destroyHandler (fid) {
+      const index = this.tablesData.rows.findIndex(item => item.fid === fid);
+      fetch(`/csc2api/ChangeDispose/${fid}?type=Cancel`, {
+        method: 'POST',
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        })
+      }).then((response) => {
+        return response.json();
+      }).then((data) => {
+        console.log(data);
+
+        this.tablesData.rows[index].helix = 'True';
+        this.$swal({
+          width: 402,
+          text: '更新成功',
+          imageUrl: require('~/assets/img/success.png'),
+          imageWidth: 70,
+          imageHeight: 70,
+          confirmButtonText: '確定',
+          showCloseButton: true
+        });
+      }).catch((err) => {
+        console.log('錯誤:', err);
+      });
+    },
+    // * 更新helix
+    updateHandler (fid) {
+      const index = this.tablesData.rows.findIndex(item => item.fid === fid);
+      fetch(`/csc2api/ChangeDispose/${fid}?type=Update`, {
+        method: 'POST',
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        })
+      }).then((response) => {
+        return response.json();
+      }).then((data) => {
+        console.log(data);
+
+        this.tablesData.rows[index].helix = 'True';
+        this.$swal({
+          width: 402,
+          text: '更新成功',
+          imageUrl: require('~/assets/img/success.png'),
+          imageWidth: 70,
+          imageHeight: 70,
+          confirmButtonText: '確定',
+          showCloseButton: true
+        });
+      }).catch((err) => {
+        console.log('錯誤:', err);
+      });
     },
     // * 點擊頁次元件左右按鈕
     pagesideClickHandler (isIncrease) {
@@ -464,9 +537,20 @@ export default {
         this.reference.helixUpdate[i].isChecked = false;
       }
     },
+    // * 單選checkbox
+    selectMe (id) {
+      for (let i = 0; i < this.reference.helixUpdate.length; i++) {
+        this.reference.helixUpdate[i].isChecked = false;
+      }
+      this.reference.helixUpdate.forEach((item) => {
+        if (item.id === id) {
+          item.isChecked = true;
+        }
+      });
+    },
     // * 取得預設資料
     getRawData () {
-      fetch('/CSCMap/api/Change?project=&status=', {
+      fetch('/csc2api/Change?project=&status=', {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -479,7 +563,88 @@ export default {
       }).catch((err) => {
         console.log('錯誤:', err);
       });
+    },
+    // * 搜尋
+    searchHandler () {
+      if (this.myHelix === 'Nope') {
+        this.searchNoUpdate();
+      } else if (this.myHelix === 'True') {
+        this.searchUpdated();
+      } else {
+        fetch(`/csc2api/Change?project=${this.myProject}&key=${this.myKey}&useNo=${this.myUseNo}&status=${this.myStatus}&changeTimeFrom=${this.reference.dateSelecter.from}&changeTimeTo=${this.reference.dateSelecter.to}&helix=${this.myHelix}`, {
+          method: 'GET',
+          headers: new Headers({
+            'Content-Type': 'application/json'
+          })
+        }).then((response) => {
+          return response.json();
+        }).then((data) => {
+          this.tablesData.rows = data;
+          console.log(data);
+        }).catch((err) => {
+          console.log('錯誤:', err);
+        });
+      }
+    },
+    // * helix搜尋條件是未更新 (抓全部資料 再去除有更新的)
+    searchNoUpdate () {
+      fetch(`/csc2api/Change?project=${this.myProject}&key=${this.myKey}&useNo=${this.myUseNo}&status=${this.myStatus}&changeTimeFrom=${this.reference.dateSelecter.from}&changeTimeTo=${this.reference.dateSelecter.to}&helix=`, {
+        method: 'GET',
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        })
+      }).then((response) => {
+        return response.json();
+      }).then((data) => {
+        // const newArr = data;
+        // newArr.forEach((item, index, arr) => {
+        //   if (item.helix === 'True') {
+        //     arr.splice(index, 1);
+        //   }
+        // });
+        const myArr = data.filter(item => item.helix !== 'True');
+        this.tablesData.rows = myArr;
+        console.log(myArr);
+      }).catch((err) => {
+        console.log('錯誤:', err);
+      });
+    },
+    searchUpdated () {
+      fetch(`/csc2api/Change?project=${this.myProject}&key=${this.myKey}&useNo=${this.myUseNo}&status=${this.myStatus}&changeTimeFrom=${this.reference.dateSelecter.from}&changeTimeTo=${this.reference.dateSelecter.to}&helix=`, {
+        method: 'GET',
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        })
+      }).then((response) => {
+        return response.json();
+      }).then((data) => {
+        const myArr = data.filter(item => item.helix === 'True');
+        this.tablesData.rows = myArr;
+        console.log(myArr);
+      }).catch((err) => {
+        console.log('錯誤:', err);
+      });
+    },
+    checkStatus (data) {
+      if (data === 'A') {
+        return '預定用地';
+      } else if (data === 'B') {
+        return '用印中';
+      } else if (data === 'C') {
+        return '請照中';
+      } else if (data === 'D') {
+        return '施工階段';
+      } else if (data === 'E') {
+        return '使照取得';
+      } else if (data === 'F') {
+        return '資產已驗收';
+      } else if (data === 'G') {
+        return '停用';
+      } else if (data === 'H') {
+        return '其他';
+      }
     }
+
   },
   computed: {
     // * 所選取的頁籤項目名稱
@@ -504,6 +669,49 @@ export default {
       const prev = (current - 1) < 1 ? 0 : (current - 1);
       const next = (current + 1) > total ? 0 : (current + 1);
       return [prev, current, next].filter(item => item > 0 && item < (total + 1));
+    },
+    myProject () {
+      return (this.navtabsCurrentName === '工程名稱') ? this.reference.searchKeyword : '';
+    },
+    myKey () {
+      return (this.navtabsCurrentName === '管理序號') ? this.reference.searchKeyword : '';
+    },
+    myUseNo () {
+      return (this.navtabsCurrentName === '使照編號') ? this.reference.searchKeyword : '';
+    },
+    myStatus () {
+      const newArr = [];
+      this.reference.buildingStatus.forEach((item) => {
+        if (item.isChecked === true) {
+          newArr.push(item.id);
+        }
+      });
+
+      const amount = newArr.length;
+      if (amount < 1) {
+        return '';
+      } else if (amount === 1) {
+        return newArr[0];
+      } else {
+        return newArr.join(',');
+      }
+    },
+    myHelix () {
+      const newArr = [];
+      this.reference.helixUpdate.forEach((item) => {
+        if (item.isChecked === true) {
+          newArr.push(item.name);
+        }
+      });
+      const amount = newArr.length;
+
+      if (amount < 1) {
+        return '';
+      } else if (newArr[0] === '更新') {
+        return 'True';
+      } else {
+        return 'Nope';
+      }
     }
   }
 };
@@ -512,6 +720,14 @@ export default {
 <style lang="scss" scoped>
 @import '~/assets/scss/utils/_utils.scss';
 @import '~/assets/scss/_article.scss';
+
+tr th:nth-child(1) {
+  width: 25%;
+}
+
+tr th:nth-child(8) {
+  width: 20%;
+}
 
 .page {
   margin-top: 32px !important;

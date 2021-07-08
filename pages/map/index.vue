@@ -100,7 +100,7 @@
 
     <!-- 左側的搜尋選單 -->
     <QueryWindow-component
-      v-if="structureCondition.length > 0"
+      v-if="structureType.length > 0 && structureCondition.length > 0"
       ref="queryWindow"
       :open="queryWindowOpen"
       :condition="structureCondition"
@@ -1523,6 +1523,7 @@ export default {
     },
     // * @坐標查詢：控制地圖API，移動至對應的坐標查詢
     setPositionHandler () {
+      document.activeElement.blur();
       // TWD定位
       if (this.positionOptions.current === 2) {
         const reg = /^(-?(?:[0-9])*(?:\.[0-9]+)?)$/;
@@ -1548,8 +1549,10 @@ export default {
           const myArr = [{ x: myTwd.x + 50, y: myTwd.y + 50 }, { x: myTwd.x + 50, y: myTwd.y - 50 }, { x: myTwd.x - 50, y: myTwd.y - 50 }, { x: myTwd.x - 50, y: myTwd.y + 50 }];
           this.gisMap.fitBounds(new CSC.GISEnvelope(myArr), 1.25);
         }
-      } else if (this.positionOptions.current === 0) {
-        // 方格圖號定位
+      }
+
+      // 方格圖號定位
+      if (this.positionOptions.current === 0) {
         const reg = /^((-?|\+?)?[0-9]{4},){0,3}?((-?|\+?)?[0-9]{4})$/;
         const result = reg.test(this.positionOptions.gridNumber);
         const gridNum = this.positionOptions.gridNumber;
@@ -1574,8 +1577,10 @@ export default {
             showCloseButton: true
           });
         }
-      } else if (this.positionOptions.current === 1) {
-        // 方格坐標定位
+      }
+
+      // 方格坐標定位
+      if (this.positionOptions.current === 1) {
         const cscX = this.positionOptions.gridPosition.x;
         const cscY = this.positionOptions.gridPosition.y;
         const imgUrl = require('~/assets/img/point-po.svg');
@@ -1590,7 +1595,10 @@ export default {
             confirmButtonText: '確定',
             showCloseButton: true
           });
-        } else if ((cscX >= -500 && cscX <= 2800) && (cscY >= 3400 && cscY <= 6400)) {
+          return;
+        }
+
+        if ((cscX >= -500 && cscX <= 2800) && (cscY >= 3400 && cscY <= 6400)) {
           const myCsc = new CSC.GISPoint(cscX, cscY);
 
           this.gisMap.setCenter(myCsc);
@@ -2028,7 +2036,7 @@ export default {
             newArr.push({ building: { key: '' }, geometry: item.toJson() });
           });
 
-          fetch('/csc2api/api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/Building', {
+          fetch('/csc2api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/Building', {
             method: 'POST',
             headers: new Headers({
               'Content-Type': 'application/json'
@@ -2177,7 +2185,7 @@ export default {
     },
     // * 取得建物類型資料 F3 API
     getStructureType () {
-      fetch('/csc2api/api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/BuildingType?_format=json', {
+      fetch('/csc2api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/BuildingType?_format=json', {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -2219,7 +2227,7 @@ export default {
     },
     // * 取得建物搜尋結果 F3 API
     getSearchResult () {
-      fetch(`/csc2api/api/proxy?url=${encodeURIComponent(`https://east.csc.com.tw/eas/mhb/rest/mhbe/BuildingList?_format=json&Keyword=${this.searchSelected.keyword}&Status=${this.searchSelected.status}&Type=${this.searchSelected.types}`)}`, {
+      fetch(`/csc2api/proxy?url=${encodeURIComponent(`https://east.csc.com.tw/eas/mhb/rest/mhbe/BuildingList?_format=json&Keyword=${this.searchSelected.keyword}&Status=${this.searchSelected.status}&Type=${this.searchSelected.types}`)}`, {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
