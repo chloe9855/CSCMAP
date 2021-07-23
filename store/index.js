@@ -16,7 +16,10 @@ export const state = () => ({
   gridRole: null,
   myErpCluster: false,
   myErpClusterMore: false,
-  cancelDrag: false
+  cancelDrag: false,
+  notHide: false,
+  gisMapp: '',
+  orangeBar: false
 
 });
 
@@ -78,8 +81,19 @@ export const mutations = {
   ERP_CLUSTER_BOX_RECORD (state, payload) {
     state.myErpClusterMore = payload;
   },
-  // *
+  // * 坐標定位dragbox取消拖曳
   CANCEL_INPUT_DRAG (state, payload) {
     state.cancelDrag = payload;
+  },
+  // * 不要觸發SET_TRIGGER_HIDDEN
+  DONT_HIDE_NAV (state, payload) {
+    state.notHide = payload;
+  },
+  // * 引入GIS map
+  GET_GIS_MAP (state, payload) {
+    state.gisMapp = payload;
+  },
+  SET_ORANGE_BAR (state, payload) {
+    state.orangeBar = payload;
   }
 };

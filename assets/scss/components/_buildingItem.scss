@@ -75,37 +75,74 @@
     }
   }
 
-  &.icon-type-A::before {
-    background-image: url('~/assets/img/building-type-yu.svg');
-  }
+  // &.icon-type-A::before {
+  //   background-image: url('~/assets/img/building-type-yu.svg');
+  // }
 
-  &.icon-type-E::before {
-    background-image: url('~/assets/img/building-type-jiun.svg');
-  }
+  // &.icon-type-E::before {
+  //   background-image: url('~/assets/img/building-type-jiun.svg');
+  // }
 
-  &.icon-type-F::before {
-    background-image: url('~/assets/img/building-type-jiun.svg');
-  }
+  // &.icon-type-F::before {
+  //   background-image: url('~/assets/img/building-type-jiun.svg');
+  // }
 
-  &.icon-type-B::before {
-    background-image: url('~/assets/img/building-type-shin.svg');
-  }
+  // &.icon-type-B::before {
+  //   background-image: url('~/assets/img/building-type-shin.svg');
+  // }
 
-  &.icon-type-C::before {
-    background-image: url('~/assets/img/building-type-shin.svg');
-  }
+  // &.icon-type-C::before {
+  //   background-image: url('~/assets/img/building-type-shin.svg');
+  // }
 
-  &.icon-type-D::before {
-    background-image: url('~/assets/img/building-type-shin.svg');
-  }
+  // &.icon-type-D::before {
+  //   background-image: url('~/assets/img/building-type-shin.svg');
+  // }
 
-  &.icon-type-G::before {
-    background-image: url('~/assets/img/building-type-ting.svg');
-  }
+  // &.icon-type-G::before {
+  //   background-image: url('~/assets/img/building-type-ting.svg');
+  // }
 
-  &.icon-type-Z::before {
+  // &.icon-type-Z::before {
+  //   background-image: url('~/assets/img/building-type-wu.svg');
+  // }
+
+  &.icon-type::before {
     background-image: url('~/assets/img/building-type-wu.svg');
   }
+
+  &.A::before {
+    background-image: url('~/assets/img/building-type-yu.svg') !important;
+  }
+
+  &.E::before {
+    background-image: url('~/assets/img/building-type-jiun.svg') !important;
+  }
+
+  &.F::before {
+    background-image: url('~/assets/img/building-type-jiun.svg') !important;
+  }
+
+  &.B::before {
+    background-image: url('~/assets/img/building-type-shin.svg') !important;
+  }
+
+  &.C::before {
+    background-image: url('~/assets/img/building-type-shin.svg') !important;
+  }
+
+  &.D::before {
+    background-image: url('~/assets/img/building-type-shin.svg') !important;
+  }
+
+  &.G::before {
+    background-image: url('~/assets/img/building-type-ting.svg') !important;
+  }
+
+  &.Z::before {
+    background-image: url('~/assets/img/building-type-wu.svg') !important;
+  }
+
 
   @at-root .infowindow .building__item & {
     padding-right: 10px;

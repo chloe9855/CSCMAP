@@ -3,23 +3,31 @@
     <ul class="menu-list">
       <li>
         <a
-          href="#"
+          href="javascript:;"
           class="menu-list-link"
           title="業務負責人"
+          @click.stop="openWindow"
           @mousedown.prevent
         >
           <span>業務負責人</span>
         </a>
       </li>
       <li v-if="$route.name === 'about'">
-        <nuxt-link
+        <!-- <nuxt-link
           :to="'/map'"
           class="menu-list-link"
           title="返回GIS圖台"
           @mousedown.prevent
         >
           <span>返回GIS圖台</span>
-        </nuxt-link>
+        </nuxt-link> -->
+        <a
+          href="map"
+          class="menu-list-link"
+          title="返回GIS圖台"
+        >
+          <span>返回GIS圖台</span>
+        </a>
       </li>
       <li v-if="$route.name === 'map' || $route.name === 'index'">
         <nuxt-link
@@ -78,7 +86,7 @@ export default {
     },
     // * 獲取登入資料
     getUserData () {
-      fetch('/csc2api/SignOnStatus', {
+      fetch('/cscmap2/api/SignOnStatus', {
         method: 'GET',
         // credentials: 'include',
         headers: new Headers({
@@ -145,6 +153,9 @@ export default {
       }).catch((err) => {
         console.log('錯誤:', err);
       });
+    },
+    openWindow () {
+      window.open('https://east.csc.com.tw/eas/mhb/platform/mhbb4');
     }
   },
   computed: {

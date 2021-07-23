@@ -23,7 +23,7 @@
             href="javascript:;"
             class="back-btn"
             title="關閉視窗"
-            @click.stop="$store.state.myErpCluster = false, $emit('close')"
+            @click.stop="$store.state.myErpCluster = false, $emit('close'), $store.commit('DONT_HIDE_NAV', false), $store.commit('SET_MOBILE_SELECT', false)"
             @mousedown.prevent
           />
         </div>
@@ -32,7 +32,7 @@
             href="javascript:;"
             class="back-btn"
             title="關閉視窗"
-            @click.stop="$store.state.myErpCluster = false, $emit('close')"
+            @click.stop="$store.state.myErpCluster = false, $emit('close'), $store.commit('DONT_HIDE_NAV', false), $store.commit('SET_MOBILE_SELECT', false)"
             @mousedown.prevent
           />
         </div>
@@ -209,6 +209,7 @@ export default {
     // * 介面設定為 detail 模式
     setModeDetailHandler () {
       this.modeType = 'detail';
+      this.getMyKey();
       this.getDetailData();
       this.CONSOLE('【ERP介面】根據所選項目取得建物的詳細資訊');
     },

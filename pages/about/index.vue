@@ -17,6 +17,9 @@ export default {
         class: 'theme-home'
       }
     };
+  },
+  mounted () {
+    this.$store.commit('GET_NOW_URL', 'about');
   }
 };
 </script>

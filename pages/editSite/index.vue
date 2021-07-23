@@ -39,7 +39,7 @@
     <!-- ↓↓ 在地圖API裡面需要用到的DOM -->
     <div :style="'display: none;'">
       <SingleCluster-component
-        :allitem="singleClusterInfo"
+        :item="singleClusterInfo"
         :my-type="singleClusterType"
         @click-detail="singleErpDetail"
       />
@@ -100,7 +100,7 @@
 
     <!-- 左側的搜尋選單 -->
     <QueryWindow-component
-      v-if="structureType.length > 0 && structureCondition.length > 0"
+      v-if="$store.state.Url !== 'editSite'"
       ref="queryWindow"
       :open="queryWindowOpen"
       :condition="structureCondition"
@@ -173,9 +173,9 @@
       mode="out-in"
     >
       <ClusterErpBox-component
-        v-if="screenWidth < 1024 && $store.state.myErpCluster === true && singleClusterInfo.length > 0"
+        v-if="screenWidth < 1024 && $store.state.myErpCluster === true"
         :current-key="singleClusterKey"
-        :clus-data="singleClusterInfo[0]"
+        :clus-data="singleClusterInfo"
         @close="clusRows[clusRows.length - 1].selected = false"
       />
     </transition>
@@ -189,7 +189,7 @@
         v-if="screenWidth < 1024 && nowMode === 'structure' && searchResult.list.structure.length > 0"
         :items-list="searchResult.list.structure"
         :current-id="searchResult.currentBuilding"
-        :clus-data="singleClusterInfo[0]"
+        :clus-data="singleClusterInfo"
         @close="clearSearchResultAndCondition"
         @map-focus="focusBuildingHandler"
       />
@@ -579,6 +579,7 @@
             <span>我的圖層</span>
           </a>
           <a
+            v-if="$store.state.Url !== 'editSite'"
             href="javascript:;"
             class="navtabs__btn theme-dark-mode"
             :class="{ 'current': layerOptions.current === 'addition' }"
@@ -1243,7 +1244,7 @@ export default {
       gridY: '',
       // * 建物/方格選單切換狀態
       nowMode: '',
-      // * 使用者自設坐標邊界、方格圖文字設定
+      // * 使用者自設邊界、方格圖文字設定
       uCSC: {
         x: '',
         y: '',
@@ -1256,24 +1257,9 @@ export default {
         x2: '',
         y2: ''
       },
-      // * 換算出的方格圖邊界
-      bCRM: {
-        x: '',
-        y: '',
-        x2: '',
-        y2: ''
-      },
-      bCSC: {
-        x: '',
-        y: '',
-        x2: '',
-        y2: ''
-      },
       gridWord: null,
-      myNew: [],
-      bigM: '',
-      markerSrc: '',
-      nowMark: ''
+      // * 從後端傳來的 編輯用圖台預定地編號(取名陣列)
+      landId: ['00381-01', '00381-02']
     };
   },
   components: {
@@ -1297,7 +1283,7 @@ export default {
   },
   mounted () {
     this.getDefaultData();
-    this.$store.commit('GET_NOW_URL', 'map');
+    this.$store.commit('GET_NOW_URL', 'editSite');
 
     this.getPositionData();
   },
@@ -1344,13 +1330,8 @@ export default {
         }
 
         // * 引入地圖api
-        const map = new CSC.GISOnlineMap(document.getElementById('CSCMap'), {
-          autoLoad: true,
-          bound_CSC: new CSC.GISEnvelope([{ x: this.uCSC.x, y: this.uCSC.y }, { x: this.uCSC.x2, y: this.uCSC.y2 }]),
-          bound_3CRM: new CSC.GISEnvelope([{ x: this.uCRM.x, y: this.uCRM.y }, { x: this.uCRM.x2, y: this.uCRM.y2 }])
-        });
+        const map = new CSC.GISOnlineMap(document.getElementById('CSCMap'), { autoLoad: true });
         this.gisMap = map;
-        this.$store.commit('GET_GIS_MAP', map);
 
         CSC.GISEvent.addListener(map, 'click', () => {
           this.mapClickHandler();
@@ -1378,26 +1359,6 @@ export default {
         CSC.GISEvent.addListener(map, 'markerclick', (e) => {
           console.log(e.markers);
           e.mouseEvent.stopPropagation();
-
-          if (e.markers.length === 1) {
-            // 清除地圖上有被定位選取的建物
-            this.myNew.forEach((item) => {
-              this.gisMap.markerBounds([item], 1.25).forEach((m) => {
-                m.selected = false;
-                m.active = false;
-              });
-            });
-          }
-
-          // // 擴大手機版的定位範圍
-          // if (e.markers.length === 1 && this.screenWidth < 1024) {
-          //   const point = e.markers[0].position;
-          //   const myArr2 = [{ x: point.x + 50, y: point.y + 150 }, { x: point.x + 50, y: point.y - 50 }, { x: point.x - 50, y: point.y - 50 }, { x: point.x - 50, y: point.y + 50 }];
-          //   this.gisMap.fitBounds(new CSC.GISEnvelope(myArr2), 1);
-
-          //   document.getElementById('CSCMap').addEventListener('click', () => { console.log('click'); });
-          // }
-
           if (e.markers.length <= 10 && e.markers.length > 1 && this.screenWidth > 1023) {
             const infoMulti = document.getElementById('meme2');
             const newArr = [];
@@ -1450,7 +1411,6 @@ export default {
             this.singleClusterKey = e.markers[0].data.key;
             this.getSingleCluster(this.singleClusterKey);
             this.$store.commit('ERP_CLUSTER_BOX', true);
-            this.$store.commit('DONT_HIDE_NAV', true);
           } else if (e.markers.length === 1 && this.screenWidth < 1024 && this.searchResult.list.structure.length > 0) {
             this.clusRows.push(e.markers[0]);
             // 只有最新的那筆(目前點的)球標會變色
@@ -1463,9 +1423,6 @@ export default {
             this.singleClusterKey = e.markers[0].data.key;
             this.getSingleCluster(this.singleClusterKey);
             this.$store.commit('ERP_CLUSTER_BOX_RECORD', true);
-
-            this.$store.commit('ERP_CLUSTER_BOX', true);
-            this.$store.commit('DONT_HIDE_NAV', true);
           } else {
             // 關閉訊息視窗
             this.gisMap.showInformation();
@@ -1478,7 +1435,7 @@ export default {
         });
 
         // 設定球標顯示
-        this.gisMap.setupMarker({ visible: true });
+        // this.gisMap.setupMarker({ visible: true });
         // 設定圖層顯示、透明度
         // this.gisMap.setupLayer({ fid: 10, visible: false, opacity: 100 });
         // 設定繪圖
@@ -1603,7 +1560,7 @@ export default {
       });
     },
     getPositionData () {
-      fetch('/cscmap2/CustomSetting.json', {
+      fetch('/CSCMap/CustomSetting.json', {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -1624,31 +1581,9 @@ export default {
         console.log('錯誤:', err);
       });
     },
-    getBorder () {
-      // 冷三方格圖號邊界
-      const myCrm = new CSC.GISPoint(this.uCRM.x, this.uCRM.y);
-      const myCrm2 = new CSC.GISPoint(this.uCRM.x2, this.uCRM.y2);
-      console.log(myCrm);
-      console.log(888);
-      const m1 = this.gisMap.coordinateInfo(myCrm).CRM;
-      const m2 = this.gisMap.coordinateInfo(myCrm2).CRM;
-      console.log(m1);
-      console.log(m2);
-      this.bCRM.x = parseInt(m1.x.toString().substring(0, 2), 10) + 1;
-      this.bCRM.x2 = parseInt(m2.x.toString().substring(0, 2), 10) + 1;
-      this.bCRM.y = parseInt(m1.y.toString().substring(0, 2), 10) + 1;
-      this.bCRM.y2 = parseInt(m2.y.toString().substring(0, 2), 10) + 1;
-
-      // 中鋼方格圖號邊界
-      this.bCSC.x = parseInt(this.uCSC.x.toString().substring(0, 2), 10) + 1;
-      this.bCSC.x2 = parseInt(this.uCSC.x2.toString().substring(0, 2), 10);
-      this.bCSC.y = parseInt(this.uCSC.y.toString().substring(0, 2), 10) + 1;
-      this.bCSC.y2 = parseInt(this.uCSC.y2.toString().substring(0, 2), 10);
-    },
     // * @坐標查詢：控制地圖API，移動至對應的坐標查詢
     setPositionHandler () {
       document.activeElement.blur();
-      this.getBorder();
       // TWD定位
       if (this.positionOptions.current === 2) {
         const reg = /^(-?(?:[0-9])*(?:\.[0-9]+)?)$/;
@@ -1657,7 +1592,7 @@ export default {
 
         if (result1 === false || result2 === false || this.positionOptions.twdPosition.x === '' || this.positionOptions.twdPosition.y === '') {
           this.$swal({
-            text: '輸入格式有誤，請重新輸入',
+            text: '輸入格式有誤，請輸入數字',
             width: 402,
             confirmButtonText: '確定',
             showCloseButton: true
@@ -1683,7 +1618,7 @@ export default {
         const gridNum = this.positionOptions.gridNumber;
         if (result === false) {
           this.$swal({
-            text: '輸入格式有誤，請重新輸入',
+            text: '輸入格式有誤，請輸入數字',
             width: 402,
             confirmButtonText: '確定',
             showCloseButton: true
@@ -1699,9 +1634,7 @@ export default {
           this.gridY = parseInt(gridNum.toString().substring(2, 4), 10);
         }
 
-        // ((this.gridX <= 65 && this.gridX >= 52 && this.gridY >= 90 && this.gridY <= 99) || (this.gridX < 28 && this.gridX >= -4 && this.gridY >= 35 && this.gridY <= 64))
-
-        if ((this.gridX <= this.bCRM.x2 && this.gridX >= this.bCRM.x && this.gridY >= this.bCRM.y && this.gridY <= this.bCRM.y2) || (this.gridX <= this.bCSC.x2 && this.gridX >= this.bCSC.x && this.gridY >= this.bCSC.y && this.gridY <= this.bCSC.y2)) {
+        if ((this.gridX <= 65 && this.gridX >= 52 && this.gridY >= 90 && this.gridY <= 99) || (this.gridX < 28 && this.gridX >= -4 && this.gridY >= 35 && this.gridY < 64)) {
           this.gisMap.fitBounds(new CSC.GISEnvelope(this.gisMap.gridInfo(this.positionOptions.gridNumber).CSC), 1.25);
           console.log(this.gisMap.gridInfo(this.positionOptions.gridNumber));
         } else {
@@ -1725,7 +1658,7 @@ export default {
         const result2 = reg.test(cscY);
         if (result1 === false || result2 === false || cscX === '' || cscY === '') {
           this.$swal({
-            text: '輸入格式有誤，請重新輸入',
+            text: '輸入格式有誤，請輸入數字',
             width: 402,
             confirmButtonText: '確定',
             showCloseButton: true
@@ -1733,7 +1666,7 @@ export default {
           return;
         }
 
-        if ((cscX > this.uCSC.x && cscX <= this.uCSC.x2) && (cscY > this.uCSC.y && cscY <= this.uCSC.y2)) {
+        if ((cscX >= uCSC.x && cscX <= uCSC.x2) && (cscY >= uCSC.y && cscY <= uCSC.y2)) {
           const myCsc = new CSC.GISPoint(cscX, cscY);
 
           this.gisMap.setCenter(myCsc);
@@ -1746,7 +1679,7 @@ export default {
         } else {
           // 超出的一律當冷三 把他輸入的坐標當冷三 先轉成中鋼方格坐標
           const myCold = CSC.CoordTrans('3CRM', 'CSC', { x: cscX, y: cscY });
-          if ((myCold.x > this.uCRM.x && myCold.x <= this.uCRM.x2) && (myCold.y > this.uCRM.y && myCold.y <= this.uCRM.y2)) {
+          if ((myCold.x >= uCRM.x && myCold.x <= uCRM.x2) && (myCold.y > uCRM.y && myCold.y <= uCRM.y2)) {
             this.gisMap.setCenter(myCold);
             this.markerImg = new CSC.GISMarker(this.gisMap, myCold, null, new CSC.GISImage(imgUrl, new CSC.GISSize(26, 35)));
             this.markerImg.setFlat(true);
@@ -2177,9 +2110,15 @@ export default {
       }).then((result) => {
         if (result.value) {
           // 若按下確定
+          const myName = [];
+          this.graphList.forEach((item) => {
+            myName.push(item.name);
+          });
+          const keName = myName.join(',');
+
           const newArr = [];
           myGraphs.forEach((item) => {
-            newArr.push({ building: { key: '' }, geometry: item.toJson() });
+            newArr.push({ building: { key: keName }, geometry: item.toJson() });
           });
 
           fetch('/csc2api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/Building', {
@@ -2191,6 +2130,9 @@ export default {
           }).then((response) => {
             return response.json();
           }).then((data) => {
+            // 若確定有儲存到ERP 才把傳到後端的key值賦值給取名陣列
+            this.landId = myName;
+            // 開新視窗
             window.open(`${data}`);
           }).catch((err) => {
             console.log('錯誤:', err);
@@ -2204,10 +2146,20 @@ export default {
     },
     // * @幾何圖形：取得幾何圖形圖層名稱
     geometryNameProvider (category) {
-      const { current, typeList, amountCounter } = this.geometryOptions;
-      const name = typeList.filter(item => item.id === current)[0].graphName;
-      const amount = amountCounter[category];
-      return `${name}${amount + 1}`;
+      // const { current, typeList, amountCounter } = this.geometryOptions;
+      // const name = typeList.filter(item => item.id === current)[0].graphName;
+      // const amount = amountCounter[category];
+      // return `${name}${amount + 1}`;
+
+      // 取到'00381-'
+      const front = this.landId[this.landId.length - 1].substring(0, 6);
+      // 取最後兩個字元+1
+      const end = parseInt(this.landId[this.landId.length - 1].substring(6, 8), 10) + 1;
+      if (end < 10) {
+        return `${front}0${end}`;
+      } else {
+        return `${front}${end}`;
+      }
     },
     // ? @搜尋：建物搜尋與匯入方格圖
     searchHandler (payload) {
@@ -2263,14 +2215,6 @@ export default {
       if (this.nowMode === 'structure') {
         this.searchResult.list.structure = [];
         this.searchResult.currentBuilding = '';
-
-        // 清除地圖上有被定位選取的建物
-        this.myNew.forEach((item) => {
-          this.gisMap.markerBounds([item], 1.25).forEach((m) => {
-            m.selected = false;
-            m.active = false;
-          });
-        });
       }
 
       if (this.nowMode === 'lattice') {
@@ -2283,75 +2227,11 @@ export default {
 
       const _queryWindow = this.$refs.queryWindow;
       _queryWindow.clearAllHandler();
-
-      // 清除地圖上有被定位選取的建物 selected->球標橘色+建物標亮 active->球標紅色
-      this.myNew.forEach((item) => {
-        this.gisMap.markerBounds([item], 1.25).forEach((m) => {
-          m.selected = false;
-          m.active = false;
-          console.log(m);
-        });
-      });
     },
-    // * 選取建物項目，地圖移動至對應坐標(定位)
+    // * 選取建物項目，地圖移動至對應坐標
     focusBuildingHandler (payload) {
-      this.gisMap.markerBounds([payload.key], 1.25).forEach((m) => { this.nowMark = m; });
-      if (this.nowMark === '') {
-        this.$swal({
-          icon: 'warning',
-          width: 402,
-          text: '建物位置請點選看詳細',
-          confirmButtonText: '確定',
-          showCloseButton: true
-        });
-
-        return;
-      }
-
-      // // 如果有報錯會跳警示窗
-      // try {
-      //   this.gisMap.markerBounds([payload.key], 1.25);
-      //   console.log('try');
-      // } catch (exception) {
-      //   this.$swal({
-      //     icon: 'warning',
-      //     width: 402,
-      //     text: '建物位置請點選看詳細',
-      //     confirmButtonText: '確定',
-      //     showCloseButton: true
-      //   });
-
-      //   return;
-      // }
-
-      // 先清除直接點選地圖而選取的球標
-      this.clusRows.forEach((item) => {
-        item.selected = false;
-      });
-
-      // 沒報錯才開始定位
       this.searchResult.currentBuilding = payload.key;
-      this.myNew.push(payload.key);
-      // const keyNumber = this.myNew.join(',');
-      // this.gisMap.markerBounds([keyNumber], 1.25).forEach(function (m) { m.selected = false; });
-      this.myNew.forEach((item) => {
-        this.gisMap.markerBounds([item], 1.25).forEach(function (m) { m.selected = false; });
-      });
-      this.gisMap.markerBounds([this.myNew[this.myNew.length - 1]], 10.5).forEach((m) => {
-        // this.markerSrc = CSC.RES_PATH + (m.selected ? 'marker3.png' : m.active ? 'marker3.png' : m.other ? 'marker4.png' : 'marker2.png');
-        // m.icon.setUrl(this.markerSrc);
-        // if (m.elem) { m.elem.attr({ src: this.markerSrc }); }
-        // m.other = false;
-        // m.active = false;
-
-        m.selected = true;
-        console.log(m);
-        this.bigM = m.position;
-        this.nowMark = '';
-      });
-
-      const myArr2 = [{ x: this.bigM.x + 50, y: this.bigM.y + 50 }, { x: this.bigM.x + 50, y: this.bigM.y - 50 }, { x: this.bigM.x - 50, y: this.bigM.y - 50 }, { x: this.bigM.x - 50, y: this.bigM.y + 50 }];
-      this.gisMap.fitBounds(new CSC.GISEnvelope(myArr2), 1.25);
+      this.CONSOLE('【建物搜尋】地圖移動到所選取的建物坐標位置');
     },
     // * @方格圖：刪除方格圖層
     deleteLatticeHandler (id) {
@@ -2412,7 +2292,6 @@ export default {
       if (this.searchResult.types !== '') { return; }
       if (this.positionAlert.isOpen === true) { return; }
       if (this.$store.state.menuOpen === true) { return; }
-      if (this.$store.state.notHide === true) { return; }
 
       const result = !this.$store.state.triggerHidden;
       this.$store.commit('SET_TRIGGER_HIDDEN', result);
@@ -2471,7 +2350,7 @@ export default {
     },
     // * 取得預設圖層API
     getDefaultLayer () {
-      fetch('/cscmap2/api/layer', {
+      fetch('/CSCMap/api/layer', {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -2506,22 +2385,9 @@ export default {
           return a.applytime < b.applytime ? 1 : -1;
         });
         this.searchResult.list.structure = data;
-
-        // 定位搜尋結果
-        this.getBuildingPosition(data);
       }).catch((err) => {
         console.log('錯誤:', err);
       });
-    },
-    // * 建物搜尋後 定位所有搜尋結果(紅色球標)
-    getBuildingPosition (data) {
-      const markRows = data.map(item => item.key);
-      this.gisMap.markerBounds(markRows, 1.25).forEach((m) => {
-        m.selected = false;
-        m.active = true;
-        console.log(m);
-      });
-      console.log(markRows);
     },
     // * 桌機版 點擊單筆ERP看詳細
     singleErpDetail (payload) {
@@ -2564,42 +2430,14 @@ export default {
     getSingleCluster (mykey) {
       // 一期 f3 api 1
       // https://east.csc.com.tw/eas/mhb/rest/mhbe/getBuildingByKey/00004-01?_format=json
-      // const cluster = require('~/static/_resources/single.json');
-      // this.singleClusterInfo = cluster.data[0];
-
-      fetch(`/csc2api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/getBuildingByKey/${mykey}?_format=json`, {
-        method: 'GET',
-        headers: new Headers({
-          'Content-Type': 'application/json'
-        })
-      }).then((response) => {
-        return response.json();
-      }).then((data) => {
-        console.log(data);
-        this.singleClusterInfo = data;
-      }).catch((err) => {
-        console.log('錯誤:', err);
-      });
+      const cluster = require('~/static/_resources/single.json');
+      this.singleClusterInfo = cluster.data[0];
     },
     getMultiCluster (mykey) {
       // 一期 f3 api 3
       // https://east.csc.com.tw/eas/mhb/rest/mhbe/getBuildingByKey/00004-01,00004-02?_format=json
-      // const cluster = require('~/static/_resources/multi.json');
-      // this.multiClusterInfo = cluster.data;
-
-      fetch(`/csc2api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/getBuildingByKey/${mykey}?_format=json`, {
-        method: 'GET',
-        headers: new Headers({
-          'Content-Type': 'application/json'
-        })
-      }).then((response) => {
-        return response.json();
-      }).then((data) => {
-        console.log(data);
-        this.multiClusterInfo = data;
-      }).catch((err) => {
-        console.log('錯誤:', err);
-      });
+      const cluster = require('~/static/_resources/multi.json');
+      this.multiClusterInfo = cluster.data;
     },
     addSymbo () {
       this.pGISSymbo = new CSC.GISSymbol();
@@ -2742,7 +2580,7 @@ export default {
     },
     dxfUpload () {
       this.haveUploaded = true;
-      fetch('/cscmap2/api/DXFLoader', {
+      fetch('/CSCMap/api/DXFLoader', {
         method: 'POST',
         headers: new Headers({
           'Content-Type': 'application/json'

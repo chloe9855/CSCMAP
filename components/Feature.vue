@@ -15,7 +15,7 @@
           <span>新增預定用地</span>
         </a>
       </li>
-      <li>
+      <li :class="{ 'hide-now': $store.state.Url === 'editSite' }">
         <a
           href="javascript:;"
           class="feature__btn icon-my-position position-alert-btn"
@@ -25,7 +25,7 @@
           <span>我的位置</span>
         </a>
       </li>
-      <li>
+      <li :class="{ 'hide-now': $store.state.Url === 'editSite' }">
         <a
           href="javascript:;"
           class="feature__btn icon-cluster-switch"
@@ -58,7 +58,7 @@
           <span>圖北切換</span>
         </a>
       </li>
-      <li>
+      <li :class="{ 'hide-now': $store.state.Url === 'editSite' }">
         <a
           href="javascript:;"
           class="feature__btn icon-set-position"
@@ -69,7 +69,7 @@
           <span>坐標定位</span>
         </a>
       </li>
-      <li>
+      <li :class="{ 'hide-now': $store.state.Url === 'editSite' }">
         <a
           href="javascript:;"
           class="feature__btn icon-measure"
@@ -80,7 +80,7 @@
           <span>測量距離/面積</span>
         </a>
       </li>
-      <li v-if="screenWidth > 1023">
+      <li v-if="screenWidth > 1023" :class="{ 'hide-now': $store.state.Url === 'editSite' }">
         <a
           class="feature__btn icon-screen-capture"
           @click.stop="$emit('screenShot')"
@@ -161,6 +161,10 @@ export default {
 // * 右側功能按鈕
 
 $btn-color: #eff2f6;
+
+.hide-now {
+  display: none;
+}
 
 .feature {
   padding: 5px 5px 0;

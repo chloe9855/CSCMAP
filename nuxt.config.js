@@ -56,7 +56,8 @@ export default {
     { src: '~/plugins/interact.js' },
     { src: '~/plugins/pictureSwipe.js', ssr: false },
     { src: '~/plugins/sweetalert.js', ssr: false },
-    { src: '~/plugins/datepicker.js' }
+    { src: '~/plugins/datepicker.js' },
+    { src: '~/plugins/paginate.js' }
   ],
   components: true,
   buildModules: [

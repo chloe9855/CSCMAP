@@ -20,6 +20,7 @@
     "v-photoswipe": "^1.0.3-1",
     "vue-interactjs": "^0.1.10",
     "vue-no-ssr": "^1.1.1",
+    "vue-paginate": "^3.6.0",
     "vue-plain-pagination": "^0.3.0",
     "vue-sweetalert2": "^4.2.1",
     "vue2-datepicker": "^3.9.0",

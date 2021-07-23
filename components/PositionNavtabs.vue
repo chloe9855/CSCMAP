@@ -17,16 +17,6 @@
     <div class="navtabs__body">
       <div class="navtabs__content">
         <div v-if="options.current === 0" class="row">
-          <div class="fieldset">
-            <InputContentListener
-              v-model="reference.gridNumber"
-              :placeholder="`輸入${searchTypeName}方格圖號`"
-              :is-password="false"
-            />
-          </div>
-        </div>
-
-        <div v-if="options.current === 1" class="row">
           <div class="fieldset row-column">
             <InputContentListener
               v-model="reference.gridPosition.x"
@@ -38,6 +28,16 @@
             <InputContentListener
               v-model="reference.gridPosition.y"
               :placeholder="`輸入方格Y坐標`"
+              :is-password="false"
+            />
+          </div>
+        </div>
+
+        <div v-if="options.current === 1" class="row">
+          <div class="fieldset">
+            <InputContentListener
+              v-model="reference.gridNumber"
+              :placeholder="`輸入方格圖號`"
               :is-password="false"
             />
           </div>
@@ -155,6 +155,7 @@ export default {
       this.reference.gridPosition.y = '';
       this.reference.twdPosition.x = '';
       this.reference.twdPosition.y = '';
+      this.$emit('clearImg');
     }
   },
   computed: {

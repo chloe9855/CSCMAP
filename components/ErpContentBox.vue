@@ -3,7 +3,8 @@
     class="erpcontent"
     :class="{
       'mode-detail': modeType === 'detail',
-      'is-hidden': isHidden
+      'is-hidden': isHidden,
+      'down': $store.state.myErpCluster === true
     }"
   >
     <div
@@ -186,6 +187,8 @@ export default {
       changePic: require('~/assets/img/minus.png'),
       changePic3: require('~/assets/img/minus.png'),
       myKey: '',
+      nowMark: '',
+      watchCluster: false,
       detailTypeList: [
         {
           id: 0,
@@ -216,12 +219,6 @@ export default {
   created () {
     this.setDefaultDetailType();
   },
-  mounted () {
-    if (this.$store.state.myErpClusterMore === true) {
-      this.currentItem = this.clusData;
-      this.modeType = 'current';
-    }
-  },
   methods: {
     // * 預設先選詳細資料頁籤的第一個
     setDefaultDetailType () {
@@ -229,16 +226,39 @@ export default {
     },
     // * 從搜尋結果中選取一筆
     setCurrentItemHandler (payload) {
-      // ? 打一個事件至上層，控制地圖API去移動至目前選取的標的
       this.$emit('map-focus', payload);
+      // 如果有報錯就不執行下面的
+      // try {
+      //   this.$store.state.gisMapp.markerBounds([payload.key], 1.25);
+      // } catch (exception) {
+      //   console.log('not exist');
+      //   return;
+      // }
+      this.$store.state.gisMapp.markerBounds([payload.key], 1.25).forEach((m) => { this.nowMark = m; });
+      if (this.nowMark === '') {
+        this.$swal({
+          icon: 'warning',
+          width: 402,
+          text: '建物位置請點選看詳細',
+          confirmButtonText: '確定',
+          showCloseButton: true
+        });
+
+        return;
+      }
+
+      // ? 打一個事件至上層，控制地圖API去移動至目前選取的標的
+      // this.$emit('map-focus', payload);
       this.currentItem = payload;
       this.modeType = 'current';
       this.$store.commit('SET_MOBILE_SELECT', true);
       this.getMyKey();
+      this.nowMark = '';
     },
     // * 返回搜尋結果
     backToNormalModeHandler () {
-      this.currentItem = {};
+      // 0722註解
+      // this.currentItem = {};
       this.modeType = '';
       this.$store.commit('SET_MOBILE_SELECT', false);
 
@@ -319,10 +339,28 @@ export default {
       }
     }
   },
+  computed: {
+    listenCluster () {
+      return this.$store.state.myErpCluster;
+    }
+  },
   watch: {
     currentItem: {
       handler () {
         this.setDefaultDetailType();
+      },
+      deep: true
+    },
+    listenCluster: {
+      handler (value) {
+        // 在ClusterErpBox出現 且先前有其它查詢結果的狀態下 : 讓ErpContentBox回歸''模式 且若之前有選取建物會有橘標, 用css來把ErpContentBox藏到下面
+        if (value === true && this.watchCluster === false) {
+          this.backToNormalModeHandler();
+          this.watchCluster = true;
+        } else if (value === true && this.watchCluster === true) {
+          this.$emit('map-focus', this.currentItem);
+          this.watchCluster = false;
+        }
       },
       deep: true
     }
@@ -332,6 +370,11 @@ export default {
 
 <style lang="scss" scoped>
 @import '~/assets/scss/utils/_utils.scss';
+
+.down {
+  transition: ease-in-out 0.5s;
+  transform: translateY(150%) !important;
+}
 
 .go-pad {
   padding: 14px 33px !important;

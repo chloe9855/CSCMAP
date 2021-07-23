@@ -21,7 +21,7 @@
           class="guide-service__enter-btn icon-info"
           title="建物資訊"
           @mousedown.prevent
-          @click="loginHandler"
+          @click="loginHandler4"
         >
           <span>建物資訊</span>
         </a>
@@ -102,6 +102,13 @@ export default {
         // this.$router.push({ name: 'map', params: { preload: 'openSetPosition' } });
       } else {
         location.href = `${window.location.href}map?now=openSetPosition`;
+      }
+    },
+    loginHandler4 () {
+      if (this.$store.state.accessToken === '') { // 如果沒登入
+        location.href = 'https://testeip.csc.com.tw:1443/SSO/DSS0/DSAOS0.aspx?.done=https://east.csc.com.tw/eas/mhb/platform/mhbba';
+      } else {
+        location.href = 'https://east.csc.com.tw/eas/mhb/platform/mhbba';
       }
     }
   },

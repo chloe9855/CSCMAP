@@ -33,8 +33,8 @@ export default {
     });
   },
   beforeDestroy () {
-    this.$refs.notdrag.removeEventListener('mousedown', e);
-    this.$refs.notdrag.removeEventListener('mouseup', e);
+    // this.$refs.notdrag.removeEventListener('mousedown', e);
+    // this.$refs.notdrag.removeEventListener('mouseup', e);
   },
   methods: {
     enterHandler (e) {

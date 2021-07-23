@@ -1,5 +1,5 @@
 <template>
-  <header class="header" :class="{ 'theme-simple': themeFilterHandler , 'hetyle': $store.state.Url === 'customLayer', 'mobstyle': $store.state.Url === 'welcomePage'}">
+  <header class="header" :class="{ 'theme-simple': themeFilterHandler , 'hetyle': $store.state.Url === 'customLayer', 'mobstyle': $store.state.Url === 'welcomePage' , 'aboutstyle': $store.state.Url === 'about' , 'editstyle': $store.state.Url === 'editSite' }">
     <div class="header__container">
       <div class="header__heading">
         <nuxt-link
@@ -24,7 +24,7 @@
         </nuxt-link>
         </nuxt-link>
       </div>
-      <div class="header__content">
+      <div class="header__content" :class="{ 'hide-now': $store.state.Url === 'editSite' }">
         <ul v-if="pageName !== 'index' && pageName !== 'admin'" class="header__menu-list">
           <li
             v-for="item of menuFilterHandler"
@@ -49,7 +49,7 @@
               :href="item.path"
               :class="item.classNameList.join('')"
               :title="item.name"
-              @click.stop="item.classNameList.indexOf('tutorial-btn') < 0 ? {} : tutorialCtrlHandler()"
+              @click.stop="openWindow(item.name), item.classNameList.indexOf('tutorial-btn') < 0 ? {} : tutorialCtrlHandler()"
               @mousedown.prevent
             >
               <span>{{ item.name }}</span>
@@ -131,7 +131,7 @@ export default {
         },
         {
           name: 'ERP建物資訊',
-          path: '#',
+          path: 'javascript:;',
           isNuxtLink: false,
           isMobileShow: false,
           isDesktopHide: false,
@@ -139,7 +139,7 @@ export default {
         },
         {
           name: '業務負責人',
-          path: '#',
+          path: 'javascript:;',
           isNuxtLink: false,
           isMobileShow: true,
           isDesktopHide: false,
@@ -165,7 +165,7 @@ export default {
       menuList2: [
         {
           name: 'ERP建物資訊',
-          path: '#',
+          path: 'javascript:;',
           isNuxtLink: false,
           isMobileShow: false,
           isDesktopHide: false,
@@ -173,7 +173,7 @@ export default {
         },
         {
           name: '業務負責人',
-          path: '#',
+          path: 'javascript:;',
           isNuxtLink: false,
           isMobileShow: true,
           isDesktopHide: false,
@@ -199,7 +199,7 @@ export default {
       menuList3: [
         {
           name: '業務負責人',
-          path: '#',
+          path: 'javascript:;',
           isNuxtLink: false,
           isMobileShow: true,
           isDesktopHide: false,
@@ -275,7 +275,7 @@ export default {
     },
     // * 獲取登入資料
     getUserData () {
-      fetch('/csc2api/SignOnStatus', {
+      fetch('/cscmap2/api/SignOnStatus', {
         method: 'GET',
         // credentials: 'include',
         headers: new Headers({
@@ -326,6 +326,14 @@ export default {
       }).catch((err) => {
         console.log('錯誤:', err);
       });
+    },
+    openWindow (name) {
+      if (name === 'ERP建物資訊') {
+        window.open('https://east.csc.com.tw/eas/mhb/platform/mhbba');
+      }
+      if (name === '業務負責人') {
+        window.open('https://east.csc.com.tw/eas/mhb/platform/mhbb4');
+      }
     }
   },
   computed: {
@@ -383,6 +391,21 @@ export default {
 
 <style lang="scss" scoped>
 @import '~/assets/scss/utils/_utils.scss';
+
+.editstyle {
+  height: 60px !important;
+  display: flex !important;
+}
+
+.hide-now {
+  display: none !important;
+}
+
+.aboutstyle {
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+}
 
 .mobstyle {
   position: absolute !important;

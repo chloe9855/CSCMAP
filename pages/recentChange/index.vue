@@ -111,7 +111,7 @@
         </div>
       </div>
     </div>
-    <div class="article__content">
+    <div class="article__content overme">
       <div class="article__wrap theme-scrollbar gogo">
         <div class="dataTable__wrapper theme-scrollbar no-mar">
           <table class="dataTable">
@@ -139,16 +139,16 @@
               </tr>
             </thead>
             <tbody v-if="tablesData.rows !== '無資料'">
-              <tr v-for="rowsItem of tablesData.rows" :key="rowsItem.fid">
-                <td>{{ rowsItem['project'] }}</td>
-                <td>{{ rowsItem['key'] }}</td>
-                <td>{{ rowsItem['permitNo'] }}</td>
-                <td>{{ rowsItem['useNo'] }}</td>
-                <td>{{ checkStatus(rowsItem['status']) }}</td>
-                <td>{{ rowsItem['changeName'] }}</td>
-                <td>{{ rowsItem['changeTime'] }}</td>
+              <tr v-for="rowsItem of resultRows" :key="rowsItem.value[rowsItem.value.length - 1].changeTime">
+                <td>{{ rowsItem.value[rowsItem.value.length - 1].project }}</td>
+                <td>{{ rowsItem.name }}</td>
+                <td>{{ rowsItem.value[rowsItem.value.length - 1].permitNo }}</td>
+                <td>{{ rowsItem.value[rowsItem.value.length - 1].useNo }}</td>
+                <td>{{ checkStatus(rowsItem.value[rowsItem.value.length - 1].status) }}</td>
+                <td>{{ rowsItem.value[rowsItem.value.length - 1].changeName }}</td>
+                <td>{{ rowsItem.value[rowsItem.value.length - 1].changeTime }}</td>
                 <td>
-                  <div v-if="rowsItem['helix'] === 'True'">
+                  <div v-if="rowsItem.value[rowsItem.value.length - 1].helix === 'True'">
                     <a
                       href="javascript:;"
                       class="btn is-disabled size-small"
@@ -163,7 +163,7 @@
                       href="javascript:;"
                       class="btn has-outline outline-color-blue-light size-small"
                       title="更新"
-                      @click.stop="clickButtonHandler(false, rowsItem.fid)"
+                      @click.stop="clickButtonHandler(false, rowsItem.value[rowsItem.value.length - 1].fid)"
                       @mousedown.prevent
                     >
                       <span>更新</span>
@@ -172,7 +172,7 @@
                       href="javascript:;"
                       class="btn size-small"
                       title="註銷"
-                      @click.stop="clickButtonHandler(true, rowsItem.fid)"
+                      @click.stop="clickButtonHandler(true, rowsItem.value[rowsItem.value.length - 1].fid)"
                       @mousedown.prevent
                     >
                       <span>註銷</span>
@@ -191,8 +191,8 @@
         </div>
       </div>
 
-      <div class="row is-space-between page">
-        <div>第 1 - 10 筆，共 75 筆</div>
+      <div v-if="tablesData.rows !== '無資料'" class="row is-space-between page">
+        <div>第 {{ minData }} - {{ countData(totalCount) }} 筆，共 {{ totalCount }} 筆</div>
         <div class="pagination">
           <a
             href="javascript:;"
@@ -203,6 +203,16 @@
             v-text="'<'"
           />
           <div class="pagination__content">
+            <a
+              v-if="pagination.total > 3 && pagination.current > (3 - 1)"
+              href="javascript:;"
+              class="pagination__btn"
+              :class="{ 'current': value === pagination.current }"
+              :title="`第1頁`"
+              @click.stop="pagination.current = 1, pageHandler()"
+              @mousedown.prevent
+            >1</a>
+            <!-- 上面是第一頁 -->
             <span v-if="pagination.total > 3 && pagination.current > (3 - 1)">...</span>
             <a
               v-for="value of paginationHandler"
@@ -211,10 +221,20 @@
               class="pagination__btn"
               :class="{ 'current': value === pagination.current }"
               :title="`第${value}頁`"
-              @click.stop="pagination.current = value"
+              @click.stop="pagination.current = value, pageHandler()"
               @mousedown.prevent
             >{{ value }}</a>
             <span v-if="pagination.total > 3 && pagination.current < (pagination.total - 1)">...</span>
+            <!-- 最後一頁 -->
+            <a
+              v-if="pagination.total > 3 && pagination.current < (pagination.total - 1)"
+              href="javascript:;"
+              class="pagination__btn"
+              :class="{ 'current': value === pagination.current }"
+              :title="`第${pagination.total}頁`"
+              @click.stop="pagination.current = pagination.total, pageHandler()"
+              @mousedown.prevent
+            >{{ pagination.total }}</a>
           </div>
           <a
             href="javascript:;"
@@ -370,29 +390,63 @@ export default {
         current: 1,
         // 總共幾頁
         total: 5
-      }
+      },
+      resultRows: [],
+      minData: '',
+      maxData: ''
     };
   },
   components: {
     InputContentListener
   },
   mounted () {
+    // 開啟 Loading 視窗
+    this.$store.commit('CTRL_LOADING_MASK', true);
     this.getRawData();
+
+    setTimeout(() => {
+      // 關閉 Loading 視窗與開啟側邊選單
+      this.$store.commit('CTRL_LOADING_MASK', false);
+      this.isInit = true;
+    }, 2800);
   },
   methods: {
     // * 表格升序
     ascendingHandler (id) {
-      this.tablesData.rows.sort((a, b) => a[id] > b[id] ? 1 : -1);
+      // this.tablesData.rows.sort((a, b) => a[id] > b[id] ? 1 : -1);
+      this.tablesData.rows.sort((a, b) => a.value[a.value.length - 1].fid > b.value[b.value.length - 1].fid ? 1 : -1);
     },
     // * 表格降序
     descendingHandler (id) {
-      this.tablesData.rows.sort((a, b) => a[id] > b[id] ? -1 : 1);
+      // this.tablesData.rows.sort((a, b) => a[id] > b[id] ? -1 : 1);
+      this.tablesData.rows.sort((a, b) => a.value[a.value.length - 1].fid > b.value[b.value.length - 1].fid ? -1 : 1);
     },
     // * 結束年月日不能小於開始年月日
     disabledBeforeFormDate (date) {
       const formDateList = this.reference.dateSelecter.from.split('-').map(value => parseInt(value, 10));
       const formDate = new Date(formDateList[0], formDateList[1] - 1, formDateList[2]);
       return date < formDate;
+    },
+    // * 結束日期 = 開始日期 + 一個月
+    setOverDate () {
+      const formDateList = this.reference.dateSelecter.from.split('-').map(value => parseInt(value, 10));
+      const myDate = new Date(formDateList[0], formDateList[1] + 1, formDateList[2]);
+      console.log(myDate);
+      let month = myDate.getMonth();
+      let day = myDate.getDate();
+      const year = myDate.getFullYear();
+      if (month.length < 2) { month = '0' + month; }
+      if (day.length < 2) { day = '0' + day; }
+
+      const result = [year, month, day].join('-');
+      this.reference.dateSelecter.to = result;
+    },
+    countData (data) {
+      if (data <= 9) {
+        return this.totalCount;
+      } else {
+        return this.maxData;
+      }
     },
     // * 點擊更新or註銷功能按鈕
     clickButtonHandler (isDestroy, myFid) {
@@ -455,8 +509,8 @@ export default {
     },
     // * 註銷helix
     destroyHandler (fid) {
-      const index = this.tablesData.rows.findIndex(item => item.fid === fid);
-      fetch(`/csc2api/ChangeDispose/${fid}?type=Cancel`, {
+      const index = this.tablesData.rows.findIndex(item => item.value[item.value.length - 1].fid === fid);
+      fetch(`/cscmap2/api/ChangeDispose/${fid}?type=Cancel`, {
         method: 'POST',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -466,7 +520,8 @@ export default {
       }).then((data) => {
         console.log(data);
 
-        this.tablesData.rows[index].helix = 'True';
+        // this.tablesData.rows[index].helix = 'True';
+        // this.tablesData.rows[index].value[this.tablesData.rows[index].value.length - 1].helix = 'True';
         this.$swal({
           width: 402,
           text: '更新成功',
@@ -479,11 +534,13 @@ export default {
       }).catch((err) => {
         console.log('錯誤:', err);
       });
+
+      this.tablesData.rows[index].value[this.tablesData.rows[index].value.length - 1].helix = 'True';
     },
     // * 更新helix
     updateHandler (fid) {
-      const index = this.tablesData.rows.findIndex(item => item.fid === fid);
-      fetch(`/csc2api/ChangeDispose/${fid}?type=Update`, {
+      const index = this.tablesData.rows.findIndex(item => item.value[item.value.length - 1].fid === fid);
+      fetch(`/cscmap2/api/ChangeDispose/${fid}?type=Update`, {
         method: 'POST',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -493,7 +550,8 @@ export default {
       }).then((data) => {
         console.log(data);
 
-        this.tablesData.rows[index].helix = 'True';
+        // this.tablesData.rows[index].helix = 'True';
+        // this.tablesData.rows[index].value[this.tablesData.rows[index].value.length - 1].helix = 'True';
         this.$swal({
           width: 402,
           text: '更新成功',
@@ -506,6 +564,8 @@ export default {
       }).catch((err) => {
         console.log('錯誤:', err);
       });
+
+      this.tablesData.rows[index].value[this.tablesData.rows[index].value.length - 1].helix = 'True';
     },
     // * 點擊頁次元件左右按鈕
     pagesideClickHandler (isIncrease) {
@@ -522,6 +582,8 @@ export default {
       if (this.pagination.current > this.pagination.total) {
         this.pagination.current = this.pagination.total;
       }
+
+      this.pageHandler();
     },
     // * 清除全部搜尋條件
     clearAllHandler () {
@@ -536,6 +598,8 @@ export default {
       for (let i = 0; i < this.reference.helixUpdate.length; i++) {
         this.reference.helixUpdate[i].isChecked = false;
       }
+
+      this.getRawData();
     },
     // * 單選checkbox
     selectMe (id) {
@@ -550,7 +614,7 @@ export default {
     },
     // * 取得預設資料
     getRawData () {
-      fetch('/csc2api/Change?project=&status=', {
+      fetch('/cscmap2/api/Change', {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -558,37 +622,25 @@ export default {
       }).then((response) => {
         return response.json();
       }).then((data) => {
-        this.tablesData.rows = data;
-        console.log(data);
+        const newObject = Object.entries(data)
+          .map(([manageId, manageValue]) => {
+            return { name: manageId, value: manageValue };
+          });
+
+        newObject.sort(function (a, b) {
+          return a.value[a.value.length - 1].fid < b.value[b.value.length - 1].fid ? 1 : -1;
+        });
+        this.tablesData.rows = newObject;
+        this.pageHandler();
+
+        console.log(this.tablesData.rows);
       }).catch((err) => {
         console.log('錯誤:', err);
       });
     },
     // * 搜尋
     searchHandler () {
-      if (this.myHelix === 'Nope') {
-        this.searchNoUpdate();
-      } else if (this.myHelix === 'True') {
-        this.searchUpdated();
-      } else {
-        fetch(`/csc2api/Change?project=${this.myProject}&key=${this.myKey}&useNo=${this.myUseNo}&status=${this.myStatus}&changeTimeFrom=${this.reference.dateSelecter.from}&changeTimeTo=${this.reference.dateSelecter.to}&helix=${this.myHelix}`, {
-          method: 'GET',
-          headers: new Headers({
-            'Content-Type': 'application/json'
-          })
-        }).then((response) => {
-          return response.json();
-        }).then((data) => {
-          this.tablesData.rows = data;
-          console.log(data);
-        }).catch((err) => {
-          console.log('錯誤:', err);
-        });
-      }
-    },
-    // * helix搜尋條件是未更新 (抓全部資料 再去除有更新的)
-    searchNoUpdate () {
-      fetch(`/csc2api/Change?project=${this.myProject}&key=${this.myKey}&useNo=${this.myUseNo}&status=${this.myStatus}&changeTimeFrom=${this.reference.dateSelecter.from}&changeTimeTo=${this.reference.dateSelecter.to}&helix=`, {
+      fetch(`/cscmap2/api/Change?project=${this.myProject}&manageId=${this.myKey}&useNo=${this.myUseNo}&status=${this.myStatus}&changeTimeFrom=${this.reference.dateSelecter.from}&changeTimeTo=${this.reference.dateSelecter.to}&helix=`, {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -596,33 +648,77 @@ export default {
       }).then((response) => {
         return response.json();
       }).then((data) => {
-        // const newArr = data;
-        // newArr.forEach((item, index, arr) => {
-        //   if (item.helix === 'True') {
-        //     arr.splice(index, 1);
-        //   }
-        // });
-        const myArr = data.filter(item => item.helix !== 'True');
-        this.tablesData.rows = myArr;
-        console.log(myArr);
+        if (data === '無資料') {
+          this.tablesData.rows = data;
+          return;
+        }
+
+        const newObject = Object.entries(data)
+          .map(([manageId, manageValue]) => {
+            return { name: manageId, value: manageValue };
+          });
+        newObject.sort(function (a, b) {
+          return a.value[a.value.length - 1].fid < b.value[b.value.length - 1].fid ? 1 : -1;
+        });
+
+        if (this.myHelix === '') {
+          // this.tablesData.rows = data;
+
+          this.tablesData.rows = newObject;
+        } else if (this.myHelix === 'True') {
+          // helix搜尋條件是有更新
+          // const myArr = data.filter(item => item.helix === 'True');
+          // this.tablesData.rows = myArr;
+
+          const myArr = newObject.filter(item => item.value[item.value.length - 1].helix === 'True');
+          this.tablesData.rows = myArr;
+        } else if (this.myHelix === 'Nope') {
+          // helix搜尋條件是未更新
+          // const myArr2 = data.filter(item => item.helix !== 'True');
+          // this.tablesData.rows = myArr2;
+
+          const myArr2 = newObject.filter(item => item.value[item.value.length - 1].helix !== 'True');
+          this.tablesData.rows = myArr2;
+        }
+
+        this.pagination.current = 1;
+        if (data !== '無資料') {
+          this.pageHandler();
+        }
+
+        console.log(this.tablesData.rows);
       }).catch((err) => {
         console.log('錯誤:', err);
       });
     },
-    searchUpdated () {
-      fetch(`/csc2api/Change?project=${this.myProject}&key=${this.myKey}&useNo=${this.myUseNo}&status=${this.myStatus}&changeTimeFrom=${this.reference.dateSelecter.from}&changeTimeTo=${this.reference.dateSelecter.to}&helix=`, {
-        method: 'GET',
-        headers: new Headers({
-          'Content-Type': 'application/json'
-        })
-      }).then((response) => {
-        return response.json();
-      }).then((data) => {
-        const myArr = data.filter(item => item.helix === 'True');
-        this.tablesData.rows = myArr;
-        console.log(myArr);
-      }).catch((err) => {
-        console.log('錯誤:', err);
+    // * 分頁
+    pageHandler () {
+      let currentPage = this.pagination.current;
+      const jsonData = this.tablesData.rows;
+      // 預設每一頁只顯示 10 筆資料。
+      const perpage = 10;
+      // page 按鈕總數量公式 總資料數量 / 每一頁要顯示的資料
+      this.pagination.total = Math.ceil(jsonData.length / perpage);
+
+      if (currentPage > this.pagination.total) {
+        currentPage = this.pagination.total;
+      }
+
+      const minData = (currentPage * perpage) - perpage + 1;
+      const maxData = (currentPage * perpage);
+      this.minData = minData;
+      this.maxData = maxData;
+
+      // 先建立新陣列
+      this.resultRows = [];
+      // 首先必須使用索引來判斷資料位子，所以要使用 index
+      jsonData.forEach((item, index) => {
+        // 獲取陣列索引，但因為索引是從 0 開始所以要 +1。
+        const num = index + 1;
+        // 當 num 比 minData 大且又小於 maxData 就push進去新陣列。
+        if (num >= minData && num <= maxData) {
+          this.resultRows.push(item);
+        }
       });
     },
     checkStatus (data) {
@@ -654,7 +750,6 @@ export default {
     // * 頁次項目
     paginationHandler () {
       const { current, total } = this.pagination;
-
       if (total < 4) {
         const result = [];
         for (let i = 0; i < total; i++) {
@@ -670,6 +765,40 @@ export default {
       const next = (current + 1) > total ? 0 : (current + 1);
       return [prev, current, next].filter(item => item > 0 && item < (total + 1));
     },
+    totalCount () {
+      return this.tablesData.rows.length;
+    },
+    // sortedRows () {
+    //   function compare (a, b) {
+    //     const time = a.value[a.value.length - 1].changeTime;
+    //     const hours = time.split(' ')[2];
+    //     let change = hours.split(':')[0];
+
+    //     const time2 = b.value[b.value.length - 1].changeTime;
+    //     const hours2 = time2.split(' ')[2];
+    //     let change2 = hours2.split(':')[0];
+
+    //     if (time.split(' ')[1] === '下午') {
+    //       change = parseInt(hours.split(':')[0]) + 12;
+    //     }
+
+    //     if (time2.split(' ')[1] === '下午') {
+    //       change2 = parseInt(hours2.split(':')[0]) + 12;
+    //     }
+
+    //     const date = `${time.split(' ')[0]}${change}${hours.split(':')[1]}${hours.split(':')[2]}`;
+    //     const date2 = `${time2.split(' ')[0]}${change2}${hours2.split(':')[1]}${hours2.split(':')[2]}`;
+
+    //     const x = date.replace(/\//g, '');
+    //     const y = date2.replace(/\//g, '');
+    //     // return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+    //     if (x < y) { return 1; }
+    //     if (x > y) { return -1; }
+    //     return 0;
+    //   }
+
+    //   return this.tablesData.rows.sort(compare);
+    // },
     myProject () {
       return (this.navtabsCurrentName === '工程名稱') ? this.reference.searchKeyword : '';
     },
@@ -713,6 +842,22 @@ export default {
         return 'Nope';
       }
     }
+  },
+  watch: {
+    'tablesData.rows': {
+      handler (value) {
+        if (this.tablesData.rows !== '無資料') {
+          this.pageHandler();
+        }
+      },
+      deep: true
+    }
+    // 'reference.dateSelecter.from': {
+    //   handler (value) {
+    //     this.setOverDate();
+    //   },
+    //   deep: true
+    // }
   }
 };
 </script>
@@ -729,12 +874,21 @@ tr th:nth-child(8) {
   width: 20%;
 }
 
+.overme {
+  padding: 30px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
 .page {
-  margin-top: 32px !important;
+  margin-top: 20px !important;
+  margin-bottom: 0 !important;
 }
 
 .gogo {
-  height: 88% !important;
+  height: auto !important;
+  overflow-x: visible;
+  overflow-y: visible;
 }
 
 .no-mar {

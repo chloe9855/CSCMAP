@@ -1,6 +1,6 @@
 <template>
   <div class="query-window__container">
-    <div v-if="resultType === 'structure'" class="query-window__info">
+    <div v-if="resultType === 'structure' && resultNumber > 0" class="query-window__info">
       <p class="query-window__info-caption">
         顯示 {{ resultNumber }} 筆結果
       </p>

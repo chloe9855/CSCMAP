@@ -24,12 +24,30 @@
               type="radio"
               name="mode-type"
               :value="'structure'"
+              @click.stop="$emit('clickStructure')"
             >
             <label for="mode-type-structure">
               <span>建物</span>
             </label>
           </div>
+
           <div class="type-control__item">
+            <input
+              id="mode-type-lattice"
+              v-model="modeType"
+              type="radio"
+              name="mode-type"
+              :value="'lattice'"
+              @click.stop="$emit('clickLattice')"
+            >
+            <label for="mode-type-lattice">
+              <span>方格</span>
+            </label>
+          </div>
+
+          <!-- 方格圖權限之後改成下面這兩個 -->
+
+          <!-- <div v-if="$store.state.gridRole === true" class="type-control__item">
             <input
               id="mode-type-lattice"
               v-model="modeType"
@@ -40,7 +58,17 @@
             <label for="mode-type-lattice">
               <span>方格</span>
             </label>
-          </div>
+          </div> -->
+
+          <!-- <div v-if="$store.state.gridRole === false" class="type-control__item">
+            <input
+              id="mode-type-lattice"
+              @click.stop="checkUserRole"
+            >
+            <label for="mode-type-lattice">
+              <span>方格</span>
+            </label>
+          </div> -->
         </div>
         <div
           v-if="modeType === 'structure'"
@@ -200,11 +228,11 @@
           <a
             href="javascript:;"
             class="btn has-back-icon icon-download size-small"
-            title="匯入方格圖層"
+            title="匯入方格"
             @click.stop="searchHandler"
             @mousedown.prevent
           >
-            <span>匯入方格圖層</span>
+            <span>匯入方格</span>
           </a>
         </div>
       </div>
@@ -219,6 +247,7 @@
     />
 
     <slot />
+    </div>
   </nav>
 </template>
 
@@ -271,6 +300,7 @@ export default {
   mounted () {
     this.switchType();
     this.structure.types.options = this.buildtype;
+    this.$emit('nowSelect', this.modeType);
   },
   methods: {
     // * 更新建物類型選項
@@ -401,11 +431,24 @@ export default {
       }
 
       this.$emit('search', result);
+    },
+    checkUserRole () {
+      this.$swal({
+        width: 402,
+        text: '您目前無權限使用方格圖匯入功能，如需使用請洽V81方格圖小組申請!',
+        confirmButtonText: '確定',
+        showCloseButton: true
+      });
     }
   },
   computed: {
     screenWidth () {
       return this.$store.state.screenWidth;
+    }
+  },
+  watch: {
+    modeType (value) {
+      this.$emit('nowSelect', value);
     }
   }
 };
@@ -413,6 +456,16 @@ export default {
 
 <style lang="scss" scoped>
 @import '~/assets/scss/utils/_utils.scss';
+
+.vieww-checkbox {
+  display: flex;
+  cursor: pointer;
+  color: white;
+}
+
+.lock {
+  background: url('~/assets/img/icon/unlock.svg') no-repeat center/contain;
+}
 
 // * 左側的查詢條件框
 

@@ -240,7 +240,7 @@ export default {
     changeHandler () {
     },
     getDefaultLayer () {
-      fetch('/CSCMap/api/layer', {
+      fetch('/cscmap2/api/layer', {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -307,7 +307,7 @@ export default {
       newArr[index].title = this.fileName;
 
       // newArr.push({ fid: this.nowFileFid, contentType: 'application/dxf', content: this.base64File, title: this.fileName });
-      fetch('/CSCMap/api/layer', {
+      fetch('/cscmap2/api/layer', {
         method: 'PATCH',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -325,7 +325,7 @@ export default {
     saveAllHandler () {
       const newArr = this.tablesData.rows;
       this.newRows = newArr;
-      fetch('/CSCMap/api/layer', {
+      fetch('/cscmap2/api/layer', {
         method: 'PATCH',
         headers: new Headers({
           'Content-Type': 'application/json'

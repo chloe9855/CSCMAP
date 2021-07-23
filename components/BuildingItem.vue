@@ -4,17 +4,22 @@
     @click.stop="$emit('click-block', item)"
   >
     <div
-      class="building__title has-icon"
-      :class="`icon-type-${item.status}`"
+      class="building__title has-icon icon-type"
+      :class="`${item.status}`"
     >
-      {{ item.project }}
+      <a href="javascript:;" :style="'color: #165f88; cursor: default;'" :title="item.project">
+        {{ item.project }}
+      </a>
     </div>
     <div class="building__body">
       <div class="building__content">
         <p class="has-icon icon-building">
           <strong>各棟名稱</strong>{{ item.project }}
         </p>
-        <p v-if="item.status === 'A' || item.status === 'G' || item.status === 'Z'" class="has-icon icon-people">
+        <!-- <p v-if="item.status === 'A' || item.status === 'G' || item.status === 'Z'" class="has-icon icon-people">
+          <strong>用地申請單位/人員</strong>{{ item.applydept }}/{{ item.applyname }}
+        </p> -->
+        <p v-if="item.status !== 'B' && item.status !== 'C' && item.status !== 'D' && item.status !== 'E' && item.status !== 'F'" class="has-icon icon-people">
           <strong>用地申請單位/人員</strong>{{ item.applydept }}/{{ item.applyname }}
         </p>
         <p v-if="item.status === 'B' || item.status === 'C' || item.status === 'D'" class="has-icon icon-people">
@@ -23,7 +28,10 @@
         <p v-if="item.status === 'E' || item.status === 'F'" class="has-icon icon-people">
           <strong>保管單位/人員</strong>{{ item.ownerdept }}/{{ item.ownername }}
         </p>
-        <p v-if="item.status === 'A' || item.status === 'G' || item.status === 'Z'" class="has-icon icon-license">
+        <!-- <p v-if="item.status === 'A' || item.status === 'G' || item.status === 'Z'" class="has-icon icon-license">
+          <strong>用地登錄時間</strong>{{ item.applytime }}
+        </p> -->
+        <p v-if="item.status !== 'B' && item.status !== 'C' && item.status !== 'D' && item.status !== 'E' && item.status !== 'F'" class="has-icon icon-license">
           <strong>用地登錄時間</strong>{{ item.applytime }}
         </p>
         <p v-if="item.status === 'B' || item.status === 'C' || item.status === 'D'" class="has-icon icon-license">
@@ -84,7 +92,7 @@ export default {
     }
   },
   mounted () {
-    this.switchNameHandler();
+    // this.switchNameHandler();
   },
   methods: {
     switchNameHandler () {
