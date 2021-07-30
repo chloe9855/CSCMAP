@@ -93,6 +93,11 @@ export default {
           'Content-Type': 'application/json'
         })
       }).then((response) => {
+        if (response.status === 401) {
+          // do what you need to do here
+          this.$store.commit('SET_ACCESS_TOKEN', '');
+          return Promise.reject(response);
+        }
         return response.json();
       }).then((jsonData) => {
         console.log(jsonData);

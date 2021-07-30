@@ -107,20 +107,21 @@
           v-if="modeType === 'lattice'"
           class="fieldset has-inner-btn"
         >
-          <InputContentListener
+          <InputListenerGrid
             ref="inputLatticeKeyword"
-            v-model.trim="lattice.keyword"
+            v-model.trim="myLatticeWord"
             :placeholder="'請輸入方格圖號'"
             :is-password="false"
+            :maxlength="maxlength"
             @enter="searchHandler"
           />
           <div class="inner-input__control is-desktop-hide">
             <a
-              v-if="lattice.keyword.length > 0"
+              v-if="myLatticeWord.length > 0"
               href="javascript:;"
               class="inner-input__btn icon-clear"
               title="清除全部"
-              @click.stop="lattice.keyword = ''"
+              @click.stop="myLatticeWord = ''"
               @mousedown.prevent
             >
               清除全部
@@ -197,7 +198,7 @@
         </div>
       </div>
 
-      <div v-if="modeType === 'lattice'" class="row">
+      <!-- <div v-if="modeType === 'lattice'" class="row">
         <div class="option-btn-group">
           <div class="option-btn checkbox">
             <input id="checkbox-0" type="checkbox" disabled>
@@ -212,9 +213,42 @@
             <label for="checkbox-2">載入九宮格</label>
           </div>
         </div>
+      </div> -->
+
+      <!-- 桌機 方格圖載入 -->
+      <div v-if="modeType === 'lattice' && screenWidth > 1023" class="row">
+        <div class="option-btn-group igg">
+          <div class="checkicon0">
+            <input id="checkbox-0" v-model="selectGrid" type="checkbox">
+            <label v-if="selectGrid === true" for="checkbox-0">關閉方格點選</label>
+            <label v-if="selectGrid === false" for="checkbox-0" class="open-grid">開啟方格點選</label>
+          </div>
+          <div class="checkbox igg2">
+            <input id="checkbox-1" v-model="isChecked" type="checkbox" :disabled="isDisabled">
+            <label for="checkbox-1">多圖顯示</label>
+          </div>
+        </div>
       </div>
 
-      <div v-if="modeType === 'lattice' && screenWidth > 1023" class="row is-flex-end">
+      <!-- 手機 方格圖載入 -->
+      <div v-if="modeType === 'lattice' && screenWidth < 1024" class="row">
+        <div class="option-btn-group mgg">
+          <div class="checkicon2">
+            <input id="checkbox-0" v-model="selectGrid" type="checkbox">
+            <label for="checkbox-0" :class="{ 'open-grid': selectGrid === false }">選圖</label>
+          </div>
+          <div class="checkbox mgg2">
+            <input id="checkbox-1" v-model="isChecked" type="checkbox" :disabled="isDisabled">
+            <label for="checkbox-1">多圖</label>
+          </div>
+          <div class="checkicon3" :class="{ 'disme' : isDisabled2 === true }" @click.stop="searchHandler">
+            <input id="checkbox-2" type="checkbox" :disabled="isDisabled2">
+            <label for="checkbox-2">匯入 </label>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="modeType === 'lattice' && screenWidth > 1023" class="row is-flex-end igg3">
         <div class="btn-group">
           <a
             href="javascript:;"
@@ -255,6 +289,7 @@
 import MultipleSelect from '~/components/tools/MultipleSelect';
 import MultipleSelectMobileList from '~/components/tools/MultipleSelectMobileList';
 import InputContentListener from '~/components/tools/InputContentListener';
+import InputListenerGrid from '~/components/tools/InputListenerGrid';
 
 export default {
   data () {
@@ -273,19 +308,28 @@ export default {
       },
       lattice: {
         keyword: ''
-      }
+      },
+      isDisabled: true,
+      isDisabled2: true,
+      // 多圖顯示
+      isChecked: false,
+      maxlength: 524288,
+      // 方格點選 預設有勾選true 為方格可點選狀態
+      selectGrid: true
     };
   },
   components: {
     MultipleSelect,
     MultipleSelectMobileList,
-    InputContentListener
+    InputContentListener,
+    InputListenerGrid
   },
   props: {
     open: Boolean,
     condition: Array,
     buildtype: Array,
-    resultType: String
+    resultType: String,
+    lattword: String
   },
   created () {
     this.structure.types.options = this.buildtype;
@@ -316,7 +360,7 @@ export default {
     },
     // * 清除全部（方格）
     clearLatticeSelected () {
-      this.lattice.keyword = '';
+      this.myLatticeWord = '';
       this.$emit('clearResult');
     },
     // * 清除全部
@@ -335,7 +379,7 @@ export default {
       };
 
       if (MODE_TYPE === 'lattice') {
-        if (KEYWORD === '') {
+        if (this.myLatticeWord === '') {
           this.$swal({
             text: '請輸入方格圖號',
             width: 402,
@@ -345,8 +389,18 @@ export default {
           return false;
         }
 
-        const validResult = this.latticeKeywordValidator(KEYWORD);
+        const validResult = this.latticeKeywordValidator(this.myLatticeWord);
         if (validResult === false) { return false; }
+
+        // 清除輸入框內容
+        this.myLatticeWord = '';
+
+        const myResult = {
+          modeType: 'lattice',
+          keyword: this.myLatticeWord
+        };
+
+        this.$emit('search', myResult);
       } else if (MODE_TYPE === 'structure') {
         result.status = this[MODE_TYPE].status.selected.value;
 
@@ -356,36 +410,40 @@ export default {
         });
         const letters = newArr.join(',');
         result.types = letters;
+
+        this.$emit('search', result);
       }
 
-      this.$emit('search', result);
+      // this.$emit('search', result);
     },
     // * 驗證方格圖號欄位
     latticeKeywordValidator (keyword) {
-      if (keyword.split(',').length > 3) {
-        this.$swal({
-          text: '輸入過多圖號，將造成系統不穩定',
-          width: 402,
-          confirmButtonText: '確定',
-          showCloseButton: true
-        });
-        return false;
-      }
+      // if (keyword.split(',').length > 3) {
+      //   this.$swal({
+      //     text: '輸入過多圖號，將造成系統不穩定',
+      //     width: 402,
+      //     confirmButtonText: '確定',
+      //     showCloseButton: true
+      //   });
+      //   return false;
+      // }
 
       // @ 正則規則你再自己調整
-      const reg = /^((-?|\+?)?[0-9]{4},){0,3}?((-?|\+?)?[0-9]{4})$/;
-      const result = reg.test(keyword);
+      // const reg = /^((-?|\+?)?[0-9]{4},){0,3}?((-?|\+?)?[0-9]{4})$/;
+      // const result = reg.test(keyword);
 
-      if (result === false) {
-        this.$swal({
-          text: '請輸入正確的方格圖號格式',
-          width: 402,
-          confirmButtonText: '確定',
-          showCloseButton: true
-        });
-      }
+      // if (result === false) {
+      //   this.$swal({
+      //     text: '請輸入正確的方格圖號格式',
+      //     width: 402,
+      //     confirmButtonText: '確定',
+      //     showCloseButton: true
+      //   });
+      // }
 
-      return result;
+      // return result;
+
+      return keyword;
     },
     // * 如果是從首頁點擊「方格圖載入」，搜尋類型切換成「方格」
     switchType () {
@@ -444,18 +502,273 @@ export default {
   computed: {
     screenWidth () {
       return this.$store.state.screenWidth;
+    },
+    // lattKeyWord () {
+    //   return this.lattice.keyword;
+    // },
+    myLatticeWord: {
+      get () {
+        return this.lattword;
+      },
+      set (value) {
+        this.$emit('latticeKeyWord', value);
+
+        if (value === '') {
+          this.isDisabled2 = true;
+          this.isDisabled = true;
+          this.isChecked = false;
+          return;
+        }
+
+        const arr = value.split(',');
+        if (arr.length > 0 && this.screenWidth < 1024) {
+        // 匯入
+          this.isDisabled2 = false;
+        } else {
+          this.isDisabled2 = true;
+        }
+        if (arr.length === 1) {
+        // 多圖
+          this.isDisabled = false;
+        } else {
+          this.isDisabled = true;
+        }
+
+        if (arr.length >= 6) {
+          this.$swal({
+            text: '輸入過多圖號，將造成系統不穩定',
+            width: 402,
+            confirmButtonText: '確定',
+            showCloseButton: true
+          });
+        }
+      }
     }
   },
   watch: {
     modeType (value) {
       this.$emit('nowSelect', value);
+    },
+    // 勾選多圖顯示時，輸入框只能輸入1張圖號
+    isChecked (value) {
+      this.$emit('crossGrid', value);
+      const number = parseInt(myLatticeWord, 10);
+      if (value === true) {
+        if (number > 0) {
+          this.maxlength = 4;
+        } else {
+          this.maxlength = 5;
+        }
+      } else {
+        this.maxlength = 524288;
+      }
+    },
+    myLatticeWord (value) {
+      if (value === '') {
+        this.isDisabled2 = true;
+        this.isDisabled = true;
+        this.isChecked = false;
+        return;
+      }
+
+      const arr = value.split(',');
+      if (arr.length > 0 && this.screenWidth < 1024) {
+        // 匯入
+        this.isDisabled2 = false;
+      } else {
+        this.isDisabled2 = true;
+      }
+      if (arr.length === 1) {
+        // 多圖
+        this.isDisabled = false;
+      } else {
+        this.isDisabled = true;
+      }
+
+      if (arr.length >= 6) {
+        this.$swal({
+          text: '輸入過多圖號，將造成系統不穩定',
+          width: 402,
+          confirmButtonText: '確定',
+          showCloseButton: true
+        });
+      }
     }
+    // lattKeyWord (value) {
+    //   this.$emit('latticeKeyWord', value);
+
+    //   if (value === '') {
+    //     this.isDisabled2 = true;
+    //     this.isDisabled = true;
+    //     this.isChecked = false;
+    //     return;
+    //   }
+
+    //   const arr = value.split(',');
+    //   if (arr.length > 0 && this.screenWidth < 1024) {
+    //     // 匯入
+    //     this.isDisabled2 = false;
+    //   } else {
+    //     this.isDisabled2 = true;
+    //   }
+    //   if (arr.length === 1) {
+    //     // 多圖
+    //     this.isDisabled = false;
+    //   } else {
+    //     this.isDisabled = true;
+    //   }
+
+    //   if (arr.length >= 6) {
+    //     this.$swal({
+    //       text: '輸入過多圖號，將造成系統不穩定',
+    //       width: 402,
+    //       confirmButtonText: '確定',
+    //       showCloseButton: true
+    //     });
+    //   }
+    // },
+
+    // lattword (value) {
+    //   this.lattice.keyword = `${this.lattice.keyword}${value}`;
+    // }
+
   }
 };
 </script>
 
 <style lang="scss" scoped>
 @import '~/assets/scss/utils/_utils.scss';
+
+.open-grid::before {
+  background: url('~/assets/img/icon/locking.png') no-repeat center/contain !important;
+}
+
+.disme {
+  opacity: 0.5;
+}
+
+.checkicon0 {
+  display: inline-block;
+  position: relative;
+  color: white;
+
+  input[type='checkbox'] {
+    width: 0;
+    height: 0;
+    padding: 0;
+    margin: 0;
+    position: absolute;
+    opacity: 0;
+    z-index: -9999;
+  }
+
+  label {
+    cursor: pointer;
+    margin-left: 20px;
+  }
+
+  label::before {
+    content: '';
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    top: 0;
+    left: -5px;
+    background: url('~/assets/img/icon/unlock.svg') no-repeat center/contain;
+  }
+
+}
+
+.checkicon2 {
+  display: inline-block;
+  position: relative;
+  color: white;
+
+  input[type='checkbox'] {
+    width: 0;
+    height: 0;
+    padding: 0;
+    margin: 0;
+    position: absolute;
+    opacity: 0;
+    z-index: -9999;
+  }
+
+  label {
+    cursor: pointer;
+    margin-left: 25px;
+  }
+
+  label::before {
+    content: '';
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: url('~/assets/img/icon/unlock.svg') no-repeat center/contain;
+  }
+
+}
+
+.checkicon3 {
+  display: inline-block;
+  position: relative;
+  color: white;
+
+  input[type='checkbox'] {
+    width: 0;
+    height: 0;
+    padding: 0;
+    margin: 0;
+    position: absolute;
+    opacity: 0;
+    z-index: -9999;
+  }
+
+  label {
+    cursor: pointer;
+    margin-left: 25px;
+  }
+
+  label::before {
+    content: '';
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: url('~/assets/img/icon/importbx.svg') no-repeat center/contain;
+  }
+
+  input[type='checkbox']:checked + label {
+    opacity: 0.5;
+  }
+
+}
+
+.mgg {
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+.igg {
+  align-items: center !important;
+  justify-content: flex-start !important;
+}
+
+.igg2 {
+  margin: 0 !important;
+  margin-left: 30px !important;
+}
+
+.igg3 {
+  padding-top: 60px;
+}
+
+.mgg2 {
+  margin: 0 !important;
+}
 
 .vieww-checkbox {
   display: flex;

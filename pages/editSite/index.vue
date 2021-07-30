@@ -1284,6 +1284,10 @@ export default {
   mounted () {
     this.getDefaultData();
     this.$store.commit('GET_NOW_URL', 'editSite');
+    // 關閉群聚點
+    this.gisMap.setupMarker({ visible: false });
+    // 開啟預定地視窗
+    this.activeWindow = 'addLandWindow';
 
     this.getPositionData();
   },
@@ -2350,7 +2354,7 @@ export default {
     },
     // * 取得預設圖層API
     getDefaultLayer () {
-      fetch('/CSCMap/api/layer', {
+      fetch('/cscmap2/api/layer', {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -2580,7 +2584,7 @@ export default {
     },
     dxfUpload () {
       this.haveUploaded = true;
-      fetch('/CSCMap/api/DXFLoader', {
+      fetch('/cscmap2/api/DXFLoader', {
         method: 'POST',
         headers: new Headers({
           'Content-Type': 'application/json'

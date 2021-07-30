@@ -106,12 +106,15 @@
       :condition="structureCondition"
       :buildtype="structureType"
       :result-type="searchResult.types"
+      :lattword="laLetters.join(',')"
       @control="payload => queryWindowOpen = payload"
       @search="searchHandler"
       @clearResult="clearSearchResultHandler"
       @nowSelect="payload => nowMode = payload"
       @clickLattice="openGridHandler"
       @clickStructure="hideGridHandler"
+      @latticeKeyWord="drawLatticeHandler"
+      @crossGrid="drawCrossLattice"
     >
       <QueryWindowContainer-component
         v-if="screenWidth > 1023 && searchResult.list.structure.length > 0 && nowMode === 'structure'"
@@ -1273,7 +1276,11 @@ export default {
       myNew: [],
       bigM: '',
       markerSrc: '',
-      nowMark: ''
+      nowMark: '',
+      // 查詢框中輸入的方格圖號
+      laLetters: [],
+      oldLetters: [],
+      clickLetters: []
     };
   },
   components: {
@@ -1354,6 +1361,19 @@ export default {
 
         CSC.GISEvent.addListener(map, 'click', () => {
           this.mapClickHandler();
+
+          // * 方格圖: 搜尋框沒有的數字 點擊方格變黃色圖塊 搜尋框加上數字 | 搜尋框有的數字 點擊方格變無色 搜尋框去除數字
+          if (this.CubeNo !== 'undefined') {
+            if (this.laLetters.includes(this.CubeNo) === false) {
+              this.gisMap.appendGrids([this.CubeNo], { noData: true, index: true });
+              this.laLetters.push(this.CubeNo);
+              this.oldLetters.push(this.CubeNo);
+            } else {
+              this.gisMap.appendGrids([this.CubeNo], { noData: true, index: false });
+              const index = this.laLetters.findIndex(item => item === this.CubeNo);
+              this.laLetters.splice(index, 1);
+            }
+          }
         });
 
         // 滑鼠坐標
@@ -1664,10 +1684,10 @@ export default {
           });
         } else {
           const myTwd = CSC.CoordTrans('EPSG3826', 'CSC', { x: this.positionOptions.twdPosition.x, y: this.positionOptions.twdPosition.y });
-          const imgUrl = require('~/assets/img/point-po.svg');
+          const imgUrl = require('~/assets/img/purple_pin.png');
 
           this.gisMap.setCenter(myTwd);
-          this.markerImg = new CSC.GISMarker(this.gisMap, myTwd, null, new CSC.GISImage(imgUrl, new CSC.GISSize(26, 35)));
+          this.markerImg = new CSC.GISMarker(this.gisMap, myTwd, null, new CSC.GISImage(imgUrl, new CSC.GISSize(32, 30)));
           this.markerImg.setFlat(true);
 
           // 放大
@@ -1718,7 +1738,7 @@ export default {
       if (this.positionOptions.current === 0) {
         const cscX = this.positionOptions.gridPosition.x;
         const cscY = this.positionOptions.gridPosition.y;
-        const imgUrl = require('~/assets/img/point-po.svg');
+        const imgUrl = require('~/assets/img/purple_pin.png');
 
         const reg = /^(-?(?:[0-9])*(?:\.[0-9]+)?)$/;
         const result1 = reg.test(cscX);
@@ -1737,7 +1757,7 @@ export default {
           const myCsc = new CSC.GISPoint(cscX, cscY);
 
           this.gisMap.setCenter(myCsc);
-          this.markerImg = new CSC.GISMarker(this.gisMap, myCsc, null, new CSC.GISImage(imgUrl, new CSC.GISSize(26, 35)));
+          this.markerImg = new CSC.GISMarker(this.gisMap, myCsc, null, new CSC.GISImage(imgUrl, new CSC.GISSize(32, 30)));
           this.markerImg.setFlat(true);
 
           // 放大
@@ -1748,7 +1768,7 @@ export default {
           const myCold = CSC.CoordTrans('3CRM', 'CSC', { x: cscX, y: cscY });
           if ((myCold.x > this.uCRM.x && myCold.x <= this.uCRM.x2) && (myCold.y > this.uCRM.y && myCold.y <= this.uCRM.y2)) {
             this.gisMap.setCenter(myCold);
-            this.markerImg = new CSC.GISMarker(this.gisMap, myCold, null, new CSC.GISImage(imgUrl, new CSC.GISSize(26, 35)));
+            this.markerImg = new CSC.GISMarker(this.gisMap, myCold, null, new CSC.GISImage(imgUrl, new CSC.GISSize(32, 30)));
             this.markerImg.setFlat(true);
 
             // 放大
@@ -2232,13 +2252,21 @@ export default {
         }
 
         if (MODE_TYPE === 'lattice') {
-          const lattResult = {
-            name: payload.keyword,
-            id: new Date(),
-            visible: true,
-            opacity: 50
-          };
-          this.searchResult.list.lattice.push(lattResult);
+          const myData = payload.keyword.split(',');
+          myData.forEach((item) => {
+            const lattResult = {
+              name: item,
+              id: new Date(),
+              visible: true,
+              opacity: 50
+            };
+
+            if (lattResult.name !== '') {
+              this.searchResult.list.lattice.push(lattResult);
+            }
+
+            this.gisMap.appendGrids([item]);
+          });
         }
 
         // const result = require(`~/static/_resources/${MODE_TYPE}Result.json`);
@@ -2275,6 +2303,7 @@ export default {
 
       if (this.nowMode === 'lattice') {
         this.searchResult.list.lattice = [];
+        this.laLetters.length = 0;
       }
     },
     // * @搜尋：清除所有搜尋結果與輸入欄位
@@ -2308,22 +2337,6 @@ export default {
         return;
       }
 
-      // // 如果有報錯會跳警示窗
-      // try {
-      //   this.gisMap.markerBounds([payload.key], 1.25);
-      //   console.log('try');
-      // } catch (exception) {
-      //   this.$swal({
-      //     icon: 'warning',
-      //     width: 402,
-      //     text: '建物位置請點選看詳細',
-      //     confirmButtonText: '確定',
-      //     showCloseButton: true
-      //   });
-
-      //   return;
-      // }
-
       // 先清除直接點選地圖而選取的球標
       this.clusRows.forEach((item) => {
         item.selected = false;
@@ -2352,6 +2365,57 @@ export default {
 
       const myArr2 = [{ x: this.bigM.x + 50, y: this.bigM.y + 50 }, { x: this.bigM.x + 50, y: this.bigM.y - 50 }, { x: this.bigM.x - 50, y: this.bigM.y - 50 }, { x: this.bigM.x - 50, y: this.bigM.y + 50 }];
       this.gisMap.fitBounds(new CSC.GISEnvelope(myArr2), 1.25);
+    },
+    // * @方格圖：查詢框輸入方格圖號 繪製圖塊
+    drawLatticeHandler (keyword) {
+      this.laLetters = keyword.split(',');
+      this.laLetters.forEach((item) => {
+        const myType = parseInt(item, 10);
+        if (this.gisMap.gridInfo(item) === null) { return; }
+        if ((myType > 0 && item.length === 4) || (myType < 0 && item.length === 5)) {
+          this.gisMap.appendGrids([item], { noData: true, index: true });
+          this.oldLetters.push(item);
+        }
+      });
+
+      // 當搜尋框刪除數字 刪除圖塊
+      new Set(this.oldLetters).forEach((item) => {
+        if (this.laLetters.includes(item) === false) {
+          this.gisMap.appendGrids([item], { noData: true, index: false });
+        }
+      });
+
+      // 搜尋框清空 刪除所有圖塊
+      if (keyword === '' && this.oldLetters !== '') {
+        new Set(this.oldLetters).forEach((item) => {
+          this.gisMap.appendGrids([item], { noData: true, index: false });
+        });
+      }
+
+      // this.gisMap.appendGrids(['5693']);
+      // this.gisMap.appendGrids(['2364']);
+    },
+    // * @方格圖：多圖顯示
+    drawCrossLattice (value) {
+      const myNo = parseInt(this.laLetters, 10);
+      const myRows = [`${myNo + 100}`, `${myNo - 100}`, `${myNo + 1}`, `${myNo - 1}`];
+      // 有勾選多圖顯示
+      if (value === true) {
+        myRows.forEach((item) => {
+          if (this.gisMap.gridInfo(item) !== null) {
+            this.gisMap.appendGrids([item], { noData: true, index: true });
+            this.oldLetters.push(item);
+          }
+        });
+      }
+      // 取消勾選
+      if (value === false && this.laLetters.length === 1 && this.laLetters[0] !== '') {
+        myRows.forEach((item) => {
+          if (this.gisMap.gridInfo(item) !== null) {
+            this.gisMap.appendGrids([item], { noData: true, index: false });
+          }
+        });
+      }
     },
     // * @方格圖：刪除方格圖層
     deleteLatticeHandler (id) {

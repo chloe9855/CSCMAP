@@ -1,60 +1,66 @@
 <template>
-  <table class="lattice-table">
-    <thead style="display: none;">
-      <tr>
-        <th>name</th>
-        <th>control</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr v-for="item of resultList" :key="item.id">
-        <td>
-          <div class="lattice-table__name">
-            {{ item.name }}
-          </div>
-        </td>
-        <td>
-          <ul class="lattice-table__control">
-            <li>
-              <ViewCheckbox
-                :id="item.id"
-                :visible="item.visible"
-                @change="item.visible = $event"
-              />
-            </li>
-            <li>
-              <OpacityController
-                :id="item.id"
-                :value="item.opacity"
-                @update="(id, value) => { $emit('updateOpacity', id, value) }"
-              />
-            </li>
-            <li>
-              <a
-                href="javascript:;"
-                class="location-btn"
-                title="定位"
-                @click.stop="$emit('setPosition', item.id)"
-                @mousedown.prevent
-              >
-                <span>定位</span>
-              </a>
-            </li>
-            <li>
-              <a
-                href="javascript:;"
-                class="delete-btn"
-                title="刪除"
-                @click.stop="$emit('delete', item.id)"
-              >
-                <span>刪除</span>
-              </a>
-            </li>
-          </ul>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="outter" :class="{ 'mobile-out': screenWidth < 1024 }">
+    <table class="lattice-table">
+      <div class="word-switch" :class="{ 'mobile-style': screenWidth < 1024 }">
+        文字顯示
+        <div class="swimg" :class="{ 'notshow': isShow === false }" @click="isShow = !isShow" />
+      </div>
+      <thead style="display: none;">
+        <tr>
+          <th>name</th>
+          <th>control</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="item of resultList" :key="item.id">
+          <td>
+            <div class="lattice-table__name">
+              {{ item.name }}
+            </div>
+          </td>
+          <td>
+            <ul class="lattice-table__control">
+              <li>
+                <ViewCheckbox
+                  :id="item.id"
+                  :visible="item.visible"
+                  @change="item.visible = $event"
+                />
+              </li>
+              <li>
+                <OpacityController
+                  :id="item.id"
+                  :value="item.opacity"
+                  @update="(id, value) => { $emit('updateOpacity', id, value) }"
+                />
+              </li>
+              <li>
+                <a
+                  href="javascript:;"
+                  class="location-btn"
+                  title="定位"
+                  @click.stop="$emit('setPosition', item.id)"
+                  @mousedown.prevent
+                >
+                  <span>定位</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="javascript:;"
+                  class="delete-btn"
+                  title="刪除"
+                  @click.stop="$emit('delete', item.id)"
+                >
+                  <span>刪除</span>
+                </a>
+              </li>
+            </ul>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </template>
 
 <script>
@@ -62,18 +68,62 @@ import ViewCheckbox from '~/components/tools/ViewCheckbox';
 import OpacityController from '~/components/tools/OpacityController';
 
 export default {
+  data () {
+    return {
+      isShow: true
+    };
+  },
   components: {
     ViewCheckbox,
     OpacityController
   },
   props: {
     resultList: Array
+  },
+  computed: {
+    screenWidth () {
+      return this.$store.state.screenWidth;
+    }
   }
 };
 </script>
 
 <style lang="scss" scoped>
 @import '~/assets/scss/utils/_utils.scss';
+
+.mobile-style {
+  position: absolute;
+  top: 27.5px !important;
+  left: 115px !important;
+}
+
+.mobile-out {
+  padding: 0 !important;
+}
+
+.word-switch {
+  display: flex;
+  position: absolute;
+  top: 10.5px;
+  right: 54px;
+}
+
+.swimg {
+  width: 20px;
+  height: 23px;
+  margin-left: 61px;
+  position: absolute;
+  background: url('~/assets/img/icon/switch-on.svg') no-repeat center/contain;
+  cursor: pointer;
+}
+
+.notshow {
+  background: url('~/assets/img/icon/switch-off.svg') no-repeat center/contain !important;
+}
+
+.outter {
+  padding-top: 39px;
+}
 
 // * 方格圖層的表格
 

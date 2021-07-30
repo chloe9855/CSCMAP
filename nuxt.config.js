@@ -25,8 +25,10 @@ export default {
     meta: [
       { charset: 'utf-8' },
       { 'http-equiv': 'Content-Type', charset: 'text/html; charset=utf-8' },
+      { 'http-equiv': 'X-UA-Compatible', content: 'IE=Edge' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' },
-      { 'http-equiv': 'X-UA-Compatible', content: 'ie=edge' },
+      // { 'http-equiv': 'X-UA-Compatible', content: 'ie=edge' },
+      // { 'http-equiv': 'X-UA-Compatible', content: 'IE=11' },
       { name: 'format-detection', content: 'telephone=no' },
       { name: 'msapplication-TileColor', content: '#ffffff' },
       { name: 'msapplication-TileImage', content: './_resources/favicon/ms-icon-144x144.png' },
