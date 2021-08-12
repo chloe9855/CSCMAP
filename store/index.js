@@ -19,7 +19,10 @@ export const state = () => ({
   cancelDrag: false,
   notHide: false,
   gisMapp: '',
-  orangeBar: false
+  orangeBar: false,
+  gridMode: false,
+  inputMode: false,
+  myPop: false
 
 });
 
@@ -95,5 +98,15 @@ export const mutations = {
   },
   SET_ORANGE_BAR (state, payload) {
     state.orangeBar = payload;
+  },
+  // * 切換至方格狀態 gridMode為true才是可點選狀態
+  OPEN_GRID_MODE (state, payload) {
+    state.gridMode = payload;
+  },
+  INPUT_FOCUS_NOW (state, payload) {
+    state.inputMode = payload;
+  },
+  UP_POPBOX (state, payload) {
+    state.myPop = payload;
   }
 };

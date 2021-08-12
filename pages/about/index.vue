@@ -1,5 +1,6 @@
 <template>
   <div class="guide-service">
+    <a href="map" class="back_gis" />
     <h1 class="guide-service__title">
       <span>中鋼廠區建物地理資訊平台</span>
     </h1>
@@ -27,4 +28,14 @@ export default {
 <style lang="scss" scoped>
   @import '~/assets/scss/utils/_utils.scss';
   @import '~/assets/scss/components/_guideService.scss';
+
+  .back_gis {
+    width: 45px;
+    height: 45px;
+    position: absolute;
+    top: 71px;
+    left: 7px;
+    background: url('~/assets/img/icon/backgis.svg') no-repeat center/contain;
+    cursor: pointer;
+  }
 </style>

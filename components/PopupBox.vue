@@ -1,5 +1,5 @@
 <template>
-  <div class="popupbox" :class="{ 'is-hidden': isHidden }">
+  <div ref="mybox" class="popupbox" :class="{ 'is-hidden': isHidden }">
     <div
       class="slideup-tips"
       :class="{ 'is-hidden': isHidden }"
@@ -52,10 +52,19 @@ export default {
   methods: {
     // PopupBox收合後 上方tag列和右側工具列要恢復顯示
     showTagBar () {
+      // if (this.isHidden === true) {
+      //   this.$store.commit('SET_MOBILE_SELECT', false);
+      // } else {
+      //   this.$store.commit('SET_MOBILE_SELECT', true);
+      // }
+    }
+  },
+  computed: {
+    tagBarCtrl () {
       if (this.isHidden === true) {
-        this.$store.commit('SET_MOBILE_SELECT', false);
+        return this.$store.commit('SET_MOBILE_SELECT', false);
       } else {
-        this.$store.commit('SET_MOBILE_SELECT', true);
+        return this.$store.commit('SET_MOBILE_SELECT', true);
       }
     }
   }
@@ -67,11 +76,11 @@ export default {
 
 .popupbox {
   width: 100%;
-  max-height: calc(100% - 180px);
+  // max-height: calc(100% - 180px);
   position: absolute;
   bottom: 0%;
   left: 0;
-  overflow: hidden;
+  // overflow: hidden;
   background-color: $color-white;
   z-index: 5500;
   box-shadow: 5px 4px 15px rgba($color-black, 0.15);

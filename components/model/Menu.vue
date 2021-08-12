@@ -21,22 +21,22 @@
         >
           <span>返回GIS圖台</span>
         </nuxt-link> -->
-        <a
+        <!-- <a
           href="map"
           class="menu-list-link"
           title="返回GIS圖台"
         >
           <span>返回GIS圖台</span>
-        </a>
+        </a> -->
       </li>
       <li v-if="$route.name === 'map' || $route.name === 'index'">
         <nuxt-link
           :to="'/about'"
           class="menu-list-link"
-          title="關於中鋼"
+          title="關於"
           @mousedown.prevent
         >
-          <span>關於中鋼</span>
+          <span>關於</span>
         </nuxt-link>
       </li>
     </ul>
@@ -108,6 +108,24 @@ export default {
         console.log('錯誤:', err);
         console.log(err.status);
       });
+
+      // fetch('/CSCMap/api/SignOnStatus', {
+      //   method: 'GET',
+      //   // credentials: 'include',
+      //   headers: new Headers({
+      //     'Content-Type': 'application/json'
+      //   })
+      // }).then((response) => {
+      //   return response.json();
+      // }).then((jsonData) => {
+      //   console.log(jsonData);
+      //   this.userID = jsonData.UID;
+      //   this.userName = jsonData.UserName;
+      //   this.$store.commit('SET_ACCESS_TOKEN', jsonData.UID);
+      // }).catch((err) => {
+      //   console.log('錯誤:', err);
+      //   console.log(err.status);
+      // });
     },
     // *登出重設cookie
     logOut (autoRedirectQS) {

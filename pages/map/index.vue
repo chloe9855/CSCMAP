@@ -147,6 +147,8 @@
           @delete="deleteLatticeHandler"
           @updateOpacity="updateLatticeOpacityHandler"
           @setPosition="setLatticePositionHandler"
+          @changeVisible="gridVisibleHandler"
+          @wordCtrl="gridWordHandler"
         />
       </QueryWindowContainer-component>
     </QueryWindow-component>
@@ -215,6 +217,8 @@
           @delete="deleteLatticeHandler"
           @updateOpacity="updateLatticeOpacityHandler"
           @setPosition="setLatticePositionHandler"
+          @changeVisible="gridVisibleHandler"
+          @wordCtrl="gridWordHandler"
         />
       </PopupBox-component>
     </transition>
@@ -349,15 +353,15 @@
             <div class="navtabs__content mea-mob">
               <div
                 v-if="pointMeasurer.current === 'cscXy'"
-                class="row is-flex-center go-margi"
+                class="go-margi"
                 :style="'display: block !important;'"
               >
                 <div id="copycsc3">
-                  <p>
+                  <p style="display: block;">
                     X{{ pointCscXy.x.toFixed(2) }} , Y{{ pointCscXy.y.toFixed(2) }}
                   </p>
-                  <br>
-                  <p v-if="pointColdXy.x !== ''">
+
+                  <p v-if="pointColdXy.x !== ''" style="display: block;">
                     (冷三坐標 X{{ pointColdXy.x.toFixed(2) }} , Y{{ pointColdXy.y.toFixed(2) }})
                   </p>
                 </div>
@@ -378,7 +382,7 @@
                   <div class="clone-block">
                     <div class="clone-pic3" />
                     <div class="clone-name3" @click.stop="backAllMeasure">
-                      重繪
+                      重測
                     </div>
                   </div>
                 </div>
@@ -405,7 +409,7 @@
                   <div class="clone-block">
                     <div class="clone-pic3" />
                     <div class="clone-name3" @click.stop="backAllMeasure">
-                      重繪
+                      重測
                     </div>
                   </div>
                 </div>
@@ -414,7 +418,7 @@
                 v-if="pointMeasurer.current === 'twdXy'"
               >
                 <p id="copytwd">
-                  X{{ pointTwdXy.x.toFixed(2) }} , Y{{ pointTwdXy.y.toFixed(2) }}
+                  {{ pointTwdXy.x.toFixed(2) }} , {{ pointTwdXy.y.toFixed(2) }}
                 </p>
                 <div class="clone-container">
                   <div class="clone-block" @click.stop="copyCoord('copytwd')">
@@ -432,7 +436,7 @@
                   <div class="clone-block">
                     <div class="clone-pic3" />
                     <div class="clone-name3" @click.stop="backAllMeasure">
-                      重繪
+                      重測
                     </div>
                   </div>
                 </div>
@@ -1244,6 +1248,7 @@ export default {
       // * 方格圖號定位
       gridX: '',
       gridY: '',
+      gridRows: [],
       // * 建物/方格選單切換狀態
       nowMode: '',
       // * 使用者自設坐標邊界、方格圖文字設定
@@ -1280,7 +1285,12 @@ export default {
       // 查詢框中輸入的方格圖號
       laLetters: [],
       oldLetters: [],
-      clickLetters: []
+      clickLetters: [],
+      // * 方格點選圖號
+      myGridNo: '',
+      // * sessionStroage裡給的建物搜尋key值
+      sesKeys: '',
+      sesId: ''
     };
   },
   components: {
@@ -1307,6 +1317,7 @@ export default {
     this.$store.commit('GET_NOW_URL', 'map');
 
     this.getPositionData();
+    this.getSession();
   },
   beforeDestroy () {
     clearTimeout(this.positionAlert.timer);
@@ -1359,18 +1370,20 @@ export default {
         this.gisMap = map;
         this.$store.commit('GET_GIS_MAP', map);
 
-        CSC.GISEvent.addListener(map, 'click', () => {
+        CSC.GISEvent.addListener(map, 'click', (e) => {
           this.mapClickHandler();
+          this.myGridNo = map.coordinateInfo(e.point).GridNO;
+          console.log(this.myGridNo);
 
           // * 方格圖: 搜尋框沒有的數字 點擊方格變黃色圖塊 搜尋框加上數字 | 搜尋框有的數字 點擊方格變無色 搜尋框去除數字
-          if (this.CubeNo !== 'undefined') {
-            if (this.laLetters.includes(this.CubeNo) === false) {
-              this.gisMap.appendGrids([this.CubeNo], { noData: true, index: true });
-              this.laLetters.push(this.CubeNo);
-              this.oldLetters.push(this.CubeNo);
+          if (this.myGridNo !== undefined && this.$store.state.gridMode === true) {
+            if (this.laLetters.includes(this.myGridNo) === false) {
+              this.gisMap.appendGrids([this.myGridNo], { noData: true, index: true });
+              this.laLetters.push(this.myGridNo);
+              this.oldLetters.push(this.myGridNo);
             } else {
-              this.gisMap.appendGrids([this.CubeNo], { noData: true, index: false });
-              const index = this.laLetters.findIndex(item => item === this.CubeNo);
+              this.gisMap.appendGrids([this.myGridNo], { noData: true, index: false });
+              const index = this.laLetters.findIndex(item => item === this.myGridNo);
               this.laLetters.splice(index, 1);
             }
           }
@@ -1667,6 +1680,7 @@ export default {
     },
     // * @坐標查詢：控制地圖API，移動至對應的坐標查詢
     setPositionHandler () {
+      // 按下定位後關閉手機鍵盤
       document.activeElement.blur();
       this.getBorder();
       // TWD定位
@@ -1724,6 +1738,17 @@ export default {
         if ((this.gridX <= this.bCRM.x2 && this.gridX >= this.bCRM.x && this.gridY >= this.bCRM.y && this.gridY <= this.bCRM.y2) || (this.gridX <= this.bCSC.x2 && this.gridX >= this.bCSC.x && this.gridY >= this.bCSC.y && this.gridY <= this.bCSC.y2)) {
           this.gisMap.fitBounds(new CSC.GISEnvelope(this.gisMap.gridInfo(this.positionOptions.gridNumber).CSC), 1.25);
           console.log(this.gisMap.gridInfo(this.positionOptions.gridNumber));
+
+          // 定位時方格圖號底色變黃
+          this.gridRows.push(gridNum);
+          if (this.gridRows.length === 1) {
+            this.gisMap.appendGrids(this.gridRows, { noData: true, index: true });
+          } else {
+            this.gisMap.appendGrids(this.gridRows, { noData: true, index: false });
+            this.gisMap.appendGrids([gridNum], { noData: true, index: true });
+          }
+
+          //
         } else {
           this.$swal({
             text: '輸入非中鋼方格圖系統，請重新輸入！',
@@ -1790,9 +1815,10 @@ export default {
         this.gisMap.drawingMethod(CSC.DrawingMethod.Remove, { overlay: this.markerImgAll.splice(0, 1)[0] });
       }
     },
-    // * @坐標定位：按下清除使圖標消失
+    // * @坐標定位：按下清除使圖標/方格圖燈消失
     clearPosImg () {
       this.gisMap.drawingMethod(CSC.DrawingMethod.Remove, { overlay: this.markerImgAll.splice(0, 1)[0] });
+      this.gisMap.appendGrids(this.gridRows, { noData: true, index: false });
     },
     // * @我的位置：控制視窗開啟/關閉
     ctrlPositionAlert (payload) {
@@ -1854,9 +1880,9 @@ export default {
 
               this.CONSOLE('【我的位置】根據瀏覽器位置調整坐標資訊');
               this.positionAlert.isOpen = true;
-              this.positionAlert.timer = setTimeout(() => {
-                this.closePositionAlert();
-              }, 3000);
+              // this.positionAlert.timer = setTimeout(() => {
+              //   this.closePositionAlert();
+              // }, 3000);
             }, (err) => {
               console.log(err);
 
@@ -2253,10 +2279,11 @@ export default {
 
         if (MODE_TYPE === 'lattice') {
           const myData = payload.keyword.split(',');
+
           myData.forEach((item) => {
             const lattResult = {
               name: item,
-              id: new Date(),
+              id: Math.random().toString(16),
               visible: true,
               opacity: 50
             };
@@ -2264,9 +2291,14 @@ export default {
             if (lattResult.name !== '') {
               this.searchResult.list.lattice.push(lattResult);
             }
-
-            this.gisMap.appendGrids([item]);
           });
+
+          this.gisMap.appendGrids(myData, { index: false, annotation: true });
+
+          this.laLetters.length = 0;
+
+          //* 匯入方格 出現面板 -> 關閉方格點選
+          this.$store.commit('OPEN_GRID_MODE', false);
         }
 
         // const result = require(`~/static/_resources/${MODE_TYPE}Result.json`);
@@ -2304,6 +2336,14 @@ export default {
       if (this.nowMode === 'lattice') {
         this.searchResult.list.lattice = [];
         this.laLetters.length = 0;
+
+        // 清除地圖上所有已載入的DXF檔
+        this.oldLetters.forEach((item) => {
+          this.gisMap.removeGrids([item]);
+        });
+
+        //* 清除全部 面板消失 -> 開啟方格點選
+        this.$store.commit('OPEN_GRID_MODE', true);
       }
     },
     // * @搜尋：清除所有搜尋結果與輸入欄位
@@ -2314,13 +2354,15 @@ export default {
       _queryWindow.clearAllHandler();
 
       // 清除地圖上有被定位選取的建物 selected->球標橘色+建物標亮 active->球標紅色
-      this.myNew.forEach((item) => {
-        this.gisMap.markerBounds([item], 1.25).forEach((m) => {
-          m.selected = false;
-          m.active = false;
-          console.log(m);
+      if (this.nowMode === 'structure') {
+        this.myNew.forEach((item) => {
+          this.gisMap.markerBounds([item], 1.25).forEach((m) => {
+            m.selected = false;
+            m.active = false;
+            console.log(m);
+          });
         });
-      });
+      }
     },
     // * 選取建物項目，地圖移動至對應坐標(定位)
     focusBuildingHandler (payload) {
@@ -2395,10 +2437,11 @@ export default {
       // this.gisMap.appendGrids(['5693']);
       // this.gisMap.appendGrids(['2364']);
     },
-    // * @方格圖：多圖顯示
+    // * @方格圖：多圖顯示 繪製圖塊
     drawCrossLattice (value) {
       const myNo = parseInt(this.laLetters, 10);
       const myRows = [`${myNo + 100}`, `${myNo - 100}`, `${myNo + 1}`, `${myNo - 1}`];
+
       // 有勾選多圖顯示
       if (value === true) {
         myRows.forEach((item) => {
@@ -2418,10 +2461,13 @@ export default {
       }
     },
     // * @方格圖：刪除方格圖層
-    deleteLatticeHandler (id) {
+    deleteLatticeHandler (myItem) {
       const { lattice } = this.searchResult.list;
-      const index = lattice.findIndex(item => item.id === id);
+      const index = lattice.findIndex(item => item.id === myItem.id);
       lattice.splice(index, 1);
+      // 刪除dxf檔
+      this.gisMap.removeGrids([myItem.name]);
+      console.log(myItem.name);
 
       if (lattice.length < 1) {
         this.clearSearchResultHandler();
@@ -2432,14 +2478,48 @@ export default {
       const { lattice } = this.searchResult.list;
       const index = lattice.findIndex(item => item.id === id);
       lattice[index].opacity = value;
+      const myItem = lattice[index].name;
+      console.log(myItem);
+
+      this.gisMap.setupGrid(myItem, { index: false, opacity: value / 100 });
+    },
+    // * @方格圖：顯示/隱藏
+    gridVisibleHandler ($event, id, file) {
+      // const index = this.searchResult.list.lattice.findIndex(item => item.id === id);
+      // const myItem = this.searchResult.list.lattice[index].name;
+      const { lattice } = this.searchResult.list;
+      const index = lattice.findIndex(item => item.id === id);
+      const myItem = lattice[index].name;
+      console.log(myItem);
+
+      this.gisMap.setupGrid(myItem, { index: false, visible: $event });
     },
     // * @方格圖：方格圖層定位
     setLatticePositionHandler (id) {
-      this.CONSOLE('【方格圖搜尋】根據方格圖的id，移動至對應的坐標定位');
+      const { lattice } = this.searchResult.list;
+      const index = lattice.findIndex(item => item.id === id);
+      const myItem = lattice[index].name;
+
+      this.gisMap.fitBounds(new CSC.GISEnvelope(this.gisMap.gridInfo(myItem).CSC), 1.25);
+    },
+    // * @方格圖：方格圖層 文字顯示/隱藏
+    gridWordHandler (value) {
+      if (value === false) {
+        this.searchResult.list.lattice.forEach((item) => {
+          this.gisMap.setupGrid(item.name, { index: false, annotation: false });
+          console.log('沒字');
+        });
+      } else {
+        this.searchResult.list.lattice.forEach((item) => {
+          this.gisMap.setupGrid(item.name, { index: false, annotation: true });
+          console.log('有字');
+        });
+      }
     },
     // * @方格圖：切換至方格 關閉球標、隱藏某些圖層
     openGridHandler () {
       this.hideClusterHandler();
+      this.$store.commit('OPEN_GRID_MODE', true);
       this.layerOptions.layerList.forEach((item) => {
         this.gisMap.setupLayer({ fid: item.fid, visible: false });
         item.visible = false;
@@ -2453,6 +2533,12 @@ export default {
     hideGridHandler () {
       this.hideClusterHandler();
       this.getDefaultLayer();
+      this.$store.commit('OPEN_GRID_MODE', false);
+      // 刪除圖面上的方格圖
+      this.oldLetters.forEach((item) => {
+        this.gisMap.setupGrid(item, { index: false });
+        this.gisMap.removeGrids([item]);
+      });
       // 將圖層設定回復至預設
       setTimeout(() => {
         this.layerOptions.layerList.forEach((item) => {
@@ -2486,9 +2572,9 @@ export default {
     },
     // 手機版點擊右側地圖工具列的 圖層工具、坐標定位、測量距離/面積時 上方TAG列和右側工具列會滑動消失
     hideTagBarCtrl () {
-      if (this.screenWidth < 1024) {
-        this.$store.commit('SET_MOBILE_SELECT', true);
-      }
+      // if (this.screenWidth < 1024) {
+      //   this.$store.commit('SET_MOBILE_SELECT', true);
+      // }
     },
     // 手機版按"X"關閉PopupBox時 上方TAG列和右側工具列會恢復顯示
     showTagBarCtrl () {
@@ -2692,7 +2778,7 @@ export default {
     },
     // * 鎖點測量: 線測量
     drawLineHandler () {
-      this.gisMap.drawingMethod(CSC.DrawingMethod.Draw, { measure: true, mode: CSC.GISOverlayType.LINESTRING, strokeOptions: { strokeWeight: 2 } });
+      this.gisMap.drawingMethod(CSC.DrawingMethod.Draw, { measure: true, mode: CSC.GISOverlayType.LINESTRING, strokeOptions: { strokeWeight: 2 }, noMouse: true });
 
       // 取得地圖中心坐標資訊
       const coordinfo = this.gisMap.coordinateInfo(this.gisMap.getCenter());
@@ -2715,7 +2801,7 @@ export default {
     },
     // * 鎖點測量: 面測量
     drawAreaHandler () {
-      this.gisMap.drawingMethod(CSC.DrawingMethod.Draw, { measure: true, mode: CSC.GISOverlayType.POLYGON, fillOptions: { fillColor: '#06E4AF', strokeWeight: 2 } });
+      this.gisMap.drawingMethod(CSC.DrawingMethod.Draw, { measure: true, mode: CSC.GISOverlayType.POLYGON, fillOptions: { fillColor: '#06E4AF', strokeWeight: 2 }, noMouse: true });
       const coordinfo = this.gisMap.coordinateInfo(this.gisMap.getCenter());
       this.gisMap.drawingMethod(CSC.DrawingMethod.Push, { point: this.gisMap.getCenter() });
     },
@@ -2833,6 +2919,35 @@ export default {
       setTimeout(() => {
         this.copyOkModal = false;
       }, 600);
+    },
+    // * 監測是否有sessionStorage傳來 有->接值進行建物搜尋
+    getSession () {
+      if (sessionStorage.getItem('iptKeys') !== null) {
+        this.sesKeys = sessionStorage.getItem('iptKeys');
+        this.sesId = sessionStorage.getItem('iptUserID');
+
+        fetch(`/csc2api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/getBuildingByKey/${this.sesKeys}?_format=json`, {
+          method: 'GET',
+          headers: new Headers({
+            'Content-Type': 'application/json'
+          })
+        }).then((response) => {
+          return response.json();
+        }).then((data) => {
+          console.log(data);
+
+          // 依時間排序
+          data.sort(function (a, b) {
+            return a.applytime < b.applytime ? 1 : -1;
+          });
+          this.searchResult.list.structure = data;
+
+          // 定位搜尋結果
+          this.getBuildingPosition(data);
+        }).catch((err) => {
+          console.log('錯誤:', err);
+        });
+      }
     }
   },
   computed: {
@@ -2910,6 +3025,18 @@ export default {
 // table.layersTable tr td:nth-child(1) {
 //   width: 60px !important;
 // }
+
+#copycsc3 {
+  height: 45px;
+}
+
+#copytwd {
+  height: 45px;
+}
+
+#copyno {
+  height: 45px;
+}
 
 .dxf-bg {
   height: 30px;

@@ -3,7 +3,7 @@
     <table class="lattice-table">
       <div class="word-switch" :class="{ 'mobile-style': screenWidth < 1024 }">
         文字顯示
-        <div class="swimg" :class="{ 'notshow': isShow === false }" @click="isShow = !isShow" />
+        <div class="swimg" :class="{ 'notshow': isShow === false }" @click="isShow = !isShow, $emit('wordCtrl', isShow)" />
       </div>
       <thead style="display: none;">
         <tr>
@@ -24,7 +24,7 @@
                 <ViewCheckbox
                   :id="item.id"
                   :visible="item.visible"
-                  @change="item.visible = $event"
+                  @change="($event, id, file) => { $emit('changeVisible', $event, id, file) }"
                 />
               </li>
               <li>
@@ -50,7 +50,7 @@
                   href="javascript:;"
                   class="delete-btn"
                   title="刪除"
-                  @click.stop="$emit('delete', item.id)"
+                  @click.stop="$emit('delete', item)"
                 >
                   <span>刪除</span>
                 </a>
@@ -93,7 +93,7 @@ export default {
 
 .mobile-style {
   position: absolute;
-  top: 27.5px !important;
+  top: 33.5px !important;
   left: 115px !important;
 }
 

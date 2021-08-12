@@ -297,6 +297,24 @@ export default {
         console.log('錯誤:', err);
         console.log(err.status);
       });
+
+      // fetch('/CSCMap/api/SignOnStatus', {
+      //   method: 'GET',
+      //   // credentials: 'include',
+      //   headers: new Headers({
+      //     'Content-Type': 'application/json'
+      //   })
+      // }).then((response) => {
+      //   return response.json();
+      // }).then((jsonData) => {
+      //   console.log(jsonData);
+      //   this.userID = jsonData.UID;
+      //   this.userName = jsonData.UserName;
+      //   this.$store.commit('SET_ACCESS_TOKEN', jsonData.UID);
+      // }).catch((err) => {
+      //   console.log('錯誤:', err);
+      //   console.log(err.status);
+      // });
     },
     // * 取得使用者權限角色
     getUserRole () {

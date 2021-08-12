@@ -5,7 +5,7 @@
       <div class="msgbox__wrapper">
         <div class="msgbox__header">
           <div class="msgbox__header-content">
-            <label class="msgbox__title has-icon icon-my-position">坐標定位</label>
+            <label class="msgbox__title has-icon icon-my-position">我的位置</label>
           </div>
           <a
             href="javascript:;"

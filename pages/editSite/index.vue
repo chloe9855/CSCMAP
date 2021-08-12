@@ -1259,7 +1259,9 @@ export default {
       },
       gridWord: null,
       // * 從後端傳來的 編輯用圖台預定地編號(取名陣列)
-      landId: ['00381-01', '00381-02']
+      landId: [],
+      geoJson: '',
+      userId: ''
     };
   },
   components: {
@@ -1284,17 +1286,27 @@ export default {
   mounted () {
     this.getDefaultData();
     this.$store.commit('GET_NOW_URL', 'editSite');
-    // 關閉群聚點
-    this.gisMap.setupMarker({ visible: false });
+
     // 開啟預定地視窗
     this.activeWindow = 'addLandWindow';
 
     this.getPositionData();
+
+    // * 接後端塞的值
+    this.getMySession();
   },
   beforeDestroy () {
     clearTimeout(this.positionAlert.timer);
   },
   methods: {
+    getMySession () {
+      if (sessionStorage.getItem('iptUserID') !== null) {
+        this.userId = sessionStorage.getItem('iptUserID');
+        const manId = sessionStorage.getItem('iptManageSerial');
+        this.landId = manId.split(',');
+        this.geoJson = JSON.parse(sessionStorage.getItem('iptLandData'));
+      }
+    },
     // ? 載入預設需要載入的資料
     getDefaultData () {
       // 開啟 Loading 視窗
@@ -1336,6 +1348,22 @@ export default {
         // * 引入地圖api
         const map = new CSC.GISOnlineMap(document.getElementById('CSCMap'), { autoLoad: true });
         this.gisMap = map;
+
+        // * 關閉群聚點
+        this.gisMap.setupMarker({ visible: false });
+
+        // * 接收ERP傳來的圖形資料
+        if (this.geoJson !== '') {
+          this.geoJson.forEach((item) => {
+            this.gisMap.drawing.load(new CSC.GISFill(this.gisMap, CSC.GISGeometry.fromJson(item.geometry), { strokeColor: '#000000', fillOpacity: 0.3, fillColor: '#8D2683' }));
+
+            this.myGraphs.push(new CSC.GISFill(this.gisMap, CSC.GISGeometry.fromJson(item.geometry), { strokeColor: '#000000', fillOpacity: 0.3, fillColor: '#8D2683' }));
+
+            this.myGraphs.forEach((item) => {
+              this.totalArea.push(item.getPath().getArea().toFixed(2));
+            });
+          });
+        }
 
         CSC.GISEvent.addListener(map, 'click', () => {
           this.mapClickHandler();
@@ -1564,7 +1592,7 @@ export default {
       });
     },
     getPositionData () {
-      fetch('/CSCMap/CustomSetting.json', {
+      fetch('/cscmap2/CustomSetting.json', {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -1587,6 +1615,7 @@ export default {
     },
     // * @坐標查詢：控制地圖API，移動至對應的坐標查詢
     setPositionHandler () {
+      // 按下定位後關閉手機鍵盤
       document.activeElement.blur();
       // TWD定位
       if (this.positionOptions.current === 2) {
@@ -2080,7 +2109,7 @@ export default {
     // * @幾何圖形：新增幾何圖形資料
     createGeometryItemHandler () {
       const { current, graphList, amountCounter } = this.geometryOptions;
-      if (current === '') { return false; }
+      // if (current === '') { return false; }
 
       const category = !['line', 'rect', 'poly', 'circle'].includes(current) ? 'lands' : current;
 

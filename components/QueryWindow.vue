@@ -24,7 +24,7 @@
               type="radio"
               name="mode-type"
               :value="'structure'"
-              @click.stop="$emit('clickStructure')"
+              @click.stop="$emit('clickStructure'), $store.commit('DONT_HIDE_NAV', false);"
             >
             <label for="mode-type-structure">
               <span>建物</span>
@@ -38,7 +38,7 @@
               type="radio"
               name="mode-type"
               :value="'lattice'"
-              @click.stop="$emit('clickLattice')"
+              @click.stop="$emit('clickLattice'), $store.commit('DONT_HIDE_NAV', true);"
             >
             <label for="mode-type-lattice">
               <span>方格</span>
@@ -54,6 +54,7 @@
               type="radio"
               name="mode-type"
               :value="'lattice'"
+              @click.stop="$emit('clickLattice'), $store.commit('DONT_HIDE_NAV', true);"
             >
             <label for="mode-type-lattice">
               <span>方格</span>
@@ -121,7 +122,7 @@
               href="javascript:;"
               class="inner-input__btn icon-clear"
               title="清除全部"
-              @click.stop="myLatticeWord = ''"
+              @click.stop="clearLatticeSelected"
               @mousedown.prevent
             >
               清除全部
@@ -220,8 +221,21 @@
         <div class="option-btn-group igg">
           <div class="checkicon0">
             <input id="checkbox-0" v-model="selectGrid" type="checkbox">
-            <label v-if="selectGrid === true" for="checkbox-0">關閉方格點選</label>
-            <label v-if="selectGrid === false" for="checkbox-0" class="open-grid">開啟方格點選</label>
+            <label
+              v-if="$store.state.gridMode === true"
+              for="checkbox-0"
+              @click.stop="switchGridMode"
+            >
+              關閉方格點選
+            </label>
+            <label
+              v-if="$store.state.gridMode === false"
+              for="checkbox-0"
+              class="open-grid"
+              @click.stop="switchGridMode"
+            >
+              開啟方格點選
+            </label>
           </div>
           <div class="checkbox igg2">
             <input id="checkbox-1" v-model="isChecked" type="checkbox" :disabled="isDisabled">
@@ -235,7 +249,13 @@
         <div class="option-btn-group mgg">
           <div class="checkicon2">
             <input id="checkbox-0" v-model="selectGrid" type="checkbox">
-            <label for="checkbox-0" :class="{ 'open-grid': selectGrid === false }">選圖</label>
+            <label
+              for="checkbox-0"
+              :class="{ 'open-grid': $store.state.gridMode === false }"
+              @click.stop="switchGridMode"
+            >
+              選圖
+            </label>
           </div>
           <div class="checkbox mgg2">
             <input id="checkbox-1" v-model="isChecked" type="checkbox" :disabled="isDisabled">
@@ -315,7 +335,9 @@ export default {
       isChecked: false,
       maxlength: 524288,
       // 方格點選 預設有勾選true 為方格可點選狀態
-      selectGrid: true
+      selectGrid: true,
+      // 過多圖號警示窗只能出現一次
+      showBox: false
     };
   },
   components: {
@@ -392,15 +414,23 @@ export default {
         const validResult = this.latticeKeywordValidator(this.myLatticeWord);
         if (validResult === false) { return false; }
 
-        // 清除輸入框內容
-        this.myLatticeWord = '';
-
         const myResult = {
           modeType: 'lattice',
           keyword: this.myLatticeWord
         };
 
+        // 有勾多圖顯示
+        if (this.isChecked === true) {
+          const myNo = parseInt(this.myLatticeWord, 10);
+          myResult.keyword = `${this.myLatticeWord},${myNo + 100},${myNo - 100},${myNo + 1},${myNo - 1}`;
+        }
+
         this.$emit('search', myResult);
+
+        // 清除輸入框內容
+        this.myLatticeWord = '';
+        // 警示窗恢復預設
+        this.showBox = false;
       } else if (MODE_TYPE === 'structure') {
         result.status = this[MODE_TYPE].status.selected.value;
 
@@ -497,6 +527,11 @@ export default {
         confirmButtonText: '確定',
         showCloseButton: true
       });
+    },
+    // * 開啟or關閉方格點選
+    switchGridMode () {
+      const result = !this.$store.state.gridMode;
+      this.$store.commit('OPEN_GRID_MODE', result);
     }
   },
   computed: {
@@ -534,13 +569,14 @@ export default {
           this.isDisabled = true;
         }
 
-        if (arr.length >= 6) {
+        if (arr.length >= 6 && this.showBox === false) {
           this.$swal({
             text: '輸入過多圖號，將造成系統不穩定',
             width: 402,
             confirmButtonText: '確定',
             showCloseButton: true
           });
+          this.showBox = true;
         }
       }
     }
@@ -552,7 +588,7 @@ export default {
     // 勾選多圖顯示時，輸入框只能輸入1張圖號
     isChecked (value) {
       this.$emit('crossGrid', value);
-      const number = parseInt(myLatticeWord, 10);
+      const number = parseInt(this.myLatticeWord, 10);
       if (value === true) {
         if (number > 0) {
           this.maxlength = 4;
@@ -585,13 +621,14 @@ export default {
         this.isDisabled = true;
       }
 
-      if (arr.length >= 6) {
+      if (arr.length >= 6 && this.showBox === false) {
         this.$swal({
           text: '輸入過多圖號，將造成系統不穩定',
           width: 402,
           confirmButtonText: '確定',
           showCloseButton: true
         });
+        this.showBox = true;
       }
     }
     // lattKeyWord (value) {

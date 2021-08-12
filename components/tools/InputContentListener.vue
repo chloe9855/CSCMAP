@@ -4,6 +4,7 @@
     ref="notdrag"
     :value="value"
     :type="isPassword === true ? 'password' : 'text'"
+    :inputmode="isDecimal === true ? 'decimal' : 'text'"
     :placeholder="placeholder"
     :class="{ 'has-content': value !== '' }"
     @input="$emit('input', $event.target.value)"
@@ -18,7 +19,9 @@ export default {
     id: String,
     placeholder: String,
     isPassword: Boolean,
-    value: String
+    value: String,
+    // 鍵盤只能輸入數字
+    isDecimal: Boolean
   },
   mounted () {
     const myInput = this.$refs.notdrag;
@@ -30,6 +33,11 @@ export default {
     myInput.addEventListener('mouseup', (e) => {
       console.log('mouseup');
       this.$store.commit('CANCEL_INPUT_DRAG', false);
+    });
+
+    myInput.addEventListener('focus', () => {
+      console.log('focus');
+      this.$store.commit('INPUT_FOCUS_NOW', true);
     });
   },
   beforeDestroy () {

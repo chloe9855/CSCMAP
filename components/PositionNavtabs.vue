@@ -22,6 +22,7 @@
               v-model="reference.gridPosition.x"
               :placeholder="`輸入方格X坐標`"
               :is-password="false"
+              :is-decimal="true"
             />
           </div>
           <div class="fieldset row-column">
@@ -29,6 +30,7 @@
               v-model="reference.gridPosition.y"
               :placeholder="`輸入方格Y坐標`"
               :is-password="false"
+              :is-decimal="true"
             />
           </div>
         </div>
@@ -39,6 +41,7 @@
               v-model="reference.gridNumber"
               :placeholder="`輸入方格圖號`"
               :is-password="false"
+              :is-decimal="true"
             />
           </div>
         </div>
@@ -47,15 +50,17 @@
           <div class="fieldset row-column">
             <InputContentListener
               v-model="reference.twdPosition.x"
-              :placeholder="`輸入TWD97 X坐標`"
+              :placeholder="`180000`"
               :is-password="false"
+              :is-decimal="true"
             />
           </div>
           <div class="fieldset row-column">
             <InputContentListener
               v-model="reference.twdPosition.y"
-              :placeholder="`輸入TWD97 Y坐標`"
+              :placeholder="`2490000`"
               :is-password="false"
+              :is-decimal="true"
             />
           </div>
         </div>
