@@ -1288,6 +1288,8 @@ export default {
       clickLetters: [],
       // * 方格點選圖號
       myGridNo: '',
+      // * dxf檔是否存在
+      dxfExist: null,
       // * sessionStroage裡給的建物搜尋key值
       sesKeys: '',
       sesId: ''
@@ -1375,9 +1377,11 @@ export default {
           this.myGridNo = map.coordinateInfo(e.point).GridNO;
           console.log(this.myGridNo);
 
+          this.checkDxfHandler(this.myGridNo);
+
           // * 方格圖: 搜尋框沒有的數字 點擊方格變黃色圖塊 搜尋框加上數字 | 搜尋框有的數字 點擊方格變無色 搜尋框去除數字
           if (this.myGridNo !== undefined && this.$store.state.gridMode === true) {
-            if (this.laLetters.includes(this.myGridNo) === false) {
+            if (this.laLetters.includes(this.myGridNo) === false && this.dxfExist === true) {
               this.gisMap.appendGrids([this.myGridNo], { noData: true, index: true });
               this.laLetters.push(this.myGridNo);
               this.oldLetters.push(this.myGridNo);
@@ -2550,6 +2554,22 @@ export default {
         });
       }, 200);
     },
+    // * @方格圖：判斷dxf檔是否存在
+    checkDxfHandler (myNos) {
+      fetch('/cscmap2/api/DXFExist', {
+        method: 'POST',
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        }),
+        body: JSON.stringify(`GridNOs[0]: ${myNos}`)
+      }).then((response) => {
+        return response.json();
+      }).then((data) => {
+        this.dxfExist = data.Status;
+      }).catch((err) => {
+        console.log('錯誤:', err);
+      });
+    },
     // 取得滑鼠座標位置
     getMousePositionHandler (e) {
       this.mousePosition.x = e.offsetX;
@@ -2889,22 +2909,6 @@ export default {
       // this.activeWindow = '';
       // this.measurePointBox = true;
       this.activeWindow = 'mobileMeasureWindow';
-    },
-    dxfUpload () {
-      this.haveUploaded = true;
-      fetch('/cscmap2/api/DXFLoader', {
-        method: 'POST',
-        headers: new Headers({
-          'Content-Type': 'application/json'
-        }),
-        body: JSON.stringify(`GridNOs[0]: ${this.pointCscNo}`)
-      }).then((response) => {
-        return response;
-      }).then((data) => {
-        console.log(data);
-      }).catch((err) => {
-        console.log('錯誤:', err);
-      });
     },
     copyCoord (id) {
       const str = document.getElementById(id);

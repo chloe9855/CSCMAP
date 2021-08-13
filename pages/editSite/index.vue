@@ -229,8 +229,8 @@
         <GeometriesTabs-component
           :current="geometryOptions.current"
           :types-list="geometryTypesProvider(['rectangleLand', 'polygonLand', 'circleLand'])"
-          :graph-list="geometryGraphProvider(['rectangleLand', 'polygonLand', 'circleLand'])"
-          :my-graphs="myGraphsProvider(['rectangleLand', 'polygonLand', 'circleLand'])"
+          :graph-list="geometryOptions.graphList"
+          :my-graphs="myGraphs"
           @allTypeList="payload => myTypeList = payload"
           @selectType="startDrawing"
           @deleteGraph="deleteGeometryItemHandler"
@@ -1261,7 +1261,9 @@ export default {
       // * 從後端傳來的 編輯用圖台預定地編號(取名陣列)
       landId: [],
       geoJson: '',
-      userId: ''
+      userId: '',
+      myCounter: 0,
+      oldLandId: []
     };
   },
   components: {
@@ -1351,19 +1353,6 @@ export default {
 
         // * 關閉群聚點
         this.gisMap.setupMarker({ visible: false });
-
-        // * 接收ERP傳來的圖形資料
-        if (this.geoJson !== '') {
-          this.geoJson.forEach((item) => {
-            this.gisMap.drawing.load(new CSC.GISFill(this.gisMap, CSC.GISGeometry.fromJson(item.geometry), { strokeColor: '#000000', fillOpacity: 0.3, fillColor: '#8D2683' }));
-
-            this.myGraphs.push(new CSC.GISFill(this.gisMap, CSC.GISGeometry.fromJson(item.geometry), { strokeColor: '#000000', fillOpacity: 0.3, fillColor: '#8D2683' }));
-
-            this.myGraphs.forEach((item) => {
-              this.totalArea.push(item.getPath().getArea().toFixed(2));
-            });
-          });
-        }
 
         CSC.GISEvent.addListener(map, 'click', () => {
           this.mapClickHandler();
@@ -1477,6 +1466,40 @@ export default {
           fillOptions: { strokeColor: '#000000', fillOpacity: 0.3 },
           tipSkin: '<div class=\'contentArea\' style=\'background-color:blanchedalmond;color:coral;border-radius:5px;\'></div>'
         });
+
+        // * 接收ERP傳來的圖形資料
+        if (this.geoJson !== '') {
+          this.gisMap.drawingMethod(CSC.DrawingMethod.Draw, { measure: true });
+
+          this.geoJson.forEach((item, index) => {
+            this.myGraphs.push(new CSC.GISFill(this.gisMap, CSC.GISGeometry.fromJson(item.geometry), { strokeColor: '#000000', fillOpacity: 0.4, fillColor: '#8D2683' }));
+
+            this.totalArea.push(this.myGraphs[index].getPath().getArea().toFixed(2));
+            if (item.geometry.type === 'Circle') {
+              this.circleRadius.push(this.myGraphs[index].getPath().getRadius().toFixed(2));
+            }
+
+            // 找到要編輯的圖形
+            const editme = this.myGraphs[index];
+            // 啟用編輯圖形
+            this.gisMap.drawingMethod(CSC.DrawingMethod.Modify, { overlay: editme });
+            // 取消
+            this.gisMap.drawingMethod(CSC.DrawingMethod.Draw, { mode: CSC.GISOverlayType.NONE });
+
+            const result = {
+              id: `geometry_${this.GET_RESOURCE_ID()}`,
+              name: item.building.key,
+              type: item.geometry.type,
+              coordinate: [],
+              detail: this.totalArea[this.totalArea.length - 1],
+              controlBar: false,
+              radius: this.circleRadius[this.circleRadius.length - 1]
+            };
+
+            this.geometryOptions.graphList.push(result);
+          });
+        }
+
         // 暫存繪圖結果
         CSC.GISEvent.addListener(this.gisMap, 'draw_complete', (p) => {
           // 閃爍
@@ -1494,7 +1517,7 @@ export default {
 
             // 取得圓半徑
             if (this.geometryOptions.current === 'circleLand' || this.geometryOptions.current === 'circle' || this.geometryOptions.current === 'line' || this.geometryMeasurer.current === 'line') {
-              this.circleRadius.push(p.overlay.measure[0].label);
+              this.circleRadius.push(p.overlay.getPath().getRadius().toFixed(2));
             }
 
             // 鎖點測量 線段長度
@@ -2109,7 +2132,7 @@ export default {
     // * @幾何圖形：新增幾何圖形資料
     createGeometryItemHandler () {
       const { current, graphList, amountCounter } = this.geometryOptions;
-      // if (current === '') { return false; }
+      if (current === '') { return false; }
 
       const category = !['line', 'rect', 'poly', 'circle'].includes(current) ? 'lands' : current;
 
@@ -2126,7 +2149,8 @@ export default {
       // * 在暫存圖形中新增type屬性 值為line/circle/circleland...等
       this.myGraphs[this.myGraphs.length - 1].type = current;
       // 新增圖形資料
-      amountCounter[category] += 1;
+      // amountCounter[category] += 1;
+      this.myCounter += 1;
       graphList.push(result);
     },
     // * @幾何圖形：上傳幾何圖形資料
@@ -2187,11 +2211,12 @@ export default {
       // 取到'00381-'
       const front = this.landId[this.landId.length - 1].substring(0, 6);
       // 取最後兩個字元+1
-      const end = parseInt(this.landId[this.landId.length - 1].substring(6, 8), 10) + 1;
+      const end = parseInt(this.landId[this.landId.length - 1].substring(6, 8), 10);
+      this.myCounter = end;
       if (end < 10) {
-        return `${front}0${end}`;
+        return `${front}0${this.myCounter + 1}`;
       } else {
-        return `${front}${end}`;
+        return `${front}${this.myCounter + 1}`;
       }
     },
     // ? @搜尋：建物搜尋與匯入方格圖

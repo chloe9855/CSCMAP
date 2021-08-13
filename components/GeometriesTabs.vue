@@ -90,8 +90,8 @@
                       />
                     </div>
                   </div>
-                  <p v-if="graphItem.type === 'circleLand' || graphItem.type === 'circle'">
-                    {{ graphItem.radius }}
+                  <p v-if="graphItem.type === 'circleLand' || graphItem.type === 'Circle'">
+                    半徑{{ graphItem.radius }}m
                   </p>
                   <p v-if="graphItem.type === 'line'">
                     總長{{ graphItem.radius }}
@@ -539,6 +539,18 @@ export default {
   }
 
   &.type-circleLand::before {
+    background-image: url('~/assets/img/icon/icon-geometry-circleLand_blue.svg');
+  }
+
+  &.type-Envelope::before {
+    background-image: url('~/assets/img/icon/icon-geometry-rectangleLand_blue.svg');
+  }
+
+  &.type-Polygon::before {
+    background-image: url('~/assets/img/icon/icon-geometry-polygonLand_blue.svg');
+  }
+
+  &.type-Circle::before {
     background-image: url('~/assets/img/icon/icon-geometry-circleLand_blue.svg');
   }
 }
