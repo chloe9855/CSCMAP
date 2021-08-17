@@ -226,7 +226,7 @@
               for="checkbox-0"
               @click.stop="switchGridMode"
             >
-              關閉方格點選
+              關閉方格選圖
             </label>
             <label
               v-if="$store.state.gridMode === false"
@@ -234,7 +234,7 @@
               class="open-grid"
               @click.stop="switchGridMode"
             >
-              開啟方格點選
+              開啟方格選圖
             </label>
           </div>
           <div class="checkbox igg2">
@@ -422,7 +422,25 @@ export default {
         // 有勾多圖顯示
         if (this.isChecked === true) {
           const myNo = parseInt(this.myLatticeWord, 10);
-          myResult.keyword = `${this.myLatticeWord},${myNo + 100},${myNo - 100},${myNo + 1},${myNo - 1}`;
+          const myRows = [`${this.myLatticeWord}`, `${myNo + 100}`, `${myNo - 100}`, `${myNo + 1}`, `${myNo - 1}`];
+          const newRows = [];
+          myRows.forEach((item) => {
+            if (parseInt(item, 10) > 0 && item.length === 2) {
+              item = `00${item}`;
+            } else if (parseInt(item, 10) > 0 && item.length === 3) {
+              item = `0${item}`;
+            } else if (parseInt(item, 10) < 0 && item.length === 4) {
+              item = `-0${Math.abs(item)}`;
+            } else if (parseInt(item, 10) < 0 && item.length === 3) {
+              item = `-00${Math.abs(item)}`;
+            }
+
+            newRows.push(item);
+          });
+
+          // myResult.keyword = `${this.myLatticeWord},${myNo + 100},${myNo - 100},${myNo + 1},${myNo - 1}`;
+          myResult.keyword = newRows.join(',');
+          console.log(myResult.keyword);
         }
 
         this.$emit('search', myResult);
@@ -481,6 +499,9 @@ export default {
       const targetPageName = searchURL.split('=')[1];
       if (targetPageName === 'searchModeLattice') {
         this.modeType = 'lattice';
+        // this.$emit('clickLattice');
+        // this.$store.commit('DONT_HIDE_NAV', true);
+        document.getElementById('mode-type-lattice').click();
       }
     },
     searchHandler2 (payload) {
@@ -538,9 +559,9 @@ export default {
     screenWidth () {
       return this.$store.state.screenWidth;
     },
-    // lattKeyWord () {
-    //   return this.lattice.keyword;
-    // },
+    gridMode () {
+      return this.$store.state.gridMode;
+    },
     myLatticeWord: {
       get () {
         return this.lattword;
@@ -552,6 +573,7 @@ export default {
           this.isDisabled2 = true;
           this.isDisabled = true;
           this.isChecked = false;
+          this.showBox = false;
           return;
         }
 
@@ -599,6 +621,11 @@ export default {
         this.maxlength = 524288;
       }
     },
+    gridMode (value) {
+      if (value === true) {
+        this.$emit('closeWindow');
+      }
+    },
     myLatticeWord (value) {
       if (value === '') {
         this.isDisabled2 = true;
@@ -631,44 +658,6 @@ export default {
         this.showBox = true;
       }
     }
-    // lattKeyWord (value) {
-    //   this.$emit('latticeKeyWord', value);
-
-    //   if (value === '') {
-    //     this.isDisabled2 = true;
-    //     this.isDisabled = true;
-    //     this.isChecked = false;
-    //     return;
-    //   }
-
-    //   const arr = value.split(',');
-    //   if (arr.length > 0 && this.screenWidth < 1024) {
-    //     // 匯入
-    //     this.isDisabled2 = false;
-    //   } else {
-    //     this.isDisabled2 = true;
-    //   }
-    //   if (arr.length === 1) {
-    //     // 多圖
-    //     this.isDisabled = false;
-    //   } else {
-    //     this.isDisabled = true;
-    //   }
-
-    //   if (arr.length >= 6) {
-    //     this.$swal({
-    //       text: '輸入過多圖號，將造成系統不穩定',
-    //       width: 402,
-    //       confirmButtonText: '確定',
-    //       showCloseButton: true
-    //     });
-    //   }
-    // },
-
-    // lattword (value) {
-    //   this.lattice.keyword = `${this.lattice.keyword}${value}`;
-    // }
-
   }
 };
 </script>

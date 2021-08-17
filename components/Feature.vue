@@ -74,7 +74,7 @@
           href="javascript:;"
           class="feature__btn icon-measure"
           :class="currentClassHandler('measureWindow')"
-          @click.stop="setDragboxHandler('measureWindow'),$emit('hideTagBar')"
+          @click.stop="setDragboxHandler('measureWindow'),$emit('hideTagBar'),$store.commit('OPEN_GRID_MODE', false)"
           @mousedown.prevent
         >
           <span>測量距離/面積</span>

@@ -35,6 +35,7 @@
         >
           <span>方格圖載入</span>
         </a>
+
         <a
           v-if="screenWidth < 1024"
           href="javascript:;"
@@ -87,11 +88,19 @@ export default {
         location.href = `${window.location.href}map`;
       }
     },
+    // * 方格圖載入
     loginHandler2 () {
       if (this.$store.state.accessToken === '') { // 如果沒登入
         location.href = `https://testeip.csc.com.tw:1443/SSO/DSS0/DSAOS0.aspx?.done=${encodeURIComponent(window.location.href)}map?now=searchModeLattice`;
-      } else {
+      } else if (this.$store.state.accessToken !== '' && this.$store.state.gridRole === true) {
         location.href = `${window.location.href}map?now=searchModeLattice`;
+      } else if (this.$store.state.accessToken !== '' && this.$store.state.gridRole === false) {
+        this.$swal({
+          width: 402,
+          text: '您目前無權限使用方格圖匯入功能，如需使用請洽V81方格圖小組申請!',
+          confirmButtonText: '確定',
+          showCloseButton: true
+        });
       }
     },
     loginHandler3 () {

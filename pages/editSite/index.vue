@@ -1263,7 +1263,7 @@ export default {
       geoJson: '',
       userId: '',
       myCounter: 0,
-      oldLandId: []
+      setCount: 0
     };
   },
   components: {
@@ -2212,11 +2212,11 @@ export default {
       const front = this.landId[this.landId.length - 1].substring(0, 6);
       // 取最後兩個字元+1
       const end = parseInt(this.landId[this.landId.length - 1].substring(6, 8), 10);
-      this.myCounter = end;
+      this.setCount = end;
       if (end < 10) {
-        return `${front}0${this.myCounter + 1}`;
+        return `${front}0${this.setCount + this.myCounter + 1}`;
       } else {
-        return `${front}${this.myCounter + 1}`;
+        return `${front}${this.setCount + this.myCounter + 1}`;
       }
     },
     // ? @搜尋：建物搜尋與匯入方格圖
@@ -2715,6 +2715,11 @@ export default {
       if (value !== '') {
         this.CONSOLE(`【幾何圖形】呼叫 createGeometryItemHandler() 就可以新增 ${value} 圖形`);
       }
+    },
+    'geometryOptions.graphList' (value) {
+      value.forEach((item) => {
+
+      });
     },
     'layerOptions.layerList': {
       handler (value) {

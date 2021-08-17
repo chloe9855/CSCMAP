@@ -115,6 +115,7 @@
       @clickStructure="hideGridHandler"
       @latticeKeyWord="drawLatticeHandler"
       @crossGrid="drawCrossLattice"
+      @closeWindow="activeWindow = ''"
     >
       <QueryWindowContainer-component
         v-if="screenWidth > 1023 && searchResult.list.structure.length > 0 && nowMode === 'structure'"
@@ -300,7 +301,7 @@
       :key="'measureWindow'"
       :name="'測量距離/面積'"
       :icon-name="'icon-measure'"
-      @close="activeWindow = ''"
+      @close="activeWindow = '', $store.commit('OPEN_GRID_MODE', true);"
     >
       <template #content>
         <GeometriesTabs-component
@@ -1290,6 +1291,10 @@ export default {
       myGridNo: '',
       // * dxf檔是否存在
       dxfExist: null,
+      // * 沒有dxf檔的圖號陣列
+      noDxfRows: [],
+      // * 輸入的圖號去除沒有dxf檔的圖號陣列
+      myData: '',
       // * sessionStroage裡給的建物搜尋key值
       sesKeys: '',
       sesId: ''
@@ -1377,20 +1382,22 @@ export default {
           this.myGridNo = map.coordinateInfo(e.point).GridNO;
           console.log(this.myGridNo);
 
-          this.checkDxfHandler(this.myGridNo);
+          this.checkDxfHandler2(this.myGridNo);
 
           // * 方格圖: 搜尋框沒有的數字 點擊方格變黃色圖塊 搜尋框加上數字 | 搜尋框有的數字 點擊方格變無色 搜尋框去除數字
-          if (this.myGridNo !== undefined && this.$store.state.gridMode === true) {
-            if (this.laLetters.includes(this.myGridNo) === false && this.dxfExist === true) {
-              this.gisMap.appendGrids([this.myGridNo], { noData: true, index: true });
-              this.laLetters.push(this.myGridNo);
-              this.oldLetters.push(this.myGridNo);
-            } else {
-              this.gisMap.appendGrids([this.myGridNo], { noData: true, index: false });
-              const index = this.laLetters.findIndex(item => item === this.myGridNo);
-              this.laLetters.splice(index, 1);
+          setTimeout(() => {
+            if (this.myGridNo !== undefined && this.$store.state.gridMode === true) {
+              if (this.laLetters.includes(this.myGridNo) === false && this.dxfExist === true) {
+                this.gisMap.appendGrids([this.myGridNo], { noData: true, index: true });
+                this.laLetters.push(this.myGridNo);
+                this.oldLetters.push(this.myGridNo);
+              } else if (this.laLetters.includes(this.myGridNo) === true) {
+                this.gisMap.appendGrids([this.myGridNo], { noData: true, index: false });
+                const index = this.laLetters.findIndex(item => item === this.myGridNo);
+                this.laLetters.splice(index, 1);
+              }
             }
-          }
+          }, 100);
         });
 
         // 滑鼠坐標
@@ -2282,24 +2289,43 @@ export default {
         }
 
         if (MODE_TYPE === 'lattice') {
-          const myData = payload.keyword.split(',');
+          const rawData = payload.keyword.split(',');
+          // 先檢查輸入的圖號有無dxf檔
+          this.checkDxfHandler3(rawData);
 
-          myData.forEach((item) => {
-            const lattResult = {
-              name: item,
-              id: Math.random().toString(16),
-              visible: true,
-              opacity: 50
-            };
+          setTimeout(() => {
+            const rows = this.noDxfRows.join(',');
+            console.log(rows);
 
-            if (lattResult.name !== '') {
-              this.searchResult.list.lattice.push(lattResult);
+            if (this.noDxfRows.length > 0) {
+              this.$swal({
+                width: 402,
+                confirmButtonText: '確定',
+                html: `${rows}<br />無方格圖面`
+              });
             }
-          });
 
-          this.gisMap.appendGrids(myData, { index: false, annotation: true });
+            // 去除沒有dxf檔的圖號
+            this.myData = rawData.filter(item => !this.noDxfRows.includes(item));
 
-          this.laLetters.length = 0;
+            // 新增至清單中
+            this.myData.forEach((item) => {
+              const lattResult = {
+                name: item,
+                id: Math.random().toString(16),
+                visible: true,
+                opacity: 50
+              };
+
+              if (lattResult.name !== '') {
+                this.searchResult.list.lattice.push(lattResult);
+              }
+            });
+
+            this.gisMap.appendGrids(this.myData, { index: false, annotation: true });
+
+            this.laLetters.length = 0;
+          }, 100);
 
           //* 匯入方格 出現面板 -> 關閉方格點選
           this.$store.commit('OPEN_GRID_MODE', false);
@@ -2415,12 +2441,14 @@ export default {
     // * @方格圖：查詢框輸入方格圖號 繪製圖塊
     drawLatticeHandler (keyword) {
       this.laLetters = keyword.split(',');
+
       this.laLetters.forEach((item) => {
         const myType = parseInt(item, 10);
         if (this.gisMap.gridInfo(item) === null) { return; }
         if ((myType > 0 && item.length === 4) || (myType < 0 && item.length === 5)) {
-          this.gisMap.appendGrids([item], { noData: true, index: true });
-          this.oldLetters.push(item);
+          this.checkDxfHandler(item);
+          // this.gisMap.appendGrids([item], { noData: true, index: true });
+          // this.oldLetters.push(item);
         }
       });
 
@@ -2449,18 +2477,36 @@ export default {
       // 有勾選多圖顯示
       if (value === true) {
         myRows.forEach((item) => {
+          if (parseInt(item, 10) > 0 && item.length === 2) {
+            item = `00${item}`;
+          } else if (parseInt(item, 10) > 0 && item.length === 3) {
+            item = `0${item}`;
+          } else if (parseInt(item, 10) < 0 && item.length === 4) {
+            item = `-0${Math.abs(item)}`;
+          } else if (parseInt(item, 10) < 0 && item.length === 3) {
+            item = `-00${Math.abs(item)}`;
+          }
+
           if (this.gisMap.gridInfo(item) !== null) {
-            this.gisMap.appendGrids([item], { noData: true, index: true });
-            this.oldLetters.push(item);
+            this.checkDxfHandler(item);
+            // this.gisMap.appendGrids([item], { noData: true, index: true });
+            // this.oldLetters.push(item);
           }
         });
       }
       // 取消勾選
       if (value === false && this.laLetters.length === 1 && this.laLetters[0] !== '') {
         myRows.forEach((item) => {
-          if (this.gisMap.gridInfo(item) !== null) {
-            this.gisMap.appendGrids([item], { noData: true, index: false });
+          if (parseInt(item, 10) > 0 && item.length === 2) {
+            item = `00${item}`;
+          } else if (parseInt(item, 10) > 0 && item.length === 3) {
+            item = `0${item}`;
+          } else if (parseInt(item, 10) < 0 && item.length === 4) {
+            item = `-0${Math.abs(item)}`;
+          } else if (parseInt(item, 10) < 0 && item.length === 3) {
+            item = `-00${Math.abs(item)}`;
           }
+          this.gisMap.appendGrids([item], { noData: true, index: false });
         });
       }
     },
@@ -2522,20 +2568,29 @@ export default {
     },
     // * @方格圖：切換至方格 關閉球標、隱藏某些圖層
     openGridHandler () {
-      this.hideClusterHandler();
+      // this.hideClusterHandler();
+      this.activeWindow = '';
+      this.markerVisible = false;
+      this.gisMap.setupMarker({ visible: false });
       this.$store.commit('OPEN_GRID_MODE', true);
-      this.layerOptions.layerList.forEach((item) => {
-        this.gisMap.setupLayer({ fid: item.fid, visible: false });
-        item.visible = false;
-        if (item.fid === 1 || item.fid === 11 || item.fid === 12) {
-          this.gisMap.setupLayer({ fid: item.fid, visible: true });
-          item.visible = true;
-        }
-      });
+
+      setTimeout(() => {
+        this.layerOptions.layerList.forEach((item) => {
+          console.log('fromHomePage3');
+          this.gisMap.setupLayer({ fid: item.fid, visible: false });
+          item.visible = false;
+          if (item.fid === 1 || item.fid === 11 || item.fid === 12) {
+            this.gisMap.setupLayer({ fid: item.fid, visible: true });
+            item.visible = true;
+          }
+        });
+      }, 200);
     },
     // * @方格圖：切換回建物 開啟球標、開啟目前的圖層預設
     hideGridHandler () {
-      this.hideClusterHandler();
+      // this.hideClusterHandler();
+      this.markerVisible = true;
+      this.gisMap.setupMarker({ visible: true });
       this.getDefaultLayer();
       this.$store.commit('OPEN_GRID_MODE', false);
       // 刪除圖面上的方格圖
@@ -2556,16 +2611,58 @@ export default {
     },
     // * @方格圖：判斷dxf檔是否存在
     checkDxfHandler (myNos) {
+      console.log(myNos);
+      const formData = new FormData();
+      formData.append('GridNOs[0]', myNos);
       fetch('/cscmap2/api/DXFExist', {
         method: 'POST',
-        headers: new Headers({
-          'Content-Type': 'application/json'
-        }),
-        body: JSON.stringify(`GridNOs[0]: ${myNos}`)
+        // headers: new Headers({
+        //   'Content-Type': 'application/json'
+        // }),
+        body: formData
       }).then((response) => {
         return response.json();
       }).then((data) => {
-        this.dxfExist = data.Status;
+        console.log(data);
+        this.dxfExist = data[0].Status;
+        if (this.dxfExist === true) {
+          this.gisMap.appendGrids([data[0].GridNOs], { noData: true, index: true });
+          this.oldLetters.push(data[0].GridNOs);
+        }
+      }).catch((err) => {
+        console.log('錯誤:', err);
+      });
+    },
+    checkDxfHandler2 (myNos) {
+      const formData = new FormData();
+      formData.append('GridNOs[0]', myNos);
+      fetch('/cscmap2/api/DXFExist', {
+        method: 'POST',
+        body: formData
+      }).then((response) => {
+        return response.json();
+      }).then((data) => {
+        console.log(data);
+        this.dxfExist = data[0].Status;
+      }).catch((err) => {
+        console.log('錯誤:', err);
+      });
+    },
+    checkDxfHandler3 (myNos) {
+      const formData = new FormData();
+      myNos.forEach((item, index) => {
+        formData.append(`GridNOs[${index}]`, item);
+      });
+
+      fetch('/cscmap2/api/DXFExist', {
+        method: 'POST',
+        body: formData
+      }).then((response) => {
+        return response.json();
+      }).then((data) => {
+        const filData = data.filter(item => item.Status === false);
+        this.noDxfRows = filData.map(item => item.GridNOs.toString());
+        console.log(this.noDxfRows);
       }).catch((err) => {
         console.log('錯誤:', err);
       });
@@ -2848,7 +2945,12 @@ export default {
     // * 關閉 手機版 測量點線面視窗
     closeMeasurePopupBox () {
       this.activeWindow = '';
-      this.mobPoint.destroy();
+      // 恢復方格選圖
+      this.$store.commit('OPEN_GRID_MODE', true);
+
+      if (this.mobPoint !== '') {
+        this.mobPoint.destroy();
+      }
       // this.measurePointBox = false;
       this.gisMap.drawingMethod(CSC.DrawingMethod.Clear);
       this.pointMeasurer.current = 'cscXy';
