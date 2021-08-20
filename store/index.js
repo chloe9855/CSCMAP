@@ -22,8 +22,8 @@ export const state = () => ({
   orangeBar: false,
   gridMode: false,
   inputMode: false,
-  myPop: false
-
+  myPop: false,
+  showClearButton: true
 });
 
 // * ==========================================================================
@@ -108,5 +108,9 @@ export const mutations = {
   },
   UP_POPBOX (state, payload) {
     state.myPop = payload;
+  },
+  // * 桌機版 新增預定用地/測量的 清除全部 按鈕
+  CLEAR_BUTTON_HANDLER (state, payload) {
+    state.showClearButton = payload;
   }
 };

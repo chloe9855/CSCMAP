@@ -1262,8 +1262,11 @@ export default {
       landId: [],
       geoJson: '',
       userId: '',
+      manageId: '',
       myCounter: 0,
-      setCount: 0
+      setCount: 0,
+      newEditRows: [],
+      frRows: []
     };
   },
   components: {
@@ -1288,6 +1291,7 @@ export default {
   mounted () {
     this.getDefaultData();
     this.$store.commit('GET_NOW_URL', 'editSite');
+    this.$store.commit('CLEAR_BUTTON_HANDLER', false);
 
     // 開啟預定地視窗
     this.activeWindow = 'addLandWindow';
@@ -1302,11 +1306,14 @@ export default {
   },
   methods: {
     getMySession () {
-      if (sessionStorage.getItem('iptUserID') !== null) {
+      if (sessionStorage.getItem('iptUserID') !== '') {
         this.userId = sessionStorage.getItem('iptUserID');
-        const manId = sessionStorage.getItem('iptManageSerial');
-        this.landId = manId.split(',');
+        this.manageId = sessionStorage.getItem('iptManageSerial');
+      }
+
+      if (sessionStorage.getItem('iptLandData') !== '') {
         this.geoJson = JSON.parse(sessionStorage.getItem('iptLandData'));
+        this.landId = this.geoJson.map(item => item.building.key);
       }
     },
     // ? 載入預設需要載入的資料
@@ -1472,11 +1479,13 @@ export default {
           this.gisMap.drawingMethod(CSC.DrawingMethod.Draw, { measure: true });
 
           this.geoJson.forEach((item, index) => {
-            this.myGraphs.push(new CSC.GISFill(this.gisMap, CSC.GISGeometry.fromJson(item.geometry), { strokeColor: '#000000', fillOpacity: 0.4, fillColor: '#8D2683' }));
+            this.myGraphs.push(new CSC.GISFill(this.gisMap, CSC.GISGeometry.fromJson(item.geometry), { strokeColor: '#000000', strokeWeight: 2, fillOpacity: 0.3, fillColor: '#8D2683' }));
 
             this.totalArea.push(this.myGraphs[index].getPath().getArea().toFixed(2));
             if (item.geometry.type === 'Circle') {
               this.circleRadius.push(this.myGraphs[index].getPath().getRadius().toFixed(2));
+              // 圓形加上type
+              this.myGraphs[index].type = 'circleLand';
             }
 
             // 找到要編輯的圖形
@@ -1561,7 +1570,10 @@ export default {
             if (this.myGraphs[this.saveIndex].type !== 'line') {
               this.geometryOptions.graphList[this.saveIndex].detail = p.overlay.getPath().getArea().toFixed(2);
             }
-            this.geometryOptions.graphList[this.saveIndex].radius = p.overlay.measure[0].label;
+            if (this.myGraphs[this.saveIndex].type === 'circleLand') {
+              this.geometryOptions.graphList[this.saveIndex].radius = p.overlay.getPath().getRadius().toFixed(2);
+            }
+            // this.geometryOptions.graphList[this.saveIndex].radius = p.overlay.measure[0].label;
             this.geometryOptions.graphList[this.saveIndex].controlBar = false;
           }
 
@@ -2108,6 +2120,10 @@ export default {
           });
           console.log(this.myGraphs);
           this.unSave = false;
+
+          // -------
+          this.frRows.length = 0;
+          this.newEditRows.length = 0;
         }
       });
     },
@@ -2167,29 +2183,42 @@ export default {
       }).then((result) => {
         if (result.value) {
           // 若按下確定
-          const myName = [];
-          this.graphList.forEach((item) => {
-            myName.push(item.name);
-          });
-          const keName = myName.join(',');
+
+          const myName = this.geometryOptions.graphList.map(item => item.name);
+          console.log(myName);
 
           const newArr = [];
-          myGraphs.forEach((item) => {
-            newArr.push({ building: { key: keName }, geometry: item.toJson() });
+          myGraphs.forEach((item, index) => {
+            newArr.push({ building: { key: myName[index] }, geometry: item.toJson() });
           });
 
-          fetch('/csc2api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/Building', {
+          const formData = new FormData();
+          formData.append('userId', this.userId);
+          formData.append('key', this.manageId);
+          formData.append('points', `${JSON.stringify(newArr)}`);
+          // formData.append('params', `userId=${this.userId}&key=${this.manageId}&points=${JSON.stringify(newArr)}`);
+
+          fetch('/csc2api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/UpdateBuildingPoints', {
             method: 'POST',
+            // headers: new Headers({
+            //   'Content-Type': 'multipart/form-data'
+            // }),
             headers: new Headers({
               'Content-Type': 'application/json'
             }),
-            body: JSON.stringify(newArr)
+            body: JSON.stringify({
+              userId: this.userId,
+              key: this.manageId,
+              points: newArr
+            })
           }).then((response) => {
-            return response.json();
+            return response;
           }).then((data) => {
             // 若確定有儲存到ERP 才把傳到後端的key值賦值給取名陣列
             this.landId = myName;
-            // 開新視窗
+            // 跳轉視窗
+            // window.location.href = `${data}`;
+            console.log(data);
             window.open(`${data}`);
           }).catch((err) => {
             console.log('錯誤:', err);
@@ -2203,20 +2232,28 @@ export default {
     },
     // * @幾何圖形：取得幾何圖形圖層名稱
     geometryNameProvider (category) {
-      // const { current, typeList, amountCounter } = this.geometryOptions;
-      // const name = typeList.filter(item => item.id === current)[0].graphName;
-      // const amount = amountCounter[category];
-      // return `${name}${amount + 1}`;
+      if (this.landId.length > 0) {
+        // 取到'00381-'
+        const front = this.landId[this.landId.length - 1].substring(0, 6);
+        // 取最後兩個字元+1
+        const end = parseInt(this.landId[this.landId.length - 1].substring(6, 8), 10);
+        this.setCount = end;
+        const result = this.setCount + this.myCounter + 1;
+        if (result < 10) {
+          return `${front}0${result}`;
+        } else {
+          return `${front}${result}`;
+        }
+      }
 
-      // 取到'00381-'
-      const front = this.landId[this.landId.length - 1].substring(0, 6);
-      // 取最後兩個字元+1
-      const end = parseInt(this.landId[this.landId.length - 1].substring(6, 8), 10);
-      this.setCount = end;
-      if (end < 10) {
-        return `${front}0${this.setCount + this.myCounter + 1}`;
-      } else {
-        return `${front}${this.setCount + this.myCounter + 1}`;
+      // 後端沒傳圖形過來
+      if (this.landId.length === 0) {
+        const result = this.myCounter + 1;
+        if (result < 10) {
+          return `${this.manageId}-0${result}`;
+        } else {
+          return `${this.manageId}-${result}`;
+        }
       }
     },
     // ? @搜尋：建物搜尋與匯入方格圖
@@ -2716,10 +2753,39 @@ export default {
         this.CONSOLE(`【幾何圖形】呼叫 createGeometryItemHandler() 就可以新增 ${value} 圖形`);
       }
     },
+    // * 新增預定用地: 資料編號
     'geometryOptions.graphList' (value) {
-      value.forEach((item) => {
+      if (this.landId.length > 0) {
+        // 取到'00381-'
+        const front = this.landId[this.landId.length - 1].substring(0, 6);
+        // 取最後兩個字元
+        const end = parseInt(this.landId[this.landId.length - 1].substring(6, 8), 10);
 
-      });
+        this.frRows = this.geometryOptions.graphList.filter(item => parseInt(item.name.substring(6, 8), 10) <= end);
+
+        this.newEditRows = this.geometryOptions.graphList.filter(item => parseInt(item.name.substring(6, 8), 10) > end);
+
+        this.newEditRows.forEach((item, index) => {
+          const newNos = end + index + 1;
+          if (newNos < 10) {
+            item.name = `${front}0${newNos}`;
+          } else {
+            item.name = `${front}${newNos}`;
+          }
+        });
+      }
+
+      //* 後端沒傳圖形過來
+      if (this.landId.length === 0) {
+        this.geometryOptions.graphList.forEach((item, index) => {
+          const newNos = index + 1;
+          if (newNos < 10) {
+            item.name = `${this.manageId}-0${newNos}`;
+          } else {
+            item.name = `${this.manageId}-${newNos}`;
+          }
+        });
+      }
     },
     'layerOptions.layerList': {
       handler (value) {

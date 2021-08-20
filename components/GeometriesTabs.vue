@@ -131,6 +131,7 @@
         class="geometry-under-row"
       >
         <a
+          v-if="$store.state.showClearButton === true"
           href="javascript:;"
           class="btn has-outline outline-color-default size-small"
           title="清除全部"

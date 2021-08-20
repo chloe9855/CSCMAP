@@ -66,14 +66,14 @@
         </div>
       </div>
     </div>
-    <div class="article__content">
+    <div class="article__content right_wrap">
       <div class="article__wrap theme-scrollbar">
         <div class="dataTable__wrapper theme-scrollbar">
           <table class="dataTable">
-            <thead>
+            <thead class="my-thead">
               <tr>
                 <th v-for="columnsItem of tablesData.columns" :key="columnsItem.id">
-                  <div class="dataTable__title">
+                  <div :class="`dataTable__title ${columnsItem.id}`">
                     <span>{{ columnsItem.name }}</span>
                     <div v-if="columnsItem.sort === true" class="sort-select">
                       <a
@@ -94,59 +94,59 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(rowsItem, index) of tablesData.rows" :key="rowsItem['serial_number']">
-                <td>{{ rowsItem['serial_number'] }}</td>
-                <td>{{ rowsItem['project_name'] }}</td>
-                <td>{{ rowsItem['building_name'] }}</td>
+              <tr v-for="(rowsItem, index) of tablesData.rows" :key="rowsItem['key']">
+                <td>{{ rowsItem['key'] }}</td>
+                <td>{{ rowsItem['project'] }}</td>
+                <td>{{ rowsItem['building'] }}</td>
                 <td>
-                  <div v-if="rowsItem['is_visible'] === true" class="dataTable__input">
-                    <InputContentListener v-model="rowsItem['mark_coordinate']" />
+                  <div v-if="rowsItem['display'] === true" class="dataTable__input">
+                    <InputContentListener :v-model="`${rowsItem.coordinate[0]},${rowsItem.coordinate[1]}`" />
                   </div>
                 </td>
                 <td>
-                  <div v-if="rowsItem['is_visible'] === true" class="dataTable__input">
-                    <InputContentListener v-model="rowsItem['text_offset']" />
+                  <div v-if="rowsItem['display'] === true" class="dataTable__input">
+                    <InputContentListener :v-model="`${rowsItem.offset[0]},${rowsItem.offset[1]}`" />
                   </div>
                 </td>
                 <td>
-                  <div v-if="rowsItem['is_visible'] === true" class="dataTable__input">
-                    <InputContentListener v-model="rowsItem['display_name']" />
+                  <div v-if="rowsItem['display'] === true" class="dataTable__input">
+                    <InputContentListener v-model="rowsItem['displayName']" />
                   </div>
                 </td>
                 <td>
                   <div class="checkbox dataTable__checkbox">
                     <input
-                      :id="`visible_${rowsItem['serial_number']}_${index}`"
-                      v-model="rowsItem['is_visible']"
+                      :id="`visible_${rowsItem['key']}_${index}`"
+                      v-model="rowsItem['display']"
                       type="checkbox"
                     >
-                    <label :for="`visible_${rowsItem['serial_number']}_${index}`">顯示</label>
+                    <label :for="`visible_${rowsItem['key']}_${index}`">顯示</label>
                   </div>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
+      </div>
 
-        <div class="row is-flex-end">
-          <div class="btn-group">
-            <a
-              href="javascript:;"
-              class="btn color-white has-outline outline-color-default size-small"
-              title="取消"
-              @mousedown.prevent
-            >
-              <span>取消</span>
-            </a>
-            <a
-              href="javascript:;"
-              class="btn size-small"
-              title="儲存修改"
-              @mousedown.prevent
-            >
-              <span>儲存修改</span>
-            </a>
-          </div>
+      <div class="row is-flex-end">
+        <div class="btn-group">
+          <a
+            href="javascript:;"
+            class="btn color-white has-outline outline-color-default size-small"
+            title="取消"
+            @mousedown.prevent
+          >
+            <span>取消</span>
+          </a>
+          <a
+            href="javascript:;"
+            class="btn size-small"
+            title="儲存修改"
+            @mousedown.prevent
+          >
+            <span>儲存修改</span>
+          </a>
         </div>
       </div>
     </div>
@@ -169,6 +169,8 @@ export default {
       },
       reference: {
         searchKeyword: '',
+        keyInfo: '',
+        keyInfoRows: [],
         itemsVisible: [
           {
             id: 'A',
@@ -220,49 +222,15 @@ export default {
             sort: true
           }
         ],
-        rows: [
-          {
-            serial_number: '00392-01',
-            project_name: '倉庫工程01',
-            building_name: '倉庫01',
-            mark_coordinate: '846.24,6101.30',
-            text_offset: '10,10',
-            display_name: '預設名稱',
-            is_visible: true
-          },
-          {
-            serial_number: '00392-02',
-            project_name: '倉庫工程01',
-            building_name: '倉庫02',
-            mark_coordinate: '456.24,6101.30',
-            text_offset: '10,10',
-            display_name: '預設名稱',
-            is_visible: true
-          },
-          {
-            serial_number: '00392-03',
-            project_name: '倉庫工程02',
-            building_name: '倉庫01',
-            mark_coordinate: '847.24,6101.30',
-            text_offset: '10,10',
-            display_name: '預設名稱',
-            is_visible: true
-          },
-          {
-            serial_number: '00392-04',
-            project_name: '倉庫工程02',
-            building_name: '倉庫02',
-            mark_coordinate: '',
-            text_offset: '',
-            display_name: '',
-            is_visible: false
-          }
-        ]
+        rows: []
       }
     };
   },
   components: {
     InputContentListener
+  },
+  mounted () {
+    this.getRawData();
   },
   methods: {
     // * 表格升序
@@ -280,6 +248,63 @@ export default {
       for (let i = 0; i < this.reference.itemsVisible.length; i++) {
         this.reference.itemsVisible[i].isChecked = false;
       }
+    },
+    // * 取得預設資料
+    getRawData () {
+      fetch('/cscmap2/api/Label', {
+        method: 'GET',
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        })
+      }).then((response) => {
+        return response.json();
+      }).then((data) => {
+        // const newObject = Object.entries(data)
+        //   .map(([manageId, manageValue]) => {
+        //     return { name: manageId, value: manageValue };
+        //   });
+
+        const keyRows = data.map(item => item.key).join(',');
+        this.getKeyData(keyRows);
+
+        setTimeout(() => {
+          this.keyInfo.forEach((item) => {
+            result = {
+              key: item.key,
+              project: item.project,
+              building: item.building
+            };
+            this.keyInfoRows.push(result);
+          });
+
+          data.forEach((item, index) => {
+            item.project = this.keyInfoRows[index].project;
+            item.building = this.keyInfoRows[index].building;
+          });
+
+          this.tablesData.rows = data;
+        }, 100);
+
+        console.log(data);
+        console.log(keyRows);
+      }).catch((err) => {
+        console.log('錯誤:', err);
+      });
+    },
+    getKeyData (myKey) {
+      fetch(`/csc2api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/getBuildingByKey/${myKey}?_format=json`, {
+        method: 'GET',
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        })
+      }).then((response) => {
+        return response.json();
+      }).then((data) => {
+        console.log(data);
+        this.keyInfo = data;
+      }).catch((err) => {
+        console.log('錯誤:', err);
+      });
     }
   },
   computed: {
@@ -299,6 +324,42 @@ h2 {
   line-height: 1.6em;
   margin-top: 1rem;
   margin-bottom: 1rem;
+}
+
+.right_wrap {
+  padding: 88px 30px 98px !important;
+}
+
+.my-thead {
+  width: 1176px;
+  position: fixed;
+  top: 123px;
+  z-index: 1000;
+  margin-bottom: 60px;
+}
+
+.project_name {
+  padding-left: 19px;
+}
+
+.building_name {
+  padding-left: 21px;
+}
+
+.mark_coordinate {
+  padding-left: 42px;
+}
+
+.text_offset {
+  padding-left: 145px;
+}
+
+.display_name {
+  padding-left: 148px;
+}
+
+.is_visible {
+  padding-left: 77px;
 }
 
 </style>

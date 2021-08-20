@@ -416,7 +416,8 @@ export default {
 
         const myResult = {
           modeType: 'lattice',
-          keyword: this.myLatticeWord
+          keyword: this.myLatticeWord,
+          isChecked: false
         };
 
         // 有勾多圖顯示
@@ -440,6 +441,7 @@ export default {
 
           // myResult.keyword = `${this.myLatticeWord},${myNo + 100},${myNo - 100},${myNo + 1},${myNo - 1}`;
           myResult.keyword = newRows.join(',');
+          myResult.isChecked = true;
           console.log(myResult.keyword);
         }
 
@@ -621,6 +623,7 @@ export default {
         this.maxlength = 524288;
       }
     },
+    // 長度測量中，若開啟方格點選 長度測量的面板會關閉
     gridMode (value) {
       if (value === true) {
         this.$emit('closeWindow');

@@ -115,7 +115,7 @@
       @clickStructure="hideGridHandler"
       @latticeKeyWord="drawLatticeHandler"
       @crossGrid="drawCrossLattice"
-      @closeWindow="activeWindow = ''"
+      @closeWindow="activeWindow = '', cancelStepHandler(), deleteAllGeometryItemHandler2(['line','rect','poly','circle'])"
     >
       <QueryWindowContainer-component
         v-if="screenWidth > 1023 && searchResult.list.structure.length > 0 && nowMode === 'structure'"
@@ -301,7 +301,7 @@
       :key="'measureWindow'"
       :name="'測量距離/面積'"
       :icon-name="'icon-measure'"
-      @close="activeWindow = '', $store.commit('OPEN_GRID_MODE', true);"
+      @close="activeWindow = '', $store.commit('OPEN_GRID_MODE', true), deleteAllGeometryItemHandler2(['line','rect','poly','circle'])"
     >
       <template #content>
         <GeometriesTabs-component
@@ -374,7 +374,7 @@
                       複製
                     </div>
                   </div>
-                  <div class="clone-block" @click.stop="dxfUpload">
+                  <div class="clone-block" @click.stop="pointDxfUpload(pointCscNo)">
                     <div class="clone-pic2" :class="{ 'dxf-bg': haveUploaded === true }" />
                     <div class="clone-name2" :class="{ 'dxf-fo': haveUploaded === true }">
                       方格圖
@@ -401,7 +401,7 @@
                       複製
                     </div>
                   </div>
-                  <div class="clone-block" @click.stop="dxfUpload">
+                  <div class="clone-block" @click.stop="pointDxfUpload(pointCscNo)">
                     <div class="clone-pic2" :class="{ 'dxf-bg': haveUploaded === true }" />
                     <div class="clone-name2" :class="{ 'dxf-fo': haveUploaded === true }">
                       方格圖
@@ -428,7 +428,7 @@
                       複製
                     </div>
                   </div>
-                  <div class="clone-block" @click.stop="dxfUpload">
+                  <div class="clone-block" @click.stop="pointDxfUpload(pointCscNo)">
                     <div class="clone-pic2" :class="{ 'dxf-bg': haveUploaded === true }" />
                     <div class="clone-name2" :class="{ 'dxf-fo': haveUploaded === true }">
                       方格圖
@@ -2234,9 +2234,13 @@ export default {
       }).then((result) => {
         if (result.value) {
           // 若按下確定
+
+          const myName = this.geometryOptions.graphList.map(item => item.name);
+          console.log(myName);
+
           const newArr = [];
-          myGraphs.forEach((item) => {
-            newArr.push({ building: { key: '' }, geometry: item.toJson() });
+          myGraphs.forEach((item, index) => {
+            newArr.push({ building: { key: myName[index] }, geometry: item.toJson() });
           });
 
           fetch('/csc2api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/Building', {
@@ -2244,9 +2248,12 @@ export default {
             headers: new Headers({
               'Content-Type': 'application/json'
             }),
-            body: JSON.stringify(newArr)
+            body: JSON.stringify({
+              points: newArr,
+              userId: this.$store.state.accessToken
+            })
           }).then((response) => {
-            return response.json();
+            return response;
           }).then((data) => {
             window.open(`${data}`);
           }).catch((err) => {
@@ -2273,40 +2280,47 @@ export default {
         this.clearSearchResultHandler();
       }
 
-      // ! 先用 setTimeout 做一個模擬 ajax 的樣子給人看
-      setTimeout(() => {
-        // 搜尋結果是建物or方格
-        const MODE_TYPE = payload.modeType;
-        this.searchResult.types = MODE_TYPE;
-        // 所選擇的搜尋條件
-        this.searchSelected.keyword = payload.keyword;
-        this.searchSelected.status = payload.status;
-        this.searchSelected.types = payload.types;
+      // 搜尋結果是建物or方格
+      const MODE_TYPE = payload.modeType;
+      this.searchResult.types = MODE_TYPE;
+      // 所選擇的搜尋條件
+      this.searchSelected.keyword = payload.keyword;
+      this.searchSelected.status = payload.status;
+      this.searchSelected.types = payload.types;
 
-        // ! 這邊要用 call api 抓資料
-        if (MODE_TYPE === 'structure') {
-          this.getSearchResult();
-        }
+      if (MODE_TYPE === 'structure') {
+        // ! call api 抓資料
+        this.getSearchResult();
 
-        if (MODE_TYPE === 'lattice') {
-          const rawData = payload.keyword.split(',');
-          // 先檢查輸入的圖號有無dxf檔
-          this.checkDxfHandler3(rawData);
+        setTimeout(() => {
+          this.$store.commit('CTRL_LOADING_MASK', false);
+        }, 1000);
+      }
+
+      if (MODE_TYPE === 'lattice') {
+        const rawData = payload.keyword.split(',');
+        // 先檢查輸入的圖號有無dxf檔
+        this.checkDxfHandler3(rawData);
+
+        setTimeout(() => {
+          const noneRows = this.noDxfRows.join(',');
+          console.log(noneRows);
+
+          // this.uploadLatticeHandler(rawData, noneRows, payload.isChecked);
+
+          // 去除沒有dxf檔的圖號
+          this.myData = rawData.filter(item => !this.noDxfRows.includes(item));
+          // ! call api 抓資料
+          this.gisMap.appendGrids(this.myData, { index: false, annotation: true });
 
           setTimeout(() => {
-            const rows = this.noDxfRows.join(',');
-            console.log(rows);
-
-            if (this.noDxfRows.length > 0) {
+            if (this.noDxfRows.length > 0 && payload.isChecked === false) {
               this.$swal({
                 width: 402,
                 confirmButtonText: '確定',
-                html: `${rows}<br />無方格圖面`
+                html: `${noneRows}<br />無方格圖面`
               });
             }
-
-            // 去除沒有dxf檔的圖號
-            this.myData = rawData.filter(item => !this.noDxfRows.includes(item));
 
             // 新增至清單中
             this.myData.forEach((item) => {
@@ -2322,30 +2336,14 @@ export default {
               }
             });
 
-            this.gisMap.appendGrids(this.myData, { index: false, annotation: true });
-
             this.laLetters.length = 0;
-          }, 100);
 
-          //* 匯入方格 出現面板 -> 關閉方格點選
-          this.$store.commit('OPEN_GRID_MODE', false);
-        }
-
-        // const result = require(`~/static/_resources/${MODE_TYPE}Result.json`);
-
-        // this.searchResult.types = MODE_TYPE;
-        // this.searchResult.list[MODE_TYPE] = [...result.data];
-        // this.activeWindow = '';  //0517修改 讓桌機版建物搜尋後 圖層工具仍開啟
-
-        // ? 看 MODE_TYPE 是建物還是方格，控制地圖API
-        if (MODE_TYPE === 'structure') {
-          this.CONSOLE('【建物搜尋】地圖移動到搜尋結果的全範圍');
-        } else if (MODE_TYPE === 'lattice') {
-          this.CONSOLE('【方格圖搜尋】地圖移動到搜尋結果的全範圍');
-        }
-
-        this.$store.commit('CTRL_LOADING_MASK', false);
-      }, 1000);
+            //* 匯入方格 出現面板 -> 關閉方格點選、關閉loading遮罩
+            this.$store.commit('OPEN_GRID_MODE', false);
+            this.$store.commit('CTRL_LOADING_MASK', false);
+          }, 7000 * this.myData.length);
+        }, 100);
+      }
     },
     // * @搜尋：清除所有搜尋結果
     clearSearchResultHandler () {
@@ -2423,12 +2421,6 @@ export default {
         this.gisMap.markerBounds([item], 1.25).forEach(function (m) { m.selected = false; });
       });
       this.gisMap.markerBounds([this.myNew[this.myNew.length - 1]], 10.5).forEach((m) => {
-        // this.markerSrc = CSC.RES_PATH + (m.selected ? 'marker3.png' : m.active ? 'marker3.png' : m.other ? 'marker4.png' : 'marker2.png');
-        // m.icon.setUrl(this.markerSrc);
-        // if (m.elem) { m.elem.attr({ src: this.markerSrc }); }
-        // m.other = false;
-        // m.active = false;
-
         m.selected = true;
         console.log(m);
         this.bigM = m.position;
@@ -2437,6 +2429,54 @@ export default {
 
       const myArr2 = [{ x: this.bigM.x + 50, y: this.bigM.y + 50 }, { x: this.bigM.x + 50, y: this.bigM.y - 50 }, { x: this.bigM.x - 50, y: this.bigM.y - 50 }, { x: this.bigM.x - 50, y: this.bigM.y + 50 }];
       this.gisMap.fitBounds(new CSC.GISEnvelope(myArr2), 1.25);
+    },
+    // * @方格圖：載入方格圖
+    uploadLatticeHandler (rawData, noneRows, isChecked) {
+      const formData = new FormData();
+      rawData.forEach((item, index) => {
+        formData.append(`GridNOs[${index}]`, item);
+      });
+
+      fetch('/cscmap2/api/DXFLoader', {
+        method: 'POST',
+        body: formData
+      }).then((response) => {
+        return response.json();
+      }).then((data) => {
+        // this.gisMap.appendGrids(rawData, { index: false, annotation: true });
+        // 去除沒有dxf檔的圖號
+        this.myData = rawData.filter(item => !this.noDxfRows.includes(item));
+
+        // 新增至清單中
+        this.myData.forEach((item) => {
+          const lattResult = {
+            name: item,
+            id: Math.random().toString(16),
+            visible: true,
+            opacity: 50
+          };
+
+          if (lattResult.name !== '') {
+            this.searchResult.list.lattice.push(lattResult);
+          }
+        });
+
+        this.laLetters.length = 0;
+        //* 匯入方格 出現面板 -> 關閉方格點選
+        this.$store.commit('OPEN_GRID_MODE', false);
+        // * 關閉黑色loading
+        this.$store.commit('CTRL_LOADING_MASK', false);
+
+        if (this.noDxfRows.length > 0 && isChecked === false) {
+          this.$swal({
+            width: 402,
+            confirmButtonText: '確定',
+            html: `${noneRows}<br />無方格圖面`
+          });
+        }
+      }).catch((err) => {
+        console.log('錯誤:', err);
+      });
     },
     // * @方格圖：查詢框輸入方格圖號 繪製圖塊
     drawLatticeHandler (keyword) {
@@ -2465,9 +2505,6 @@ export default {
           this.gisMap.appendGrids([item], { noData: true, index: false });
         });
       }
-
-      // this.gisMap.appendGrids(['5693']);
-      // this.gisMap.appendGrids(['2364']);
     },
     // * @方格圖：多圖顯示 繪製圖塊
     drawCrossLattice (value) {
@@ -2531,7 +2568,7 @@ export default {
       const myItem = lattice[index].name;
       console.log(myItem);
 
-      this.gisMap.setupGrid(myItem, { index: false, opacity: value / 100 });
+      this.gisMap.setupGrid(myItem, { index: false, opacity: 1 - (value / 100) });
     },
     // * @方格圖：顯示/隱藏
     gridVisibleHandler ($event, id, file) {
@@ -3012,6 +3049,7 @@ export default {
       // this.measurePointBox = true;
       this.activeWindow = 'mobileMeasureWindow';
     },
+    // * 鎖點測量: 點測量 複製
     copyCoord (id) {
       const str = document.getElementById(id);
       window.getSelection().selectAllChildren(str);
@@ -3025,6 +3063,10 @@ export default {
       setTimeout(() => {
         this.copyOkModal = false;
       }, 600);
+    },
+    // * 鎖點測量: 點測量 載入方格圖
+    pointDxfUpload (gridNos) {
+      this.gisMap.appendGrids([gridNos], { index: false, annotation: true });
     },
     // * 監測是否有sessionStorage傳來 有->接值進行建物搜尋
     getSession () {
