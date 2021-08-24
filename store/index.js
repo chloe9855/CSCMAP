@@ -23,7 +23,8 @@ export const state = () => ({
   gridMode: false,
   inputMode: false,
   myPop: false,
-  showClearButton: true
+  showClearButton: true,
+  stackWindow: false
 });
 
 // * ==========================================================================
@@ -112,5 +113,9 @@ export const mutations = {
   // * 桌機版 新增預定用地/測量的 清除全部 按鈕
   CLEAR_BUTTON_HANDLER (state, payload) {
     state.showClearButton = payload;
+  },
+  // * 手機版 當已有建物查詢結果時 又開啟工具列視窗 -> erpbox會被壓在後面
+  STACK_MULTI_BOX (state, payload) {
+    state.stackWindow = payload;
   }
 };

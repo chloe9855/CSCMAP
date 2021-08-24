@@ -171,6 +171,7 @@ export default {
         searchKeyword: '',
         keyInfo: '',
         keyInfoRows: [],
+        allKeys: {},
         itemsVisible: [
           {
             id: 'A',
@@ -264,7 +265,14 @@ export default {
         //     return { name: manageId, value: manageValue };
         //   });
 
-        const keyRows = data.map(item => item.key).join(',');
+        const keyRows = data.map(item => item.key);
+
+        const times = keyRows.length / 200 + 1;
+        // for (let i = 1; i <= times; i++) {
+        //   const row1 = keyRows.slice(0, 200);
+        // const row2 = keyRows.slice(200, 400);
+        // const row3 = keyRows.slice(400);
+        // }
         this.getKeyData(keyRows);
 
         setTimeout(() => {

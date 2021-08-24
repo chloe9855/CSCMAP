@@ -116,6 +116,7 @@
       @latticeKeyWord="drawLatticeHandler"
       @crossGrid="drawCrossLattice"
       @closeWindow="activeWindow = '', cancelStepHandler(), deleteAllGeometryItemHandler2(['line','rect','poly','circle'])"
+      @moreSearch="iframeSearch"
     >
       <QueryWindowContainer-component
         v-if="screenWidth > 1023 && searchResult.list.structure.length > 0 && nowMode === 'structure'"
@@ -910,14 +911,14 @@
       mode="out-in"
     >
       <PositionAlert-component
-        v-if="positionAlert.isOpen === true"
+        v-if="activeWindow === 'posAlertWindow'"
         :reference="positionAlert.reference"
         :csc="myCsc"
         :twd="myTwd"
         :cubeno="myCubeNo"
         :cubename="myCubeName"
         :cold="myCold"
-        @control="ctrlPositionAlert"
+        @close="closePositionAlert"
       />
     </transition>
   </div>
@@ -1832,96 +1833,92 @@ export default {
       this.gisMap.appendGrids(this.gridRows, { noData: true, index: false });
     },
     // * @我的位置：控制視窗開啟/關閉
-    ctrlPositionAlert (payload) {
-      if (payload === true) {
-        if (this.positionAlert.timer === null) {
-          // ! 這邊需要抓取坐標資訊
-          if (window.navigator.geolocation) {
-            // 取得瀏覽器坐標資訊
-            window.navigator.geolocation.getCurrentPosition((data) => {
-              this.positionAlert.reference.latitude = data.coords.latitude;
-              this.positionAlert.reference.longitude = data.coords.longitude;
-              const lat = data.coords.latitude;
-              const lon = data.coords.longitude;
-              console.log(lat + ',' + lon);
-              // 中鋼坐標
-              const corTrans = CSC.CoordTrans('EPSG4326', 'CSC', { x: lon, y: lat });
+    ctrlPositionAlert () {
+      // ! 這邊需要抓取坐標資訊
+      if (window.navigator.geolocation) {
+        // 取得瀏覽器坐標資訊
+        window.navigator.geolocation.getCurrentPosition((data) => {
+          this.positionAlert.reference.latitude = data.coords.latitude;
+          this.positionAlert.reference.longitude = data.coords.longitude;
+          const lat = data.coords.latitude;
+          const lon = data.coords.longitude;
+          console.log(lat + ',' + lon);
+          // 中鋼坐標
+          const corTrans = CSC.CoordTrans('EPSG4326', 'CSC', { x: lon, y: lat });
 
-              console.log(CSC.CoordTrans('EPSG4326', 'CSC', { x: lon, y: lat }));
-              console.log(corTrans.x);
+          console.log(CSC.CoordTrans('EPSG4326', 'CSC', { x: lon, y: lat }));
+          console.log(corTrans.x);
 
-              // TWD&方格坐標 (中鋼坐標=換算出來的方格坐標)
-              console.log(this.gisMap.coordinateInfo(CSC.CoordTrans('EPSG4326', 'CSC', { x: lon, y: lat })));
-              this.myCsc.x = this.gisMap.coordinateInfo(corTrans).CSC.x.toFixed(2);
-              this.myCsc.y = this.gisMap.coordinateInfo(corTrans).CSC.y.toFixed(2);
-              this.myTwd.x = this.gisMap.coordinateInfo(corTrans).TWD97.x.toFixed(2);
-              this.myTwd.y = this.gisMap.coordinateInfo(corTrans).TWD97.y.toFixed(2);
-              if (this.gisMap.coordinateInfo(corTrans).GridNO !== undefined) {
-                this.myCubeNo = this.gisMap.coordinateInfo(corTrans).GridNO;
-              }
-
-              if (typeof this.gisMap.coordinateInfo(corTrans).CRM !== 'undefined') {
-                this.myCold.x = this.gisMap.coordinateInfo(corTrans).CRM.x.toFixed(2);
-                this.myCold.y = this.gisMap.coordinateInfo(corTrans).CRM.y.toFixed(2);
-                this.myCubeName = '冷三方格圖號';
-              } else {
-                this.myCubeName = '方格圖號';
-                this.myCold.x = '';
-                this.myCold.y = '';
-              }
-
-              // 定位
-              this.gisMap.setCenter(corTrans);
-              if (this.bluep !== '') {
-                this.bluep.destroy();
-              }
-
-              const imgUrl = require('~/assets/img/mycircle.svg');
-              this.bluep = new CSC.GISMarker(this.gisMap, (corTrans), null, new CSC.GISImage(imgUrl, new CSC.GISSize(20, 20), corTrans, new CSC.GISPoint(10, 10)));
-              // this.bluep = new CSC.GISMarker(this.gisMap, corTrans, null, this.pGISSymbo); // 用幾何圖形建立標記點
-
-              this.bluepAll.push(this.bluep);
-              if (this.bluepAll.length > 1) {
-                this.gisMap.drawingMethod(CSC.DrawingMethod.Remove, { overlay: this.bluepAll.splice(0, 1)[0] });
-              }
-
-              this.bluep.setFlat(true);
-              // this.addSymbo();
-              // this.bluep.setIcon(this.pGISSymbo);
-
-              this.CONSOLE('【我的位置】根據瀏覽器位置調整坐標資訊');
-              this.positionAlert.isOpen = true;
-              // this.positionAlert.timer = setTimeout(() => {
-              //   this.closePositionAlert();
-              // }, 3000);
-            }, (err) => {
-              console.log(err);
-
-              this.$swal({
-                icon: 'error',
-                width: 402,
-                text: '坐標資訊取得失敗',
-                confirmButtonText: '確定',
-                showCloseButton: true
-              });
-            });
-          } else {
-            this.$swal({
-              icon: 'error',
-              width: 402,
-              text: '您的瀏覽器的不支援取得坐標資訊',
-              confirmButtonText: '確定',
-              showCloseButton: true
-            });
+          // TWD&方格坐標 (中鋼坐標=換算出來的方格坐標)
+          console.log(this.gisMap.coordinateInfo(CSC.CoordTrans('EPSG4326', 'CSC', { x: lon, y: lat })));
+          this.myCsc.x = this.gisMap.coordinateInfo(corTrans).CSC.x.toFixed(2);
+          this.myCsc.y = this.gisMap.coordinateInfo(corTrans).CSC.y.toFixed(2);
+          this.myTwd.x = this.gisMap.coordinateInfo(corTrans).TWD97.x.toFixed(2);
+          this.myTwd.y = this.gisMap.coordinateInfo(corTrans).TWD97.y.toFixed(2);
+          if (this.gisMap.coordinateInfo(corTrans).GridNO !== undefined) {
+            this.myCubeNo = this.gisMap.coordinateInfo(corTrans).GridNO;
           }
-        }
+
+          if (typeof this.gisMap.coordinateInfo(corTrans).CRM !== 'undefined') {
+            this.myCold.x = this.gisMap.coordinateInfo(corTrans).CRM.x.toFixed(2);
+            this.myCold.y = this.gisMap.coordinateInfo(corTrans).CRM.y.toFixed(2);
+            this.myCubeName = '冷三方格圖號';
+          } else {
+            this.myCubeName = '方格圖號';
+            this.myCold.x = '';
+            this.myCold.y = '';
+          }
+
+          // 定位
+          this.gisMap.setCenter(corTrans);
+          if (this.bluep !== '') {
+            this.bluep.destroy();
+          }
+
+          // 放大
+          const myArr2 = [{ x: corTrans.x + 50, y: corTrans.y + 50 }, { x: corTrans.x + 50, y: corTrans.y - 50 }, { x: corTrans.x - 50, y: corTrans.y - 50 }, { x: corTrans.x - 50, y: corTrans.y + 50 }];
+          this.gisMap.fitBounds(new CSC.GISEnvelope(myArr2), 1.25);
+
+          const imgUrl = require('~/assets/img/mycircle.svg');
+          this.bluep = new CSC.GISMarker(this.gisMap, (corTrans), null, new CSC.GISImage(imgUrl, new CSC.GISSize(20, 20), corTrans, new CSC.GISPoint(10, 10)));
+
+          this.bluepAll.push(this.bluep);
+          if (this.bluepAll.length > 1) {
+            this.gisMap.drawingMethod(CSC.DrawingMethod.Remove, { overlay: this.bluepAll.splice(0, 1)[0] });
+          }
+
+          this.bluep.setFlat(true);
+
+          this.CONSOLE('【我的位置】根據瀏覽器位置調整坐標資訊');
+
+          // this.positionAlert.timer = setTimeout(() => {
+          //   this.closePositionAlert();
+          // }, 3000);
+        }, (err) => {
+          console.log(err);
+
+          this.$swal({
+            icon: 'error',
+            width: 402,
+            text: '坐標資訊取得失敗',
+            confirmButtonText: '確定',
+            showCloseButton: true
+          });
+        });
       } else {
-        clearTimeout(this.positionAlert.timer);
-        this.closePositionAlert();
+        this.$swal({
+          icon: 'error',
+          width: 402,
+          text: '您的瀏覽器的不支援取得坐標資訊',
+          confirmButtonText: '確定',
+          showCloseButton: true
+        });
       }
     },
     // * @我的位置：視窗關閉，並清除坐標資訊
     closePositionAlert () {
+      this.activeWindow = '';
+      clearInterval(this.positionAlert.timer);
       this.positionAlert.isOpen = false;
       this.positionAlert.timer = null;
       this.positionAlert.reference.latitude = 0;
@@ -1929,6 +1926,9 @@ export default {
     },
     // * 圖層顯示或隱藏
     layerVisibleHandler ($event, id, file) {
+      const index = this.layerOptions.layerList.findIndex(item => item.fid === id);
+      this.layerOptions.layerList[index].visible = $event;
+
       if (this.layerOptions.current === 'local') {
         this.gisMap.setupLayer({ fid: id, visible: $event });
         console.log(`id ${id} 是否顯示 ${$event}`);
@@ -2243,18 +2243,20 @@ export default {
             newArr.push({ building: { key: myName[index] }, geometry: item.toJson() });
           });
 
+          const formData = new FormData();
+          formData.append('userId', this.$store.state.accessToken);
+          formData.append('points', `${JSON.stringify(newArr)}`);
+
           fetch('/csc2api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/Building', {
             method: 'POST',
-            headers: new Headers({
-              'Content-Type': 'application/json'
-            }),
-            body: JSON.stringify({
-              points: newArr,
-              userId: this.$store.state.accessToken
-            })
+            // headers: new Headers({
+            //   'Content-Type': 'application/json'
+            // }),
+            body: formData
           }).then((response) => {
-            return response;
+            return response.json();
           }).then((data) => {
+            console.log(data);
             window.open(`${data}`);
           }).catch((err) => {
             console.log('錯誤:', err);
@@ -2291,6 +2293,12 @@ export default {
       if (MODE_TYPE === 'structure') {
         // ! call api 抓資料
         this.getSearchResult();
+
+        // 手機版會關閉有開啟的視窗
+        if (this.screenWidth < 1024) {
+          this.activeWindow = '';
+          this.closePositionAlert();
+        }
 
         setTimeout(() => {
           this.$store.commit('CTRL_LOADING_MASK', false);
@@ -2623,9 +2631,10 @@ export default {
         });
       }, 200);
     },
-    // * @方格圖：切換回建物 開啟球標、開啟目前的圖層預設
+    // * @方格圖：切換回建物 開啟球標、開啟目前的圖層預設、清除方格搜尋結果
     hideGridHandler () {
       // this.hideClusterHandler();
+      this.searchResult.list.lattice.length = 0;
       this.markerVisible = true;
       this.gisMap.setupMarker({ visible: true });
       this.getDefaultLayer();
@@ -2851,6 +2860,25 @@ export default {
           return a.applytime > b.applytime ? 1 : -1;
         });
       }
+    },
+    // * 建物搜尋 -> 更多篩選條件
+    iframeSearch () {
+      this.$swal({
+        width: 800,
+        allowOutsideClick: true,
+        showConfirmButton: false,
+        html: '<iframe src="https://east.csc.com.tw/eas/mhb/platform/mhbba?ref=gis" width="784" height="164" style="position: absolute; top: 24px; left: 4px;"></iframe>',
+        onRender: () => {
+          window.addEventListener('message', (event) => {
+            // console.log(`Received message: ${event.data}`);
+            console.log(typeof event.data);
+            this.searchResult.list.structure = JSON.parse(event.data);
+            console.log('Received message');
+            console.log(event);
+            this.$swal.close();
+          });
+        }
+      });
     },
     // * 畫面擷取
     screenShotHandler () {
@@ -3125,6 +3153,22 @@ export default {
         this.pointMeasurer.aimpoint = true;
       } else {
         this.pointMeasurer.aimpoint = false;
+      }
+
+      // * 手機版 當已有建物查詢結果時 又開啟工具列視窗 -> erpbox會被壓在後面
+      if (value !== '' && this.searchResult.list.structure.length >= 1 && this.screenWidth < 1024) {
+        this.$store.commit('STACK_MULTI_BOX', true);
+      } else {
+        this.$store.commit('STACK_MULTI_BOX', false);
+      }
+
+      // * 我的定位 面板開啟後每5秒更新一次
+      if (value === 'posAlertWindow') {
+        this.positionAlert.timer = setInterval(() => {
+          this.ctrlPositionAlert();
+        }, 5000);
+      } else {
+        clearInterval(this.positionAlert.timer);
       }
     },
     markerVisible (value) {

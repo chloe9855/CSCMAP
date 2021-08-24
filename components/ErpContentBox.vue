@@ -4,7 +4,8 @@
     :class="{
       'mode-detail': modeType === 'detail',
       'is-hidden': isHidden,
-      'down': $store.state.myErpCluster === true
+      'down': $store.state.myErpCluster === true,
+      'hide-back': $store.state.stackWindow === true
     }"
   >
     <div
@@ -370,6 +371,11 @@ export default {
 
 <style lang="scss" scoped>
 @import '~/assets/scss/utils/_utils.scss';
+
+// * 手機版 當已有建物查詢結果時 又開啟工具列視窗 -> erpbox會被壓在後面
+.hide-back {
+  z-index: 200 !important;
+}
 
 .down {
   transition: ease-in-out 0.5s;

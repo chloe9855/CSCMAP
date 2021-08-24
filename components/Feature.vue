@@ -19,7 +19,8 @@
         <a
           href="javascript:;"
           class="feature__btn icon-my-position position-alert-btn"
-          @click.stop="$emit('setPositionAlert', true)"
+          :class="currentClassHandler('posAlertWindow')"
+          @click.stop="setDragboxHandler('posAlertWindow'), $emit('setPositionAlert')"
           @mousedown.prevent
         >
           <span>我的位置</span>

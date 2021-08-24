@@ -1,7 +1,7 @@
 <template>
   <div class="position-alert">
-    <div class="msgbox">
-      <div class="slideup-tips" @click.stop="$emit('control', false)" />
+    <div class="msgbox" :class="{ 'is-hidden': isHidden }">
+      <div class="slideup-tips" :class="{ 'is-hidden': isHidden }" @click.stop="isHidden = !isHidden" />
       <div class="msgbox__wrapper">
         <div class="msgbox__header">
           <div class="msgbox__header-content">
@@ -10,7 +10,7 @@
           <a
             href="javascript:;"
             class="msgbox__close-btn"
-            @click.stop="$emit('control', false)"
+            @click.stop="$emit('close')"
             @mousedown.prevent
           />
         </div>
@@ -36,6 +36,11 @@
 
 <script>
 export default {
+  data () {
+    return {
+      isHidden: false
+    };
+  },
   props: {
     reference: Object,
     csc: Object,
@@ -80,6 +85,10 @@ export default {
 
   @include max-width(map-get($tablet, lg)) {
     border-radius: 0;
+  }
+
+  &.is-hidden {
+    transform: translateY(65%);
   }
 }
 

@@ -173,6 +173,7 @@
           href="javascript:;"
           class="controller-btn"
           title="更多篩選條件"
+          @click.stop="$emit('moreSearch')"
           @mousedown.prevent
         >
           更多篩選條件

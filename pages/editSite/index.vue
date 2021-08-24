@@ -2196,30 +2196,20 @@ export default {
           formData.append('userId', this.userId);
           formData.append('key', this.manageId);
           formData.append('points', `${JSON.stringify(newArr)}`);
-          // formData.append('params', `userId=${this.userId}&key=${this.manageId}&points=${JSON.stringify(newArr)}`);
 
           fetch('/csc2api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/UpdateBuildingPoints', {
             method: 'POST',
             // headers: new Headers({
             //   'Content-Type': 'multipart/form-data'
             // }),
-            headers: new Headers({
-              'Content-Type': 'application/json'
-            }),
-            body: JSON.stringify({
-              userId: this.userId,
-              key: this.manageId,
-              points: newArr
-            })
+            body: formData
           }).then((response) => {
             return response;
           }).then((data) => {
             // 若確定有儲存到ERP 才把傳到後端的key值賦值給取名陣列
             this.landId = myName;
-            // 跳轉視窗
-            // window.location.href = `${data}`;
-            console.log(data);
-            window.open(`${data}`);
+            // 關閉視窗
+            window.close();
           }).catch((err) => {
             console.log('錯誤:', err);
           });

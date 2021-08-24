@@ -228,7 +228,9 @@ export default {
       // * 使用者權限角色
       myRole: '',
       // * 查詢載入方格圖權限
-      canSearchGrid: null
+      canSearchGrid: null,
+      // * 是否已呼叫signOnStatus
+      callLoginApi: false
     };
   },
   mounted () {
@@ -285,6 +287,7 @@ export default {
         if (response.status === 401) {
           // do what you need to do here
           this.$store.commit('SET_ACCESS_TOKEN', '');
+          this.callLoginApi = true;
           return Promise.reject(response);
         }
         return response.json();
@@ -293,6 +296,7 @@ export default {
         this.userID = jsonData.UID;
         this.userName = jsonData.UserName;
         this.$store.commit('SET_ACCESS_TOKEN', jsonData.UID);
+        this.callLoginApi = true;
       }).catch((err) => {
         console.log('錯誤:', err);
         console.log(err.status);
@@ -402,6 +406,12 @@ export default {
     }
   },
   watch: {
+    // * 若沒登入會跳轉回首頁
+    callLoginApi (value) {
+      if (value === true && this.hasAccessToken === false) {
+        this.$router.push('/index');
+      }
+    }
     // * 監聽路由變化 若有改變就重新整理
     // '$route' (to, from) {
     //   if (to === 'map') {
