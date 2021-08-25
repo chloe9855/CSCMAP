@@ -2209,6 +2209,7 @@ export default {
             // 若確定有儲存到ERP 才把傳到後端的key值賦值給取名陣列
             this.landId = myName;
             // 關閉視窗
+            window.open('', '_self', '');
             window.close();
           }).catch((err) => {
             console.log('錯誤:', err);

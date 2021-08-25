@@ -94,27 +94,39 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(rowsItem, index) of tablesData.rows" :key="rowsItem['key']">
-                <td>{{ rowsItem['key'] }}</td>
-                <td>{{ rowsItem['project'] }}</td>
-                <td>{{ rowsItem['building'] }}</td>
-                <td>
-                  <div v-if="rowsItem['display'] === true" class="dataTable__input">
-                    <InputContentListener :v-model="`${rowsItem.coordinate[0]},${rowsItem.coordinate[1]}`" />
+              <tr v-for="(rowsItem, index) of tablesData.rows" :key="rowsItem['project']" class="tr">
+                <td class="t1">
+                  <div class="d1">
+                    {{ rowsItem['key'] }}
+                  </div>
+                </td>
+                <td class="t2">
+                  <div class="d2">
+                    {{ rowsItem['project'] }}
+                  </div>
+                </td>
+                <td class="t3">
+                  <div class="d3">
+                    {{ rowsItem['building'] }}
+                  </div>
+                </td>
+                <td class="t4">
+                  <div class="dataTable__input">
+                    <InputContentListener v-if="rowsItem['display'] === true" v-model="rowsItem['myCoor']" />
+                  </div>
+                </td>
+                <td class="t5">
+                  <div class="dataTable__input d5">
+                    <InputContentListener v-if="rowsItem['display'] === true" v-model="rowsItem['myOffset']" />
+                  </div>
+                </td>
+                <td class="t6">
+                  <div class="dataTable__input d6">
+                    <InputContentListener v-if="rowsItem['display'] === true" v-model="rowsItem['displayName']" />
                   </div>
                 </td>
                 <td>
-                  <div v-if="rowsItem['display'] === true" class="dataTable__input">
-                    <InputContentListener :v-model="`${rowsItem.offset[0]},${rowsItem.offset[1]}`" />
-                  </div>
-                </td>
-                <td>
-                  <div v-if="rowsItem['display'] === true" class="dataTable__input">
-                    <InputContentListener v-model="rowsItem['displayName']" />
-                  </div>
-                </td>
-                <td>
-                  <div class="checkbox dataTable__checkbox">
+                  <div class="checkbox dataTable__checkbox d7">
                     <input
                       :id="`visible_${rowsItem['key']}_${index}`"
                       v-model="rowsItem['display']"
@@ -159,6 +171,10 @@ import InputContentListener from '~/components/tools/InputContentListener';
 export default {
   data () {
     return {
+      rawData: '',
+      keyInfo: '',
+      keyInfoRows: [],
+      labelKeys: '',
       navtabs: {
         current: 0,
         typeList: [
@@ -169,9 +185,6 @@ export default {
       },
       reference: {
         searchKeyword: '',
-        keyInfo: '',
-        keyInfoRows: [],
-        allKeys: {},
         itemsVisible: [
           {
             id: 'A',
@@ -260,45 +273,37 @@ export default {
       }).then((response) => {
         return response.json();
       }).then((data) => {
-        // const newObject = Object.entries(data)
-        //   .map(([manageId, manageValue]) => {
-        //     return { name: manageId, value: manageValue };
-        //   });
-
-        const keyRows = data.map(item => item.key);
-
-        const times = keyRows.length / 200 + 1;
-        // for (let i = 1; i <= times; i++) {
-        //   const row1 = keyRows.slice(0, 200);
-        // const row2 = keyRows.slice(200, 400);
-        // const row3 = keyRows.slice(400);
-        // }
-        this.getKeyData(keyRows);
-
-        setTimeout(() => {
-          this.keyInfo.forEach((item) => {
-            result = {
-              key: item.key,
-              project: item.project,
-              building: item.building
-            };
-            this.keyInfoRows.push(result);
-          });
-
-          data.forEach((item, index) => {
-            item.project = this.keyInfoRows[index].project;
-            item.building = this.keyInfoRows[index].building;
-          });
-
-          this.tablesData.rows = data;
-        }, 100);
-
         console.log(data);
-        console.log(keyRows);
+
+        this.rawData = data;
+        this.rawData.forEach((item) => {
+          item.myCoor = `${item.coordinate[0].toFixed(2)},${item.coordinate[1].toFixed(2)}`;
+          item.myOffset = `${item.offset[0]},${item.offset[1]}`;
+        });
+
+        this.tablesData.rows = this.rawData;
+        const keyRows = data.map(item => item.key);
+        const times = Math.ceil(keyRows.length / 200); // total=514 times=3
+        for (let i = 0; i < times; i++) {
+        //   const row0 = keyRows.slice(0, 200);
+        //   const row1 = keyRows.slice(200, 400);
+        //   const row2 = keyRows.slice(400);
+
+          if (i === times - 1) {
+            this.labelKeys = keyRows.slice(i * 200);
+          } else {
+            this.labelKeys = keyRows.slice(i * 200, (i + 1) * 200);
+          }
+
+          console.log(i);
+          // 用key值去call f3 api
+          this.getKeyData(this.labelKeys);
+        }
       }).catch((err) => {
         console.log('錯誤:', err);
       });
     },
+    // * 用key值去call f3 api以取得 工程名稱project、各棟名稱building
     getKeyData (myKey) {
       fetch(`/csc2api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/getBuildingByKey/${myKey}?_format=json`, {
         method: 'GET',
@@ -308,11 +313,33 @@ export default {
       }).then((response) => {
         return response.json();
       }).then((data) => {
-        console.log(data);
         this.keyInfo = data;
+        this.keyInfo.forEach((item) => {
+          result = {
+            key: item.key,
+            project: item.project,
+            building: item.building
+          };
+          this.keyInfoRows.push(result);
+
+          // 在rawData中補上project、building
+          if (item.key !== null && item.key !== '') {
+            this.moreRawData(item.key, item.project, item.building);
+          }
+        });
+
+        console.log(data);
       }).catch((err) => {
         console.log('錯誤:', err);
       });
+    },
+    // * 在rawData中補上project、building
+    moreRawData (key, project, building) {
+      const index = this.rawData.findIndex(item => item.key === key);
+      this.rawData[index].project = project;
+      this.rawData[index].building = building;
+      this.$forceUpdate();
+      // this.tablesData.rows = this.rawData;
     }
   },
   computed: {
@@ -347,27 +374,85 @@ h2 {
 }
 
 .project_name {
-  padding-left: 19px;
+  width: 146px;
+  padding-left: 5px;
 }
 
 .building_name {
-  padding-left: 21px;
+  width: 210px;
+  // padding-left: 21px;
 }
 
 .mark_coordinate {
-  padding-left: 42px;
+  width: 156px;
+  // padding-left: 42px;
 }
 
 .text_offset {
-  padding-left: 145px;
+  width: 147px;
 }
 
 .display_name {
-  padding-left: 148px;
+  width: 154px;
+  padding-left: 11px;
 }
 
-.is_visible {
-  padding-left: 77px;
+.tr {
+  height: 60px;
+  position: relative;
+}
+
+.t1 {
+  width: 100px;
+}
+
+.d1 {
+  width: 70px;
+}
+
+.t2 {
+  width: 172px;
+}
+
+.d2 {
+  // margin-left: -12px;
+}
+
+.t3 {
+  width: 200px;
+}
+
+.d3 {
+  width: 209px;
+  margin-left: -5px;
+}
+
+.t4 {
+  width: 150px;
+}
+
+.t5 {
+  width: 147px;
+}
+
+.d5 {
+  margin-left: 7px;
+}
+
+.t6 {
+  width: 150px;
+}
+
+.d6 {
+  margin-left: 8px;
+}
+
+.d7 {
+  margin-left: 12px;
+}
+
+.dataTable__input {
+  width: 150px;
 }
 
 </style>

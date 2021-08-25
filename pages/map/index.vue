@@ -2220,7 +2220,7 @@ export default {
       amountCounter[category] += 1;
       graphList.push(result);
     },
-    // * @幾何圖形：上傳幾何圖形資料
+    // * @幾何圖形：上傳幾何圖形資料 更新至ERP
     uploadGraphHandler () {
       const count = this.myGraphs.length;
       const myGraphs = this.myGraphs;
@@ -3166,9 +3166,11 @@ export default {
       if (value === 'posAlertWindow') {
         this.positionAlert.timer = setInterval(() => {
           this.ctrlPositionAlert();
+          console.log('更新位置');
         }, 5000);
       } else {
         clearInterval(this.positionAlert.timer);
+        console.log('解除更新');
       }
     },
     markerVisible (value) {
