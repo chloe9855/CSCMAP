@@ -112,12 +112,12 @@
                 </td>
                 <td class="t4">
                   <div class="dataTable__input">
-                    <InputContentListener v-if="rowsItem['display'] === true" v-model="rowsItem['myCoor']" />
+                    <InputContentListener v-if="rowsItem['display'] === true" v-model="rowsItem['myCoor']" @input="updateCoorValue($event, index)" />
                   </div>
                 </td>
                 <td class="t5">
                   <div class="dataTable__input d5">
-                    <InputContentListener v-if="rowsItem['display'] === true" v-model="rowsItem['myOffset']" />
+                    <InputContentListener v-if="rowsItem['display'] === true" v-model="rowsItem['myOffset']" @input="updateOffValue($event, index)" />
                   </div>
                 </td>
                 <td class="t6">
@@ -154,7 +154,9 @@
           <a
             href="javascript:;"
             class="btn size-small"
+            :class="{'add-orange': orangeSaveButton === true }"
             title="儲存修改"
+            @click.stop="saveAllHandler"
             @mousedown.prevent
           >
             <span>儲存修改</span>
@@ -172,9 +174,12 @@ export default {
   data () {
     return {
       rawData: '',
+      oldValue: '',
       keyInfo: '',
       keyInfoRows: [],
       labelKeys: '',
+      // 要儲存的資料
+      saveRows: '',
       navtabs: {
         current: 0,
         typeList: [
@@ -263,6 +268,18 @@ export default {
         this.reference.itemsVisible[i].isChecked = false;
       }
     },
+    // * 更新坐標數值
+    updateCoorValue ($event, index) {
+      console.log($event);
+      console.log(index);
+      const arr = $event.split(',');
+      this.tablesData.rows[index].coordinate = arr.map(item => parseInt(item, 10));
+    },
+    // * 更新文字偏移數值
+    updateOffValue ($event, index) {
+      const arr = $event.split(',');
+      this.tablesData.rows[index].offset = arr.map(item => parseInt(item, 10));
+    },
     // * 取得預設資料
     getRawData () {
       fetch('/cscmap2/api/Label', {
@@ -282,6 +299,7 @@ export default {
         });
 
         this.tablesData.rows = this.rawData;
+
         const keyRows = data.map(item => item.key);
         const times = Math.ceil(keyRows.length / 200); // total=514 times=3
         for (let i = 0; i < times; i++) {
@@ -340,20 +358,100 @@ export default {
       this.rawData[index].building = building;
       this.$forceUpdate();
       // this.tablesData.rows = this.rawData;
+      // 深拷貝一份
+      this.oldValue = _.cloneDeep(this.rawData);
+    },
+    // * 儲存全部修改
+    saveAllHandler () {
+      this.saveRows = _.cloneDeep(this.tablesData.rows);
+      this.saveRows.forEach((item) => {
+        delete item.myCoor;
+        delete item.myOffset;
+        delete item.project;
+        delete item.building;
+      });
+      // this.saveRows = [
+      //   {
+      //     key: '00005-03',
+      //     coordinate: [846.24, 6101.30],
+      //     offset: [10, 10],
+      //     displayName: '預設名稱',
+      //     display: false,
+      //     type: 'C'
+      //   }
+      // ];
+
+      fetch('/cscmap2/api/label', {
+        method: 'PATCH',
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        }),
+        body: JSON.stringify(this.saveRows)
+      }).then((response) => {
+        return response;
+      }).then((data) => {
+        console.log(data);
+
+        this.$swal({
+          width: 402,
+          text: '儲存成功',
+          imageUrl: require('~/assets/img/success.png'),
+          imageWidth: 70,
+          imageHeight: 70,
+          confirmButtonText: '確定',
+          showCloseButton: true
+        });
+
+        setTimeout(() => {
+          this.getRawData();
+        }, 100);
+      }).catch((err) => {
+        console.log('錯誤:', err);
+      });
     }
   },
   computed: {
     // * 所選取的頁籤項目名稱
     navtabsCurrentName () {
       return this.navtabs.typeList.filter(item => item.id === this.navtabs.current)[0].name;
+    },
+    // 有修改時按鈕變橘色
+    orangeSaveButton () {
+      const neww = JSON.stringify(this.tablesData.rows);
+      const oldd = JSON.stringify(this.oldValue);
+      if (neww !== oldd) {
+        return true;
+      } else {
+        return false;
+      }
     }
   }
+  // watch: {
+  //   'tablesData.rows': {
+  //     handler (value) {
+  //       console.log(value);
+  //       value.forEach((item) => {
+  //         const arr = item.myCoor.split(',');
+  //         console.log(arr);
+  //         const meme = arr.map(item => parseInt(item, 10));
+  //         console.log(meme);
+  //         item.coordinate = arr.map(item => parseInt(item, 10));
+  //       });
+  //     }
+  //   }
+  // }
 };
 </script>
 
 <style lang="scss" scoped>
 @import '~/assets/scss/utils/_utils.scss';
 @import '~/assets/scss/_article.scss';
+
+.add-orange {
+  color: #f08300 !important;
+  background-color: #fff !important;
+  border: 1px #f08300 solid !important;
+}
 
 h2 {
   line-height: 1.6em;

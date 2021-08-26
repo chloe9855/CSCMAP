@@ -240,12 +240,12 @@ export default {
         this.$swal({
           icon: 'warning',
           width: 402,
-          text: '建物位置請點選看詳細',
+          text: '無建物位置資訊',
           confirmButtonText: '確定',
           showCloseButton: true
         });
 
-        return;
+        // return;
       }
 
       // ? 打一個事件至上層，控制地圖API去移動至目前選取的標的

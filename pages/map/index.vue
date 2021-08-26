@@ -115,7 +115,7 @@
       @clickStructure="hideGridHandler"
       @latticeKeyWord="drawLatticeHandler"
       @crossGrid="drawCrossLattice"
-      @closeWindow="activeWindow = '', cancelStepHandler(), deleteAllGeometryItemHandler2(['line','rect','poly','circle'])"
+      @closeWindow="activeWindow = '', cancelStepHandler(), deleteAllGeometryItemHandler2(['line','rect','poly','circle']), closeMeasurePopupBox()"
       @moreSearch="iframeSearch"
     >
       <QueryWindowContainer-component
@@ -2297,6 +2297,7 @@ export default {
         // 手機版會關閉有開啟的視窗
         if (this.screenWidth < 1024) {
           this.activeWindow = '';
+          this.closeMeasurePopupBox();
           this.closePositionAlert();
         }
 

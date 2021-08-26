@@ -1,5 +1,5 @@
 <template>
-  <ul class="buildingList">
+  <ul class="buildingList" :class="{ 'mobile': $store.state.screenWidth < 1024 }">
     <li
       v-for="item of itemsList"
       :key="item.key"
@@ -46,6 +46,12 @@ export default {
     .building__item {
       background-color: #f4f4f4;
     }
+  }
+}
+
+.mobile {
+  li:last-child {
+    padding-bottom: 65px;
   }
 }
 
