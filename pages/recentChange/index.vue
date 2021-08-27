@@ -139,7 +139,7 @@
               </tr>
             </thead>
             <tbody v-if="tablesData.rows !== '無資料'">
-              <tr v-for="rowsItem of resultRows" :key="rowsItem.value[rowsItem.value.length - 1].changeTime">
+              <tr v-for="rowsItem of resultRows" :key="rowsItem.name">
                 <td>{{ rowsItem.value[rowsItem.value.length - 1].project }}</td>
                 <td>{{ rowsItem.name }}</td>
                 <td>{{ rowsItem.value[rowsItem.value.length - 1].permitNo }}</td>
@@ -408,7 +408,7 @@ export default {
       // 關閉 Loading 視窗與開啟側邊選單
       this.$store.commit('CTRL_LOADING_MASK', false);
       this.isInit = true;
-    }, 2800);
+    }, 2000);
   },
   methods: {
     // * 表格升序
@@ -653,6 +653,13 @@ export default {
           return;
         }
 
+        // 去除是空值的資料
+        for (const prop in data) {
+          if (data[prop].length < 1) {
+            delete data[prop];
+          }
+        }
+
         const newObject = Object.entries(data)
           .map(([manageId, manageValue]) => {
             return { name: manageId, value: manageValue };
@@ -662,21 +669,13 @@ export default {
         });
 
         if (this.myHelix === '') {
-          // this.tablesData.rows = data;
-
           this.tablesData.rows = newObject;
         } else if (this.myHelix === 'True') {
           // helix搜尋條件是有更新
-          // const myArr = data.filter(item => item.helix === 'True');
-          // this.tablesData.rows = myArr;
-
           const myArr = newObject.filter(item => item.value[item.value.length - 1].helix === 'True');
           this.tablesData.rows = myArr;
         } else if (this.myHelix === 'Nope') {
           // helix搜尋條件是未更新
-          // const myArr2 = data.filter(item => item.helix !== 'True');
-          // this.tablesData.rows = myArr2;
-
           const myArr2 = newObject.filter(item => item.value[item.value.length - 1].helix !== 'True');
           this.tablesData.rows = myArr2;
         }

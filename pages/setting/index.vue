@@ -38,7 +38,7 @@
             :key="checkbox.id"
             class="option-btn checkbox"
           >
-            <input :id="`items-visible-chk_${checkbox.id}`" v-model="checkbox.isChecked" type="checkbox">
+            <input :id="`items-visible-chk_${checkbox.id}`" v-model="checkbox.isChecked" type="checkbox" @click="selectMe(`update-chk_${checkbox.id}`)">
             <label :for="`items-visible-chk_${checkbox.id}`">{{ checkbox.name }}</label>
           </div>
         </div>
@@ -58,6 +58,7 @@
               href="javascript:;"
               class="btn has-back-icon icon-search size-small"
               title="搜尋"
+              @click.stop="searchHandler"
               @mousedown.prevent
             >
               <span>搜尋</span>
@@ -67,7 +68,7 @@
       </div>
     </div>
     <div class="article__content right_wrap">
-      <div class="article__wrap theme-scrollbar">
+      <div ref="content" class="article__wrap theme-scrollbar">
         <div class="dataTable__wrapper theme-scrollbar">
           <table class="dataTable">
             <thead class="my-thead">
@@ -94,7 +95,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(rowsItem, index) of tablesData.rows" :key="rowsItem['project']" class="tr">
+              <tr v-for="(rowsItem, index) of tablesData.rows" :key="rowsItem['key']" class="tr">
                 <td class="t1">
                   <div class="d1">
                     {{ rowsItem['key'] }}
@@ -138,15 +139,20 @@
               </tr>
             </tbody>
           </table>
+
+          <div v-if="tablesData.rows.length < 1" :style="'position: absolute; left: 47%; top: 48%;'">
+            查無匹配結果
+          </div>
         </div>
       </div>
 
-      <div class="row is-flex-end">
+      <div v-if="tablesData.rows.length >= 1" class="row is-flex-end">
         <div class="btn-group">
           <a
             href="javascript:;"
             class="btn color-white has-outline outline-color-default size-small"
             title="取消"
+            @click.stop="returnBack"
             @mousedown.prevent
           >
             <span>取消</span>
@@ -180,6 +186,8 @@ export default {
       labelKeys: '',
       // 要儲存的資料
       saveRows: '',
+      // 搜尋結果
+      searchResult: '',
       navtabs: {
         current: 0,
         typeList: [
@@ -250,6 +258,14 @@ export default {
   },
   mounted () {
     this.getRawData();
+    // 開啟 Loading 視窗
+    this.$store.commit('CTRL_LOADING_MASK', true);
+    // 關閉 Loading 視窗
+    setTimeout(() => {
+      this.$store.commit('CTRL_LOADING_MASK', false);
+    }, 6000);
+
+    sessionStorage.setItem('oriData', '');
   },
   methods: {
     // * 表格升序
@@ -258,7 +274,14 @@ export default {
     },
     // * 表格降序
     descendingHandler (id) {
-      this.tablesData.rows.sort((a, b) => a[id] > b[id] ? -1 : 1);
+      // this.tablesData.rows.sort((a, b) => a[id] > b[id] ? -1 : 1);
+      this.tablesData.rows.sort((a, b) => a[id] > b[id] ? 1 : -1);
+    },
+    // * 按下取消 -> 回復原狀
+    returnBack () {
+      const originalData = JSON.parse(sessionStorage.getItem('oriData'));
+      this.tablesData.rows = originalData;
+      this.rawData = originalData;
     },
     // * 清除全部搜尋條件
     clearAllHandler () {
@@ -267,6 +290,12 @@ export default {
       for (let i = 0; i < this.reference.itemsVisible.length; i++) {
         this.reference.itemsVisible[i].isChecked = false;
       }
+      // 回復成搜尋前的資料
+      this.tablesData.rows = this.rawData;
+      // scroll至頂端
+      this.$nextTick(() => {
+        this.$refs.content.scrollTop = 0;
+      });
     },
     // * 更新坐標數值
     updateCoorValue ($event, index) {
@@ -279,6 +308,17 @@ export default {
     updateOffValue ($event, index) {
       const arr = $event.split(',');
       this.tablesData.rows[index].offset = arr.map(item => parseInt(item, 10));
+    },
+    // * 單選checkbox
+    selectMe (id) {
+      for (let i = 0; i < this.reference.itemsVisible.length; i++) {
+        this.reference.itemsVisible[i].isChecked = false;
+      }
+      this.reference.itemsVisible.forEach((item) => {
+        if (item.id === id) {
+          item.isChecked = true;
+        }
+      });
     },
     // * 取得預設資料
     getRawData () {
@@ -313,7 +353,6 @@ export default {
             this.labelKeys = keyRows.slice(i * 200, (i + 1) * 200);
           }
 
-          console.log(i);
           // 用key值去call f3 api
           this.getKeyData(this.labelKeys);
         }
@@ -360,6 +399,7 @@ export default {
       // this.tablesData.rows = this.rawData;
       // 深拷貝一份
       this.oldValue = _.cloneDeep(this.rawData);
+      sessionStorage.setItem('oriData', JSON.stringify(this.oldValue));
     },
     // * 儲存全部修改
     saveAllHandler () {
@@ -370,16 +410,6 @@ export default {
         delete item.project;
         delete item.building;
       });
-      // this.saveRows = [
-      //   {
-      //     key: '00005-03',
-      //     coordinate: [846.24, 6101.30],
-      //     offset: [10, 10],
-      //     displayName: '預設名稱',
-      //     display: false,
-      //     type: 'C'
-      //   }
-      // ];
 
       fetch('/cscmap2/api/label', {
         method: 'PATCH',
@@ -408,6 +438,57 @@ export default {
       }).catch((err) => {
         console.log('錯誤:', err);
       });
+    },
+    // * 搜尋
+    searchHandler () {
+      if (this.navtabsCurrentName === '工程名稱' && this.myDisplay !== '') {
+        const newArr = this.rawData.filter(item => item.project === this.myProject && item.display === this.myDisplay);
+        this.tablesData.rows = newArr;
+      }
+      if (this.navtabsCurrentName === '工程名稱' && this.myDisplay === '') {
+        const newArr = this.rawData.filter(item => item.project === this.myProject);
+        this.tablesData.rows = newArr;
+      }
+      if (this.navtabsCurrentName === '各棟名稱' && this.myDisplay !== '') {
+        const newArr = this.rawData.filter(item => item.building === this.myBuilding && item.display === this.myDisplay);
+        this.tablesData.rows = newArr;
+      }
+      if (this.navtabsCurrentName === '各棟名稱' && this.myDisplay === '') {
+        const newArr = this.rawData.filter(item => item.building === this.myBuilding);
+        this.tablesData.rows = newArr;
+      }
+      if (this.navtabsCurrentName === '管理序號' && this.myDisplay !== '') {
+        const newArr = [];
+        this.rawData.forEach((item) => {
+          if (item.key.search(this.myKey) !== -1) {
+            newArr.push(item);
+          }
+        });
+        const myArr = newArr.filter(item => item.display === this.myDisplay);
+        this.tablesData.rows = myArr;
+
+        if (this.myKey === '') {
+          this.tablesData.rows.length = 0;
+        }
+      }
+      if (this.navtabsCurrentName === '管理序號' && this.myDisplay === '') {
+        const newArr = [];
+        this.rawData.forEach((item) => {
+          if (item.key.search(this.myKey) !== -1) {
+            newArr.push(item);
+          }
+        });
+        this.tablesData.rows = newArr;
+
+        if (this.myKey === '') {
+          this.tablesData.rows.length = 0;
+        }
+      }
+
+      // scroll至頂端
+      this.$nextTick(() => {
+        this.$refs.content.scrollTop = 0;
+      });
     }
   },
   computed: {
@@ -417,29 +498,36 @@ export default {
     },
     // 有修改時按鈕變橘色
     orangeSaveButton () {
-      const neww = JSON.stringify(this.tablesData.rows);
+      const neww = JSON.stringify(this.rawData);
       const oldd = JSON.stringify(this.oldValue);
+
       if (neww !== oldd) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+    myProject () {
+      return (this.navtabsCurrentName === '工程名稱') ? this.reference.searchKeyword.replace(/\s/g, '').replace(/,$/, '') : '';
+    },
+    myBuilding () {
+      return (this.navtabsCurrentName === '各棟名稱') ? this.reference.searchKeyword.replace(/\s/g, '').replace(/,$/, '') : '';
+    },
+    myKey () {
+      return (this.navtabsCurrentName === '管理序號') ? this.reference.searchKeyword.replace(/\s/g, '').replace(/,$/, '') : '';
+    },
+    myDisplay () {
+      const newArr = this.reference.itemsVisible.filter(item => item.isChecked === true);
+      const amount = newArr.length;
+      if (amount < 1) {
+        return '';
+      } else if (newArr[0].name === '顯示') {
         return true;
       } else {
         return false;
       }
     }
   }
-  // watch: {
-  //   'tablesData.rows': {
-  //     handler (value) {
-  //       console.log(value);
-  //       value.forEach((item) => {
-  //         const arr = item.myCoor.split(',');
-  //         console.log(arr);
-  //         const meme = arr.map(item => parseInt(item, 10));
-  //         console.log(meme);
-  //         item.coordinate = arr.map(item => parseInt(item, 10));
-  //       });
-  //     }
-  //   }
-  // }
 };
 </script>
 

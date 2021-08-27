@@ -1298,7 +1298,9 @@ export default {
       myData: '',
       // * sessionStroage裡給的建物搜尋key值
       sesKeys: '',
-      sesId: ''
+      sesId: '',
+      // * 現在是建物or方格
+      searchMode: ''
     };
   },
   components: {
@@ -2614,7 +2616,7 @@ export default {
     },
     // * @方格圖：切換至方格 關閉球標、隱藏某些圖層
     openGridHandler () {
-      // this.hideClusterHandler();
+      this.searchMode = 'lattice';
       this.activeWindow = '';
       this.markerVisible = false;
       this.gisMap.setupMarker({ visible: false });
@@ -2634,7 +2636,7 @@ export default {
     },
     // * @方格圖：切換回建物 開啟球標、開啟目前的圖層預設、清除方格搜尋結果
     hideGridHandler () {
-      // this.hideClusterHandler();
+      this.searchMode = 'structure';
       this.searchResult.list.lattice.length = 0;
       this.markerVisible = true;
       this.gisMap.setupMarker({ visible: true });
@@ -2645,6 +2647,7 @@ export default {
         this.gisMap.setupGrid(item, { index: false });
         this.gisMap.removeGrids([item]);
       });
+
       // 將圖層設定回復至預設
       setTimeout(() => {
         this.layerOptions.layerList.forEach((item) => {
@@ -3011,8 +3014,12 @@ export default {
     // * 關閉 手機版 測量點線面視窗
     closeMeasurePopupBox () {
       this.activeWindow = '';
-      // 恢復方格選圖
-      this.$store.commit('OPEN_GRID_MODE', true);
+      // 在非建物搜尋情況下 恢復方格選圖
+      if (this.searchMode === 'lattice') {
+        this.$store.commit('OPEN_GRID_MODE', true);
+      } else if (this.searchMode === 'structure') {
+        this.$store.commit('OPEN_GRID_MODE', false);
+      }
 
       if (this.mobPoint !== '') {
         this.mobPoint.destroy();
