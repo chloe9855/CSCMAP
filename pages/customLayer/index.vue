@@ -63,7 +63,7 @@
                 </div>
               </td>
               <td>
-                <div class="checkbox dataTable__checkbox">
+                <div v-if="rowsItem['fid'] !== 10 && rowsItem['fid'] !== 11" class="checkbox dataTable__checkbox">
                   <input
                     :id="`visible_${rowsItem['fid']}_${index}`"
                     v-model="rowsItem['inUse']"

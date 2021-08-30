@@ -298,7 +298,7 @@ export default {
   position: fixed;
   bottom: 0%;
   left: 0;
-  overflow: hidden;
+  // overflow: hidden;
   background-color: $color-white;
   z-index: 6000;
   box-shadow: 5px 4px 15px rgba($color-black, 0.15);

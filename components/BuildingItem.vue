@@ -14,7 +14,7 @@
     <div class="building__body">
       <div class="building__content">
         <p class="has-icon icon-building">
-          <strong>各棟名稱</strong>{{ item.project }}
+          <strong>各棟名稱</strong>{{ item.building }}
         </p>
         <!-- <p v-if="item.status === 'A' || item.status === 'G' || item.status === 'Z'" class="has-icon icon-people">
           <strong>用地申請單位/人員</strong>{{ item.applydept }}/{{ item.applyname }}

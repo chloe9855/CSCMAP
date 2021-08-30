@@ -905,6 +905,20 @@
       </div>
     </div>
 
+    <!-- 手機版 點測量 載入中 -->
+    <div v-if="loadModal === true" class="modal_wrapper">
+      <div class="modal ww5" :style="'width: 345px !important;'">
+        <p
+          class="p3"
+          style="margin: 0;
+          margin-bottom: 10px;"
+        >
+          載入中
+        </p>
+        <div class="bar" />
+      </div>
+    </div>
+
     <!-- 我的位置視窗 -->
     <transition
       name="popup-slide"
@@ -1098,6 +1112,9 @@ export default {
       haveUploaded: false,
       gisWarnModal: false,
       copyOkModal: false,
+      loadModal: false,
+      // 點測量載入方格圖號
+      pointDxf: [],
       pointMeasurer: {
         // 目前選取的圖形類別
         current: 'cscXy',
@@ -2242,7 +2259,7 @@ export default {
 
           const newArr = [];
           myGraphs.forEach((item, index) => {
-            newArr.push({ building: { key: myName[index] }, geometry: item.toJson() });
+            newArr.push({ building: { key: '' }, geometry: item.toJson() });
           });
 
           const formData = new FormData();
@@ -2264,8 +2281,19 @@ export default {
             console.log('錯誤:', err);
           });
 
-          this.myGraphs.length = 0;
-          this.geometryOptions.graphList.length = 0;
+          // 刪除圖面上的圖形
+          const nameList = ['rectangleLand', 'polygonLand', 'circleLand'];
+          const { graphList } = this.geometryOptions;
+          const clear = graphList.filter(item => !nameList.includes(item.type));
+          const clear2 = this.myGraphs.filter(item => !nameList.includes(item.type));
+          const killme = this.myGraphs.filter(item => nameList.includes(item.type));
+          this.geometryOptions.graphList = clear;
+          this.myGraphs = clear2;
+          // 刪除地圖上的圖形
+          killme.forEach((item) => {
+            this.gisMap.drawingMethod(CSC.DrawingMethod.Remove, { overlay: item });
+          });
+          console.log(this.myGraphs);
           this.unSave = false;
         }
       });
@@ -3039,6 +3067,8 @@ export default {
       this.pointTwdXy.y = '';
       this.pointColdXy.x = '';
       this.pointColdXy.y = '';
+      // 清除點測量dxf檔
+      this.gisMap.removeGrids([this.pointDxf[this.pointDxf.length - 1]]);
     },
     // * 返回所有測量視窗 & 重繪
     backAllMeasure () {
@@ -3054,6 +3084,8 @@ export default {
       this.pointTwdXy.y = '';
       this.pointColdXy.x = '';
       this.pointColdXy.y = '';
+      // 清除點測量dxf檔
+      this.gisMap.removeGrids([this.pointDxf[this.pointDxf.length - 1]]);
     },
     okHandler () {
       this.gisWarnModal = true;
@@ -3102,7 +3134,29 @@ export default {
     },
     // * 鎖點測量: 點測量 載入方格圖
     pointDxfUpload (gridNos) {
-      this.gisMap.appendGrids([gridNos], { index: false, annotation: true });
+      this.loadModal = true;
+
+      const formData = new FormData();
+      formData.append('GridNOs[0]', gridNos);
+      fetch('/cscmap2/api/DXFExist', {
+        method: 'POST',
+        body: formData
+      }).then((response) => {
+        return response.json();
+      }).then((data) => {
+        console.log(data);
+        this.dxfExist = data[0].Status;
+        if (this.dxfExist === true) {
+          this.gisMap.appendGrids([data[0].GridNOs], { index: false, annotation: true });
+          this.pointDxf.push(data[0].GridNOs);
+        }
+
+        setTimeout(() => {
+          this.loadModal = false;
+        }, 7000);
+      }).catch((err) => {
+        console.log('錯誤:', err);
+      });
     },
     // * 監測是否有sessionStorage傳來 有->接值進行建物搜尋
     getSession () {

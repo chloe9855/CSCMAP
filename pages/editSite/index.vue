@@ -2176,7 +2176,8 @@ export default {
       this.$swal({
         icon: 'question',
         width: 402,
-        html: `確認新增${count}筆建物預定用地申請<br />確認後將跳轉建物預定地簽核作業`,
+        // html: `確認新增${count}筆建物預定用地申請<br />確認後將跳轉建物預定地簽核作業`,
+        html: '編輯完成  確認後將返回ERP建物頁面',
         showCancelButton: true,
         confirmButtonText: '確定',
         cancelButtonText: '取消'

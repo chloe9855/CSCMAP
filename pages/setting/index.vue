@@ -395,8 +395,13 @@ export default {
       const index = this.rawData.findIndex(item => item.key === key);
       this.rawData[index].project = project;
       this.rawData[index].building = building;
+      // 顯示名稱若為空值 預設帶入棟名
+      if (this.rawData[index].displayName === '') {
+        this.rawData[index].displayName = this.rawData[index].building;
+      }
+
       this.$forceUpdate();
-      // this.tablesData.rows = this.rawData;
+
       // 深拷貝一份
       this.oldValue = _.cloneDeep(this.rawData);
       sessionStorage.setItem('oriData', JSON.stringify(this.oldValue));
@@ -552,7 +557,8 @@ h2 {
 }
 
 .my-thead {
-  width: 1176px;
+  // width: 1176px;
+  // width: 76.6%;
   position: fixed;
   top: 123px;
   z-index: 1000;
@@ -560,27 +566,64 @@ h2 {
 }
 
 .project_name {
-  width: 146px;
-  padding-left: 5px;
+  width: 100%;
+  // padding-left: 5px;
+  padding-left: 2%;
 }
 
 .building_name {
-  width: 210px;
+  // width: 210px;
   // padding-left: 21px;
 }
 
 .mark_coordinate {
-  width: 156px;
+  // width: 156px;
   // padding-left: 42px;
 }
 
 .text_offset {
-  width: 147px;
+  // width: 147px;
 }
 
 .display_name {
-  width: 154px;
-  padding-left: 11px;
+  // width: 154px;
+  // padding-left: 11px;
+}
+
+.my-thead th:nth-child(2) {
+  width: 14.65%;
+}
+
+.my-thead th:nth-child(3) {
+  width: 20%;
+}
+
+.my-thead th:nth-child(4) {
+  width: 15.4%;
+}
+
+.my-thead th:nth-child(5) {
+  width: 15.2%;
+}
+
+.my-thead th:nth-child(6) {
+  width: 15.3%;
+}
+
+.my-thead th:nth-child(7) {
+  width: 11%;
+}
+
+.my-thead::after {
+  content: '';
+  width: 7px;
+  height: 53px;
+  position: fixed;
+  top: 16%;
+  right: 1.8%;
+  color: red;
+  background-color: white;
+  // border: 1px solid red;
 }
 
 .tr {
@@ -589,15 +632,18 @@ h2 {
 }
 
 .t1 {
-  width: 100px;
+  // width: 100px;
+  width: 8.7%;
 }
 
 .d1 {
-  width: 70px;
+  // width: 70px;
+  width: 100%;
 }
 
 .t2 {
-  width: 172px;
+  // width: 172px;
+  width: 12%;
 }
 
 .d2 {
@@ -605,36 +651,45 @@ h2 {
 }
 
 .t3 {
-  width: 200px;
+  // width: 200px;
+  width: 19%;
 }
 
 .d3 {
-  width: 209px;
-  margin-left: -5px;
+  width: 100%;
+  // width: 209px;
+  // margin-left: -5px;
+  margin-left: -3%;
 }
 
 .t4 {
-  width: 150px;
+  // width: 150px;
+  width: 12%;
 }
 
 .t5 {
-  width: 147px;
+  // width: 147px;
+  width: 12%;
 }
 
 .d5 {
-  margin-left: 7px;
+  // margin-left: 7px;
+  margin-left: 5%;
 }
 
 .t6 {
-  width: 150px;
+  // width: 150px;
+  width: 17%;
 }
 
 .d6 {
-  margin-left: 8px;
+  // margin-left: 8px;
+  margin-left: 10%;
 }
 
 .d7 {
-  margin-left: 12px;
+  // margin-left: 12px;
+  margin-left: 12%;
 }
 
 .dataTable__input {

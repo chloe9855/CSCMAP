@@ -51,7 +51,7 @@ export default {
 
 .mobile {
   li:last-child {
-    padding-bottom: 65px;
+    // padding-bottom: 65px;
   }
 }
 
