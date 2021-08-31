@@ -1,7 +1,7 @@
 <template>
   <div class="article__container">
     <div class="article__aside">
-      <div class="article__wrap theme-scrollbar">
+      <div class="theme-scrollbar">
         <div class="asideNavtabs">
           <div class="asideNavtabs__header">
             <a
@@ -68,81 +68,79 @@
       </div>
     </div>
     <div class="article__content right_wrap">
-      <div ref="content" class="article__wrap theme-scrollbar">
-        <div class="dataTable__wrapper theme-scrollbar">
-          <table class="dataTable">
-            <thead class="my-thead">
-              <tr>
-                <th v-for="columnsItem of tablesData.columns" :key="columnsItem.id">
-                  <div :class="`dataTable__title ${columnsItem.id}`">
-                    <span>{{ columnsItem.name }}</span>
-                    <div v-if="columnsItem.sort === true" class="sort-select">
-                      <a
-                        href="javascript:;"
-                        class="sort-select__ascending"
-                        @click.stop="ascendingHandler(columnsItem.id)"
-                        @mousedown.prevent
-                      />
-                      <a
-                        href="javascript:;"
-                        class="sort-select__descending"
-                        @click.stop="descendingHandler(columnsItem.id)"
-                        @mousedown.prevent
-                      />
-                    </div>
+      <div class="dataTable__wrapper">
+        <table class="dataTable">
+          <thead class="my-thead">
+            <tr>
+              <th v-for="columnsItem of tablesData.columns" :key="columnsItem.id">
+                <div :class="`dataTable__title ${columnsItem.id}`">
+                  <span>{{ columnsItem.name }}</span>
+                  <div v-if="columnsItem.sort === true" class="sort-select">
+                    <a
+                      href="javascript:;"
+                      class="sort-select__ascending"
+                      @click.stop="ascendingHandler(columnsItem.id)"
+                      @mousedown.prevent
+                    />
+                    <a
+                      href="javascript:;"
+                      class="sort-select__descending"
+                      @click.stop="descendingHandler(columnsItem.id)"
+                      @mousedown.prevent
+                    />
                   </div>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(rowsItem, index) of tablesData.rows" :key="rowsItem['key']" class="tr">
-                <td class="t1">
-                  <div class="d1">
-                    {{ rowsItem['key'] }}
-                  </div>
-                </td>
-                <td class="t2">
-                  <div class="d2">
-                    {{ rowsItem['project'] }}
-                  </div>
-                </td>
-                <td class="t3">
-                  <div class="d3">
-                    {{ rowsItem['building'] }}
-                  </div>
-                </td>
-                <td class="t4">
-                  <div class="dataTable__input">
-                    <InputContentListener v-if="rowsItem['display'] === true" v-model="rowsItem['myCoor']" @input="updateCoorValue($event, index)" />
-                  </div>
-                </td>
-                <td class="t5">
-                  <div class="dataTable__input d5">
-                    <InputContentListener v-if="rowsItem['display'] === true" v-model="rowsItem['myOffset']" @input="updateOffValue($event, index)" />
-                  </div>
-                </td>
-                <td class="t6">
-                  <div class="dataTable__input d6">
-                    <InputContentListener v-if="rowsItem['display'] === true" v-model="rowsItem['displayName']" />
-                  </div>
-                </td>
-                <td>
-                  <div class="checkbox dataTable__checkbox d7">
-                    <input
-                      :id="`visible_${rowsItem['key']}_${index}`"
-                      v-model="rowsItem['display']"
-                      type="checkbox"
-                    >
-                    <label :for="`visible_${rowsItem['key']}_${index}`">顯示</label>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody ref="content" class="my-tbody theme-scrollbar">
+            <tr v-for="(rowsItem, index) of tablesData.rows" :key="rowsItem['key']" class="tr">
+              <td class="t1">
+                <div class="d1">
+                  {{ rowsItem['key'] }}
+                </div>
+              </td>
+              <td class="t2">
+                <div class="d2">
+                  {{ rowsItem['project'] }}
+                </div>
+              </td>
+              <td class="t3">
+                <div class="d3">
+                  {{ rowsItem['building'] }}
+                </div>
+              </td>
+              <td class="t4">
+                <div class="dataTable__input">
+                  <InputContentListener v-if="rowsItem['display'] === true" v-model="rowsItem['myCoor']" @input="updateCoorValue($event, index)" />
+                </div>
+              </td>
+              <td class="t5">
+                <div class="dataTable__input d5">
+                  <InputContentListener v-if="rowsItem['display'] === true" v-model="rowsItem['myOffset']" @input="updateOffValue($event, index)" />
+                </div>
+              </td>
+              <td class="t6">
+                <div class="dataTable__input d6">
+                  <InputContentListener v-if="rowsItem['display'] === true" v-model="rowsItem['displayName']" />
+                </div>
+              </td>
+              <td>
+                <div class="checkbox dataTable__checkbox d7">
+                  <input
+                    :id="`visible_${rowsItem['key']}_${index}`"
+                    v-model="rowsItem['display']"
+                    type="checkbox"
+                  >
+                  <label :for="`visible_${rowsItem['key']}_${index}`">顯示</label>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
 
-          <div v-if="tablesData.rows.length < 1" :style="'position: absolute; left: 47%; top: 48%;'">
-            查無匹配結果
-          </div>
+        <div v-if="tablesData.rows.length < 1" :style="'position: absolute; left: 47%; top: 48%;'">
+          查無匹配結果
         </div>
       </div>
 
@@ -553,21 +551,23 @@ h2 {
 }
 
 .right_wrap {
-  padding: 88px 30px 98px !important;
+  padding: 23px 30px 98px !important;
 }
 
 .my-thead {
-  // width: 1176px;
-  // width: 76.6%;
-  position: fixed;
-  top: 123px;
+  width: 100%;
+  display: table;
   z-index: 1000;
-  margin-bottom: 60px;
+}
+
+.my-tbody {
+  height: 32vw;
+  display: block;
+  overflow-y: auto;
 }
 
 .project_name {
   width: 100%;
-  // padding-left: 5px;
   padding-left: 2%;
 }
 
@@ -614,17 +614,17 @@ h2 {
   width: 11%;
 }
 
-.my-thead::after {
-  content: '';
-  width: 7px;
-  height: 53px;
-  position: fixed;
-  top: 16%;
-  right: 1.8%;
-  color: red;
-  background-color: white;
-  // border: 1px solid red;
-}
+// .my-thead::after {
+//   content: '';
+//   width: 7px;
+//   height: 53px;
+//   position: fixed;
+//   top: 16%;
+//   right: 1.8%;
+//   color: red;
+//   background-color: white;
+//   // border: 1px solid red;
+// }
 
 .tr {
   height: 60px;
@@ -643,7 +643,7 @@ h2 {
 
 .t2 {
   // width: 172px;
-  width: 12%;
+  width: 14.8%;
 }
 
 .d2 {

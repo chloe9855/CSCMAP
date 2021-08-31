@@ -388,7 +388,7 @@ export default {
 
 .erpcontent {
   width: 100%;
-  max-height: calc(100% - 116px);
+  // max-height: calc(100% - 116px);
   position: fixed;
   bottom: 0%;
   left: 0;

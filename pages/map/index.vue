@@ -2010,17 +2010,24 @@ export default {
       if (fileSize <= 2097152) {
         this.selectFileModal = false;
         this.updateModal = true;
-        this.gisMap.appendDXF(newFile, (lyr) => {
-          window.dxfLayer = lyr;
-          this.myLayer = lyr;
-          console.log(lyr);
-          // 確定上面都做完後才會執行下面的
-          setTimeout(() => {
-            this.addLayerHandler();
-            this.updateModal = false;
-            this.completeModal = true;
-          }, 500);
-        });
+        // this.gisMap.appendDXF(newFile, (lyr) => {
+        //   window.dxfLayer = lyr;
+        //   this.myLayer = lyr;
+        //   console.log(lyr);
+        //   // 確定上面都做完後才會執行下面的
+        //   setTimeout(() => {
+        //     this.addLayerHandler();
+        //     this.updateModal = false;
+        //     this.completeModal = true;
+        //   }, 500);
+        // });
+        this.myLayer = this.gisMap.appendDXF(newFile, { annotation: false });
+
+        // setTimeout(() => {
+        //   this.addLayerHandler();
+        //   this.updateModal = false;
+        //   this.completeModal = true;
+        // }, 100);
       } else if (fileSize > 2097152 && fileSize <= 8388608) {
         this.selectFileModal = false;
         this.over2Modal = true;
@@ -2032,17 +2039,24 @@ export default {
     continueUpload () {
       this.over2Modal = false;
       this.updateModal = true;
-      this.gisMap.appendDXF(this.nowFile, (lyr) => {
-        window.dxfLayer = lyr;
-        this.myLayer = lyr;
-        console.log(lyr);
+      // this.gisMap.appendDXF(this.nowFile, (lyr) => {
+      //   window.dxfLayer = lyr;
+      //   this.myLayer = lyr;
+      //   console.log(lyr);
 
-        setTimeout(() => {
-          this.updateModal = false;
-          this.addLayerHandler();
-          this.completeModal = true;
-        }, 500);
-      });
+      //   setTimeout(() => {
+      //     this.updateModal = false;
+      //     this.addLayerHandler();
+      //     this.completeModal = true;
+      //   }, 500);
+      // });
+
+      this.myLayer = this.gisMap.appendDXF(this.nowFile, { annotation: false });
+      setTimeout(() => {
+        this.addLayerHandler();
+        this.updateModal = false;
+        this.completeModal = true;
+      }, 8000);
     },
     // ? @圖層切換調整：新增圖層
     addLayerHandler () {
@@ -2367,7 +2381,7 @@ export default {
                 name: item,
                 id: Math.random().toString(16),
                 visible: true,
-                opacity: 50
+                opacity: 0
               };
 
               if (lattResult.name !== '') {
@@ -2492,7 +2506,7 @@ export default {
             name: item,
             id: Math.random().toString(16),
             visible: true,
-            opacity: 50
+            opacity: 0
           };
 
           if (lattResult.name !== '') {
@@ -3134,6 +3148,28 @@ export default {
     },
     // * 鎖點測量: 點測量 載入方格圖
     pointDxfUpload (gridNos) {
+      this.checkDxfHandler2(gridNos);
+      setTimeout(() => {
+        if (this.dxfExist === false && gridNos !== undefined) {
+          this.$swal({
+            width: 402,
+            confirmButtonText: '確定',
+            html: `${gridNos}無方格圖面`
+          });
+        } else if (this.dxfExist === false && gridNos === undefined) {
+          this.$swal({
+            width: 402,
+            confirmButtonText: '確定',
+            html: '無方格圖面'
+          });
+        }
+
+        if (this.dxfExist === true) {
+          this.pointDxfUpload2(gridNos);
+        }
+      }, 100);
+    },
+    pointDxfUpload2 (gridNos) {
       this.loadModal = true;
 
       const formData = new FormData();
