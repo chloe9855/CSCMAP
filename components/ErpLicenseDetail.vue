@@ -49,7 +49,7 @@ export default {
     firstItem: Object
   },
   mounted () {
-    this.getFirstItem();
+    // this.getFirstItem();
   },
   methods: {
     picToggler2 () {
@@ -66,6 +66,22 @@ export default {
       if (this.firstItem.removeSrlNo === this.licenseItem.removeSrlNo) {
         this.changePic2 = require('~/assets/img/minus.png');
         document.querySelector(`.block-${this.licenseItem.removeSrlNo}`).style.display = 'block';
+      }
+    }
+  },
+  computed: {
+    hideAsset () {
+      return this.$store.state.hideAsset;
+    }
+  },
+  watch: {
+    hideAsset (value) {
+      if (value === true) {
+        this.changePic2 = require('~/assets/img/plus.png');
+        const type = document.querySelectorAll('.default');
+        type.forEach((item) => {
+          item.style.display = 'none';
+        });
       }
     }
   }

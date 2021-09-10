@@ -355,8 +355,7 @@
             <div class="navtabs__content mea-mob">
               <div
                 v-if="pointMeasurer.current === 'cscXy'"
-                class="go-margi"
-                :style="'display: block !important;'"
+                :style="'display: block !important; margin-bottom: -10px;'"
               >
                 <div id="copycsc3">
                   <p style="display: block;">
@@ -477,10 +476,21 @@
               <span>{{ typeItem.name }}</span>
             </a>
           </div>
-          <div class="navtabs__body">
+          <div class="navtabs__body" style="padding-bottom: 5px !important;">
             <div class="navtabs__content mea-mob">
               <div class="notice-tips">
-                <p>{{ geometryMeasurerDiscription }}</p>
+                <!-- <p>
+                  {{ geometryMeasurerDiscription }}
+                </p> -->
+                <p v-if="geometryMeasurer.current === 'point'">
+                  手指放大縮小移動坐標位置
+                </p>
+                <p v-if="drawModeLine === true && geometryMeasurer.current === 'line'">
+                  手指移動地圖新增節點，按下完成結束測量
+                </p>
+                <p v-if="drawModeArea === true && geometryMeasurer.current === 'surface'">
+                  手指移動地圖新增節點，按下完成結束測量
+                </p>
               </div>
               <div
                 v-if="geometryMeasurer.current === 'point'"
@@ -493,7 +503,9 @@
               <div
                 v-if="geometryMeasurer.current === 'line'"
               >
-                <p>總長 {{ lineSum.toFixed(2) }} 公里</p>
+                <p v-if="drawModeLine === false">
+                  總長 {{ lineSum.toFixed(2) }} 公里
+                </p>
                 <div v-if="drawModeLine === true" class="row is-flex-center">
                   <a
                     href="javascript:;"
@@ -522,6 +534,7 @@
                   v-if="drawModeLine === false"
                   href="javascript:;"
                   class="links-btn color-red"
+                  style="margin: 16.5px 0;"
                   title="重新繪製"
                   @click.stop="clearLineHandler"
                 >重新繪製</a>
@@ -529,7 +542,9 @@
               <div
                 v-if="geometryMeasurer.current === 'surface'"
               >
-                <p>總面積 {{ areaSum }} 平方公尺</p>
+                <p v-if="drawModeArea === false">
+                  總面積 {{ areaSum }} 平方公尺
+                </p>
                 <div v-if="drawModeArea === true" class="row is-flex-center">
                   <a
                     href="javascript:;"
@@ -558,6 +573,7 @@
                   v-if="drawModeArea === false"
                   href="javascript:;"
                   class="links-btn color-red"
+                  style="margin: 16.5px 0;"
                   title="重新繪製"
                   @click.stop="clearAreaHandler"
                 >重新繪製</a>
@@ -758,7 +774,7 @@
 
     <!-- 畫面截圖的lightbox -->
     <div v-if="screenShotModal === true" class="modal_wrapper">
-      <div class="modal">
+      <div class="modal" style="width: 380px;">
         <p class="p3 screen-modal">
           檔案下載中，請稍後
         </p>
@@ -791,7 +807,7 @@
       <div class="modal">
         <div class="close-modal" @click.stop="over2Modal = false" />
         <p class="p1">
-          檔案已超過2MB，加入圖層會使系統<br>運作不穩，請問是否繼續執行？
+          檔案已超過2MB，加入圖層會使系統運作不穩，請問是否繼續執行？
         </p>
         <div class="flex-group">
           <div class="file-button-cancel" @click.stop="over2Modal = false, nowFile = '', selectFileModal = true">
@@ -866,11 +882,11 @@
       <div class="modal ww1">
         <div class="close-modal" @click.stop="gisWarnModal = false" />
         <p class="ww2">
-          GIS測量坐標值僅供參考，
+          GIS測量坐標值僅供參考，不得作證明文件使用。
         </p>
-        <p>
+        <!-- <p>
           不得作證明文件使用。
-        </p>
+        </p> -->
         <div class="file-button ww3" @click.stop="drawPointHandler">
           確定
         </div>
@@ -879,7 +895,7 @@
 
     <!-- 手機版 點測量 複製視窗 -->
     <div v-if="copyOkModal === true" class="modal_wrapper">
-      <div class="modal ww5" :style="'width: 345px !important;'">
+      <div class="modal ww5" :style="'width: 280px !important;'">
         <div class="copyok" />
         <div v-if="pointMeasurer.current === 'cscXy'">
           <p>
@@ -896,10 +912,10 @@
         </div>
         <div v-if="pointMeasurer.current === 'twdXy'">
           <p>
-            X{{ pointTwdXy.x.toFixed(2) }} , Y{{ pointTwdXy.y.toFixed(2) }}
+            {{ pointTwdXy.x.toFixed(2) }} , {{ pointTwdXy.y.toFixed(2) }}
           </p>
         </div>
-        <p>
+        <p style="margin-bottom: 10px;">
           複製成功
         </p>
       </div>
@@ -907,11 +923,10 @@
 
     <!-- 手機版 點測量 載入中 -->
     <div v-if="loadModal === true" class="modal_wrapper">
-      <div class="modal ww5" :style="'width: 345px !important;'">
+      <div class="modal ww5" :style="'width: 280px !important;'">
         <p
           class="p3"
-          style="margin: 0;
-          margin-bottom: 10px;"
+          style="margin-bottom: 10px;"
         >
           載入中
         </p>
@@ -1095,12 +1110,12 @@ export default {
           {
             id: 'line',
             name: '線測量',
-            discription: '手指移動地圖新增節點，按下確定結束測量'
+            discription: '手指移動地圖新增節點，按下完成結束測量'
           },
           {
             id: 'surface',
             name: '面測量',
-            discription: '手指移動地圖新增節點，按下確定結束測量'
+            discription: '手指移動地圖新增節點，按下完成結束測量'
           }
         ],
         // 準心
@@ -1297,7 +1312,9 @@ export default {
         y2: ''
       },
       gridWord: null,
+      //* 選取建物項目，地圖移動至對應坐標
       myNew: [],
+      myNewss: [],
       bigM: '',
       markerSrc: '',
       nowMark: '',
@@ -1416,8 +1433,9 @@ export default {
                 const index = this.laLetters.findIndex(item => item === this.myGridNo);
                 this.laLetters.splice(index, 1);
               }
+              console.log('set');
             }
-          }, 100);
+          }, 50);
         });
 
         // 滑鼠坐標
@@ -1445,22 +1463,17 @@ export default {
 
           if (e.markers.length === 1) {
             // 清除地圖上有被定位選取的建物
-            this.myNew.forEach((item) => {
-              this.gisMap.markerBounds([item], 1.25).forEach((m) => {
-                m.selected = false;
-                m.active = false;
-              });
+            // this.myNew.forEach((item) => {
+            //   this.gisMap.markerBounds([item], 1.25).forEach((m) => {
+            //     m.selected = false;
+            //     m.active = false;
+            //   });
+            // });
+            this.myNewss.forEach((item) => {
+              item.selected = false;
+              item.active = false;
             });
           }
-
-          // // 擴大手機版的定位範圍
-          // if (e.markers.length === 1 && this.screenWidth < 1024) {
-          //   const point = e.markers[0].position;
-          //   const myArr2 = [{ x: point.x + 50, y: point.y + 150 }, { x: point.x + 50, y: point.y - 50 }, { x: point.x - 50, y: point.y - 50 }, { x: point.x - 50, y: point.y + 50 }];
-          //   this.gisMap.fitBounds(new CSC.GISEnvelope(myArr2), 1);
-
-          //   document.getElementById('CSCMap').addEventListener('click', () => { console.log('click'); });
-          // }
 
           if (e.markers.length <= 10 && e.markers.length > 1 && this.screenWidth > 1023) {
             const infoMulti = document.getElementById('meme2');
@@ -1634,7 +1647,7 @@ export default {
             if (p.intersects) {
               this.$swal({
                 icon: 'warning',
-                width: 402,
+                width: 280,
                 text: '新繪製建地有重疊',
                 confirmButtonText: '確定',
                 showCloseButton: true
@@ -1723,7 +1736,7 @@ export default {
         if (result1 === false || result2 === false || this.positionOptions.twdPosition.x === '' || this.positionOptions.twdPosition.y === '') {
           this.$swal({
             text: '輸入格式有誤，請重新輸入',
-            width: 402,
+            width: 280,
             confirmButtonText: '確定',
             showCloseButton: true
           });
@@ -1749,7 +1762,7 @@ export default {
         if (result === false) {
           this.$swal({
             text: '輸入格式有誤，請重新輸入',
-            width: 402,
+            width: 280,
             confirmButtonText: '確定',
             showCloseButton: true
           });
@@ -1783,7 +1796,7 @@ export default {
         } else {
           this.$swal({
             text: '輸入非中鋼方格圖系統，請重新輸入！',
-            width: 402,
+            width: 280,
             confirmButtonText: '確定',
             showCloseButton: true
           });
@@ -1802,7 +1815,7 @@ export default {
         if (result1 === false || result2 === false || cscX === '' || cscY === '') {
           this.$swal({
             text: '輸入格式有誤，請重新輸入',
-            width: 402,
+            width: 280,
             confirmButtonText: '確定',
             showCloseButton: true
           });
@@ -1833,7 +1846,7 @@ export default {
           } else {
             this.$swal({
               text: '輸入非中鋼方格圖系統，請重新輸入！',
-              width: 402,
+              width: 280,
               confirmButtonText: '確定',
               showCloseButton: true
             });
@@ -1918,7 +1931,7 @@ export default {
 
           this.$swal({
             icon: 'error',
-            width: 402,
+            width: 280,
             text: '坐標資訊取得失敗',
             confirmButtonText: '確定',
             showCloseButton: true
@@ -1927,7 +1940,7 @@ export default {
       } else {
         this.$swal({
           icon: 'error',
-          width: 402,
+          width: 280,
           text: '您的瀏覽器的不支援取得坐標資訊',
           confirmButtonText: '確定',
           showCloseButton: true
@@ -1942,6 +1955,7 @@ export default {
       this.positionAlert.timer = null;
       this.positionAlert.reference.latitude = 0;
       this.positionAlert.reference.longitude = 0;
+      this.$store.commit('SET_MOBILE_SELECT', false);
     },
     // * 圖層顯示或隱藏
     layerVisibleHandler ($event, id, file) {
@@ -2021,13 +2035,14 @@ export default {
         //     this.completeModal = true;
         //   }, 500);
         // });
-        this.myLayer = this.gisMap.appendDXF(newFile, { annotation: false });
-
-        // setTimeout(() => {
-        //   this.addLayerHandler();
-        //   this.updateModal = false;
-        //   this.completeModal = true;
-        // }, 100);
+        this.myLayer = this.gisMap.appendDXF(newFile, {
+          annotation: false,
+          finally: (dxf) => {
+            this.addLayerHandler();
+            this.updateModal = false;
+            this.completeModal = true;
+          }
+        });
       } else if (fileSize > 2097152 && fileSize <= 8388608) {
         this.selectFileModal = false;
         this.over2Modal = true;
@@ -2039,24 +2054,16 @@ export default {
     continueUpload () {
       this.over2Modal = false;
       this.updateModal = true;
-      // this.gisMap.appendDXF(this.nowFile, (lyr) => {
-      //   window.dxfLayer = lyr;
-      //   this.myLayer = lyr;
-      //   console.log(lyr);
 
-      //   setTimeout(() => {
-      //     this.updateModal = false;
-      //     this.addLayerHandler();
-      //     this.completeModal = true;
-      //   }, 500);
-      // });
-
-      this.myLayer = this.gisMap.appendDXF(this.nowFile, { annotation: false });
-      setTimeout(() => {
-        this.addLayerHandler();
-        this.updateModal = false;
-        this.completeModal = true;
-      }, 8000);
+      this.myLayer = this.gisMap.appendDXF(this.nowFile, {
+        annotation: false,
+        finally: (dxf) => {
+          this.addLayerHandler();
+          this.updateModal = false;
+          this.completeModal = true;
+          console.log(dxf);
+        }
+      });
     },
     // ? @圖層切換調整：新增圖層
     addLayerHandler () {
@@ -2161,7 +2168,7 @@ export default {
       const index = graphList.findIndex(item => item.id === id);
       this.$swal({
         icon: 'warning',
-        width: 402,
+        width: 320,
         showCancelButton: true,
         confirmButtonText: '確定',
         cancelButtonText: '取消',
@@ -2193,7 +2200,7 @@ export default {
       const killme = this.myGraphs.filter(item => nameList.includes(item.type));
       this.$swal({
         icon: 'warning',
-        width: 402,
+        width: 320,
         showCancelButton: true,
         confirmButtonText: '確定',
         cancelButtonText: '取消',
@@ -2259,7 +2266,7 @@ export default {
       const myGraphs = this.myGraphs;
       this.$swal({
         icon: 'question',
-        width: 402,
+        width: 320,
         html: `確認新增${count}筆建物預定用地申請<br />確認後將跳轉建物預定地簽核作業`,
         showCancelButton: true,
         confirmButtonText: '確定',
@@ -2369,8 +2376,9 @@ export default {
           setTimeout(() => {
             if (this.noDxfRows.length > 0 && payload.isChecked === false) {
               this.$swal({
-                width: 402,
+                width: 280,
                 confirmButtonText: '確定',
+                showCloseButton: true,
                 html: `${noneRows}<br />無方格圖面`
               });
             }
@@ -2391,9 +2399,12 @@ export default {
 
             this.laLetters.length = 0;
 
-            //* 匯入方格 出現面板 -> 關閉方格點選、關閉loading遮罩
+            //* 匯入方格 出現面板 -> 關閉方格點選、關閉loading遮罩、手機版隱藏側邊工具列
             this.$store.commit('OPEN_GRID_MODE', false);
             this.$store.commit('CTRL_LOADING_MASK', false);
+            if (this.screenWidth < 1024) {
+              this.$store.commit('SET_MOBILE_SELECT', true);
+            }
           }, 7000 * this.myData.length);
         }, 100);
       }
@@ -2406,11 +2417,9 @@ export default {
         this.searchResult.currentBuilding = '';
 
         // 清除地圖上有被定位選取的建物
-        this.myNew.forEach((item) => {
-          this.gisMap.markerBounds([item], 1.25).forEach((m) => {
-            m.selected = false;
-            m.active = false;
-          });
+        this.myNewss.forEach((item) => {
+          item.selected = false;
+          item.active = false;
         });
       }
 
@@ -2423,8 +2432,11 @@ export default {
           this.gisMap.removeGrids([item]);
         });
 
-        //* 清除全部 面板消失 -> 開啟方格點選
+        //* 清除全部 面板消失 -> 開啟方格點選、手機版恢復顯示工具列
         this.$store.commit('OPEN_GRID_MODE', true);
+        if (this.screenWidth < 1024) {
+          this.$store.commit('SET_MOBILE_SELECT', false);
+        }
       }
     },
     // * @搜尋：清除所有搜尋結果與輸入欄位
@@ -2436,12 +2448,16 @@ export default {
 
       // 清除地圖上有被定位選取的建物 selected->球標橘色+建物標亮 active->球標紅色
       if (this.nowMode === 'structure') {
-        this.myNew.forEach((item) => {
-          this.gisMap.markerBounds([item], 1.25).forEach((m) => {
-            m.selected = false;
-            m.active = false;
-            console.log(m);
-          });
+        // this.myNew.forEach((item) => {
+        //   this.gisMap.markerBounds([item], 1.25).forEach((m) => {
+        //     m.selected = false;
+        //     m.active = false;
+        //     console.log(m);
+        //   });
+        // });
+        this.myNewss.forEach((item) => {
+          item.selected = false;
+          item.active = false;
         });
       }
     },
@@ -2451,7 +2467,7 @@ export default {
       if (this.nowMark === '') {
         this.$swal({
           icon: 'warning',
-          width: 402,
+          width: 280,
           text: '建物位置請點選看詳細',
           confirmButtonText: '確定',
           showCloseButton: true
@@ -2466,13 +2482,17 @@ export default {
       });
 
       // 沒報錯才開始定位
-      this.searchResult.currentBuilding = payload.key;
+      this.searchResult.currentBuilding = payload.key; // 加上橘標
       this.myNew.push(payload.key);
-      // const keyNumber = this.myNew.join(',');
-      // this.gisMap.markerBounds([keyNumber], 1.25).forEach(function (m) { m.selected = false; });
+
       this.myNew.forEach((item) => {
-        this.gisMap.markerBounds([item], 1.25).forEach(function (m) { m.selected = false; });
+        this.gisMap.markerBounds([item], 1.25).forEach((m) => {
+          m.selected = false;
+          m.active = false;
+          this.myNewss.push(m);
+        });
       });
+
       this.gisMap.markerBounds([this.myNew[this.myNew.length - 1]], 10.5).forEach((m) => {
         m.selected = true;
         console.log(m);
@@ -2522,8 +2542,9 @@ export default {
 
         if (this.noDxfRows.length > 0 && isChecked === false) {
           this.$swal({
-            width: 402,
+            width: 280,
             confirmButtonText: '確定',
+            showCloseButton: true,
             html: `${noneRows}<br />無方格圖面`
           });
         }
@@ -2656,13 +2677,21 @@ export default {
         });
       }
     },
-    // * @方格圖：切換至方格 關閉球標、隱藏某些圖層
+    // * @方格圖：切換至方格 關閉球標、隱藏某些圖層、關閉單筆球標點擊的建物資訊
     openGridHandler () {
       this.searchMode = 'lattice';
       this.activeWindow = '';
       this.markerVisible = false;
       this.gisMap.setupMarker({ visible: false });
       this.$store.commit('OPEN_GRID_MODE', true);
+      this.$store.commit('SET_MOBILE_SELECT', false);
+
+      if (this.singleClusterInfo.length > 0) {
+        this.clusRows[this.clusRows.length - 1].selected = false;
+        this.$store.commit('ERP_CLUSTER_BOX', false);
+        this.$store.commit('DONT_HIDE_NAV', false);
+        this.$store.commit('SET_MOBILE_SELECT', false);
+      }
 
       setTimeout(() => {
         this.layerOptions.layerList.forEach((item) => {
@@ -2684,6 +2713,10 @@ export default {
       this.gisMap.setupMarker({ visible: true });
       this.getDefaultLayer();
       this.$store.commit('OPEN_GRID_MODE', false);
+      // 手機版恢復顯示側邊工具列
+      if (this.screenWidth < 1024) {
+        this.$store.commit('SET_MOBILE_SELECT', false);
+      }
       // 刪除圖面上的方格圖
       this.oldLetters.forEach((item) => {
         this.gisMap.setupGrid(item, { index: false });
@@ -3152,13 +3185,15 @@ export default {
       setTimeout(() => {
         if (this.dxfExist === false && gridNos !== undefined) {
           this.$swal({
-            width: 402,
+            width: 280,
+            showCloseButton: true,
             confirmButtonText: '確定',
             html: `${gridNos}無方格圖面`
           });
         } else if (this.dxfExist === false && gridNos === undefined) {
           this.$swal({
-            width: 402,
+            width: 280,
+            showCloseButton: true,
             confirmButtonText: '確定',
             html: '無方格圖面'
           });
@@ -3278,13 +3313,7 @@ export default {
         this.addClusterBg = false;
       }
     },
-    // measurePointBox (value) {
-    //   if (value === true) {
-    //     this.pointMeasurer.aimpoint = true;
-    //   } else {
-    //     this.pointMeasurer.aimpoint = false;
-    //   }
-    // },
+
     // * 這邊用 watch 監聽資料的變化，也可以改用別種方式來做
     'geometryOptions.current' (value) {
       if (value !== '') {
@@ -3357,8 +3386,8 @@ export default {
 }
 
 .ww1 {
-  width: 345px !important;
-  height: 200px !important;
+  width: 280px !important;
+  // height: 200px !important;
 
   p {
     margin-bottom: 0;
@@ -3407,11 +3436,13 @@ export default {
 }
 
 .mea-mob {
+  padding: 0 3px !important;
   text-align: center !important;
 }
 
 .go-margi {
-  margin-bottom: -10px !important;
+  // margin-bottom: 23px !important;
+  margin: 15px 0 17.5px !important;
 }
 
 .triangle {
@@ -3444,14 +3475,15 @@ export default {
 }
 
 .modal {
-  width: 430px;
-  padding: 30px;
+  width: 280px;
+  padding: 5px 31px;
   margin: 0 auto;
   display: flex;
   align-items: center;
   position: fixed;
   top: 50%;
   left: 50%;
+  font-size: 16px;
   text-align: center;
   background-color: #fff;
   border-radius: 10px;
@@ -3461,8 +3493,8 @@ export default {
 }
 
 .close-modal {
-  width: 35px;
-  height: 35px;
+  width: 25px;
+  height: 25px;
   position: absolute;
   top: 8px;
   right: 10px;
@@ -3482,9 +3514,12 @@ export default {
 }
 
 .file-button {
-  width: 118px;
-  padding: 10px 6px;
-  margin: 26px 0 18px;
+  // width: 118px;
+  // padding: 10px 6px;
+  width: 85px;
+  padding: 6px;
+  // margin: 26px 0 18px;
+  margin: 13px 0 7px;
   font-size: 16px;
   color: #fff;
   background-color: #408bc5;
@@ -3493,9 +3528,12 @@ export default {
 }
 
 .file-button-cancel {
-  width: 118px;
-  padding: 10px 6px;
-  margin: 26px 0 18px;
+  // width: 118px;
+  // padding: 10px 6px;
+  width: 85px;
+  padding: 6px;
+  // margin: 26px 0 18px;
+  margin: 13px 0 7px;
   font-size: 16px;
   color: #454141;
   background-color: #fff;
@@ -3506,6 +3544,7 @@ export default {
 
 .title-img {
   padding: 5px;
+  margin-top: 25px;
   display: flex;
   justify-content: space-evenly;
   color: #408bc5;
@@ -3559,7 +3598,7 @@ export default {
 .flex-group {
   width: 250px;
   display: flex;
-  justify-content: space-between;
+  justify-content: space-evenly;
 }
 
 .add8 {

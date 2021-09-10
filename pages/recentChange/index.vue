@@ -457,7 +457,7 @@ export default {
       if (isDestroy === true) {
         this.$swal({
           icon: 'warning',
-          width: 402,
+          width: 324,
           showCancelButton: true,
           confirmButtonText: '確定',
           cancelButtonText: '取消',
@@ -466,11 +466,11 @@ export default {
           if (result.value) {
             this.$swal({
               icon: 'warning',
-              width: 402,
+              width: 324,
               showCancelButton: true,
               confirmButtonText: '確定',
               cancelButtonText: '取消',
-              html: '注意！轉為已更新，<br />則該筆更新圖形將被永久刪除，無法回復！'
+              html: '注意！轉為已更新則該筆更新圖形將被永久刪除，無法回復！'
             }).then((result) => {
               if (result.value) {
                 this.destroyHandler(myFid);
@@ -484,7 +484,7 @@ export default {
       if (isDestroy === false) {
         this.$swal({
           icon: 'warning',
-          width: 402,
+          width: 324,
           showCancelButton: true,
           confirmButtonText: '確定',
           cancelButtonText: '取消',
@@ -493,11 +493,11 @@ export default {
           if (result.value) {
             this.$swal({
               icon: 'warning',
-              width: 402,
+              width: 324,
               showCancelButton: true,
               confirmButtonText: '確定',
               cancelButtonText: '取消',
-              html: '注意！更新圖形將取代HELIX原有圖型，<br />是否確定覆蓋，更新後無法還原'
+              html: '注意！更新圖形將取代HELIX原有圖型，是否確定覆蓋，更新後無法還原'
             }).then((result) => {
               if (result.value) {
                 this.updateHandler(myFid);
@@ -523,7 +523,7 @@ export default {
         // this.tablesData.rows[index].helix = 'True';
         // this.tablesData.rows[index].value[this.tablesData.rows[index].value.length - 1].helix = 'True';
         this.$swal({
-          width: 402,
+          width: 320,
           text: '更新成功',
           imageUrl: require('~/assets/img/success.png'),
           imageWidth: 70,
@@ -553,7 +553,7 @@ export default {
         // this.tablesData.rows[index].helix = 'True';
         // this.tablesData.rows[index].value[this.tablesData.rows[index].value.length - 1].helix = 'True';
         this.$swal({
-          width: 402,
+          width: 320,
           text: '更新成功',
           imageUrl: require('~/assets/img/success.png'),
           imageWidth: 70,

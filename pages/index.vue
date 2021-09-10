@@ -73,7 +73,7 @@ export default {
     if (this.$store.state.myUserRole === 4) {
       this.$swal({
         icon: 'error',
-        width: 402,
+        width: 280,
         text: '您無權登入',
         confirmButtonText: '確定',
         showCloseButton: true
@@ -81,11 +81,27 @@ export default {
     }
   },
   methods: {
+    // * 進入圖台
     loginHandler () {
-      if (this.$store.state.accessToken === '') { // 如果沒登入
+      // 如果沒登入
+      if (this.$store.state.accessToken === '') {
         location.href = `https://testeip.csc.com.tw:1443/SSO/DSS0/DSAOS0.aspx?.done=${encodeURIComponent(window.location.href)}map`;
-      } else {
+      }
+
+      // 有登入且有權限
+      if (this.$store.state.accessToken !== '' && this.$store.state.myUserRole !== 4) {
         location.href = `${window.location.href}map`;
+      }
+
+      // 有登入但無權限  (為無權使用者(4))
+      if (this.$store.state.accessToken !== '' && this.$store.state.myUserRole === 4) {
+        this.$swal({
+          icon: 'error',
+          width: 280,
+          text: '無權登入',
+          confirmButtonText: '確定',
+          showCloseButton: true
+        });
       }
     },
     // * 方格圖載入
@@ -96,28 +112,58 @@ export default {
         location.href = `${window.location.href}map?now=searchModeLattice`;
       } else if (this.$store.state.accessToken !== '' && this.$store.state.gridRole === false) {
         this.$swal({
-          width: 402,
+          width: 280,
           text: '您目前無權限使用方格圖匯入功能，如需使用請洽V81方格圖小組申請!',
           confirmButtonText: '確定',
           showCloseButton: true
         });
       }
     },
+    // * 坐標定位
     loginHandler3 () {
-      if (this.$store.state.accessToken === '') { // 如果沒登入
-        // 跳登入頁 按下登入後跳回首頁
+      // 如果沒登入 -> 跳登入頁 按下登入後導回座標定位
+      if (this.$store.state.accessToken === '') {
         location.href = `https://testeip.csc.com.tw:1443/SSO/DSS0/DSAOS0.aspx?.done=${encodeURIComponent(window.location.href)}map?now=openSetPosition`;
-        // 導回座標定位
         // this.$router.push({ name: 'map', params: { preload: 'openSetPosition' } });
-      } else {
+      }
+
+      // 有登入且有權限
+      if (this.$store.state.accessToken !== '' && this.$store.state.myUserRole !== 4) {
         location.href = `${window.location.href}map?now=openSetPosition`;
       }
+
+      // 有登入但無權限  (為無權使用者(4))
+      if (this.$store.state.accessToken !== '' && this.$store.state.myUserRole === 4) {
+        this.$swal({
+          icon: 'error',
+          width: 280,
+          text: '無權登入',
+          confirmButtonText: '確定',
+          showCloseButton: true
+        });
+      }
     },
+    // * 建物資訊
     loginHandler4 () {
-      if (this.$store.state.accessToken === '') { // 如果沒登入
+      // 如果沒登入
+      if (this.$store.state.accessToken === '') {
         location.href = 'https://testeip.csc.com.tw:1443/SSO/DSS0/DSAOS0.aspx?.done=https://east.csc.com.tw/eas/mhb/platform/mhbba';
-      } else {
+      }
+
+      // 有登入且有權限
+      if (this.$store.state.accessToken !== '' && this.$store.state.myUserRole !== 4) {
         location.href = 'https://east.csc.com.tw/eas/mhb/platform/mhbba';
+      }
+
+      // 有登入但無權限  (為無權使用者(4))
+      if (this.$store.state.accessToken !== '' && this.$store.state.myUserRole === 4) {
+        this.$swal({
+          icon: 'error',
+          width: 280,
+          text: '無權登入',
+          confirmButtonText: '確定',
+          showCloseButton: true
+        });
       }
     }
   },

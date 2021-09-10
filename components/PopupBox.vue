@@ -4,7 +4,6 @@
       class="slideup-tips"
       :class="{ 'is-hidden': isHidden }"
       @click.stop="isHidden = !isHidden"
-      @click="showTagBar"
     />
     <div class="popupbox__wrapper">
       <div class="popupbox__header">
@@ -49,22 +48,25 @@ export default {
     iconName: String,
     closeBtnText: String
   },
+  mounted () {
+    this.$store.commit('SET_MOBILE_SELECT', true);
+  },
   methods: {
     // PopupBox收合後 上方tag列和右側工具列要恢復顯示
-    showTagBar () {
-      // if (this.isHidden === true) {
-      //   this.$store.commit('SET_MOBILE_SELECT', false);
-      // } else {
-      //   this.$store.commit('SET_MOBILE_SELECT', true);
-      // }
-    }
   },
   computed: {
-    tagBarCtrl () {
-      if (this.isHidden === true) {
-        return this.$store.commit('SET_MOBILE_SELECT', false);
-      } else {
-        return this.$store.commit('SET_MOBILE_SELECT', true);
+    isHiddenCtrl () {
+      return this.isHidden;
+    }
+  },
+  watch: {
+    isHiddenCtrl (value) {
+      if (value === true) {
+        this.$store.commit('SET_MOBILE_SELECT', false);
+      }
+
+      if (value === false) {
+        this.$store.commit('SET_MOBILE_SELECT', true);
       }
     }
   }

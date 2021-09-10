@@ -31,7 +31,23 @@
             </label>
           </div>
 
-          <div class="type-control__item">
+          <!-- <div class="type-control__item">
+            <input
+              id="mode-type-lattice"
+              v-model="modeType"
+              type="radio"
+              name="mode-type"
+              :value="'lattice'"
+              @click.stop="$emit('clickLattice'), $store.commit('DONT_HIDE_NAV', true);"
+            >
+            <label for="mode-type-lattice">
+              <span>方格</span>
+            </label>
+          </div> -->
+
+          <!-- 方格圖權限之後改成下面這兩個 -->
+
+          <div v-if="$store.state.gridRole === true" class="type-control__item">
             <input
               id="mode-type-lattice"
               v-model="modeType"
@@ -45,23 +61,7 @@
             </label>
           </div>
 
-          <!-- 方格圖權限之後改成下面這兩個 -->
-
-          <!-- <div v-if="$store.state.gridRole === true" class="type-control__item">
-            <input
-              id="mode-type-lattice"
-              v-model="modeType"
-              type="radio"
-              name="mode-type"
-              :value="'lattice'"
-              @click.stop="$emit('clickLattice'), $store.commit('DONT_HIDE_NAV', true);"
-            >
-            <label for="mode-type-lattice">
-              <span>方格</span>
-            </label>
-          </div> -->
-
-          <!-- <div v-if="$store.state.gridRole === false" class="type-control__item">
+          <div v-if="$store.state.gridRole === false" class="type-control__item">
             <input
               id="mode-type-lattice"
               @click.stop="checkUserRole"
@@ -69,7 +69,9 @@
             <label for="mode-type-lattice">
               <span>方格</span>
             </label>
-          </div> -->
+          </div>
+
+          <!--  -->
         </div>
         <div
           v-if="modeType === 'structure'"
@@ -405,7 +407,7 @@ export default {
         if (this.myLatticeWord === '') {
           this.$swal({
             text: '請輸入方格圖號',
-            width: 402,
+            width: 280,
             confirmButtonText: '確定',
             showCloseButton: true
           });
@@ -500,11 +502,20 @@ export default {
     switchType () {
       const searchURL = window.location.search;
       const targetPageName = searchURL.split('=')[1];
-      if (targetPageName === 'searchModeLattice') {
+      if (targetPageName === 'searchModeLattice' && this.$store.state.gridRole === true) {
         this.modeType = 'lattice';
         // this.$emit('clickLattice');
         // this.$store.commit('DONT_HIDE_NAV', true);
         document.getElementById('mode-type-lattice').click();
+      }
+
+      if (targetPageName === 'searchModeLattice' && this.$store.state.gridRole === false) {
+        this.$swal({
+          width: 280,
+          text: '您目前無權限使用方格圖匯入功能，如需使用請洽V81方格圖小組申請!',
+          confirmButtonText: '確定',
+          showCloseButton: true
+        });
       }
     },
     searchHandler2 (payload) {
@@ -522,7 +533,7 @@ export default {
         if (KEYWORD === '') {
           this.$swal({
             text: '請輸入方格圖號',
-            width: 402,
+            width: 280,
             confirmButtonText: '確定',
             showCloseButton: true
           });
@@ -546,7 +557,9 @@ export default {
     },
     checkUserRole () {
       this.$swal({
-        width: 402,
+        width: 280,
+        scrollbarPadding: false,
+        heightAuto: false,
         text: '您目前無權限使用方格圖匯入功能，如需使用請洽V81方格圖小組申請!',
         confirmButtonText: '確定',
         showCloseButton: true
@@ -597,7 +610,7 @@ export default {
         if (arr.length >= 6 && this.showBox === false) {
           this.$swal({
             text: '輸入過多圖號，將造成系統不穩定',
-            width: 402,
+            width: 280,
             confirmButtonText: '確定',
             showCloseButton: true
           });
@@ -655,7 +668,7 @@ export default {
       if (arr.length >= 6 && this.showBox === false) {
         this.$swal({
           text: '輸入過多圖號，將造成系統不穩定',
-          width: 402,
+          width: 280,
           confirmButtonText: '確定',
           showCloseButton: true
         });

@@ -871,7 +871,7 @@
 
     <!-- 手機版 點測量 複製視窗 -->
     <div v-if="copyOkModal === true" class="modal_wrapper">
-      <div class="modal ww5" :style="'width: 345px !important;'">
+      <div class="modal ww5" :style="'width: 280px !important;'">
         <div class="copyok" />
         <div v-if="pointMeasurer.current === 'cscXy'">
           <p>
@@ -888,7 +888,7 @@
         </div>
         <div v-if="pointMeasurer.current === 'twdXy'">
           <p>
-            X{{ pointTwdXy.x.toFixed(2) }} , Y{{ pointTwdXy.y.toFixed(2) }}
+            {{ pointTwdXy.x.toFixed(2) }} , {{ pointTwdXy.y.toFixed(2) }}
           </p>
         </div>
         <p>
@@ -1594,7 +1594,7 @@ export default {
             if (p.intersects) {
               this.$swal({
                 icon: 'warning',
-                width: 402,
+                width: 320,
                 text: '新繪製建地有重疊',
                 confirmButtonText: '確定',
                 showCloseButton: true
@@ -2072,7 +2072,7 @@ export default {
       const index = graphList.findIndex(item => item.id === id);
       this.$swal({
         icon: 'warning',
-        width: 402,
+        width: 320,
         showCancelButton: true,
         confirmButtonText: '確定',
         cancelButtonText: '取消',
@@ -2104,7 +2104,7 @@ export default {
       const killme = this.myGraphs.filter(item => nameList.includes(item.type));
       this.$swal({
         icon: 'warning',
-        width: 402,
+        width: 320,
         showCancelButton: true,
         confirmButtonText: '確定',
         cancelButtonText: '取消',
@@ -2175,7 +2175,7 @@ export default {
       const myGraphs = this.myGraphs;
       this.$swal({
         icon: 'question',
-        width: 402,
+        width: 320,
         // html: `確認新增${count}筆建物預定用地申請<br />確認後將跳轉建物預定地簽核作業`,
         html: '編輯完成  確認後將返回ERP建物頁面',
         showCancelButton: true,
@@ -2833,8 +2833,8 @@ export default {
 }
 
 .ww1 {
-  width: 345px !important;
-  height: 200px !important;
+  width: 280px !important;
+  // height: 200px !important;
 
   p {
     margin-bottom: 0;
@@ -2920,14 +2920,15 @@ export default {
 }
 
 .modal {
-  width: 430px;
-  padding: 30px;
+  width: 280px;
+  padding: 5px 31px;
   margin: 0 auto;
   display: flex;
   align-items: center;
   position: fixed;
   top: 50%;
   left: 50%;
+  font-size: 16px;
   text-align: center;
   background-color: #fff;
   border-radius: 10px;
@@ -2937,8 +2938,8 @@ export default {
 }
 
 .close-modal {
-  width: 35px;
-  height: 35px;
+  width: 25px;
+  height: 25px;
   position: absolute;
   top: 8px;
   right: 10px;
@@ -2958,9 +2959,12 @@ export default {
 }
 
 .file-button {
-  width: 118px;
-  padding: 10px 6px;
-  margin: 26px 0 18px;
+  // width: 118px;
+  // padding: 10px 6px;
+  width: 85px;
+  padding: 6px;
+  // margin: 26px 0 18px;
+  margin: 13px 0 7px;
   font-size: 16px;
   color: #fff;
   background-color: #408bc5;
@@ -2969,9 +2973,12 @@ export default {
 }
 
 .file-button-cancel {
-  width: 118px;
-  padding: 10px 6px;
-  margin: 26px 0 18px;
+  // width: 118px;
+  // padding: 10px 6px;
+  width: 85px;
+  padding: 6px;
+  // margin: 26px 0 18px;
+  margin: 13px 0 7px;
   font-size: 16px;
   color: #454141;
   background-color: #fff;
@@ -2982,6 +2989,7 @@ export default {
 
 .title-img {
   padding: 5px;
+  margin-top: 25px;
   display: flex;
   justify-content: space-evenly;
   color: #408bc5;
@@ -3002,7 +3010,7 @@ export default {
 }
 
 .p3 {
-  margin-top: 42px;
+  margin-top: 13px;
   font-size: 25px;
   font-weight: bold;
   color: #165f88;

@@ -235,8 +235,8 @@ export default {
   },
   mounted () {
     this.getUserData();
-    this.getUserRole();
-    this.getGridAuthority();
+    // this.getUserRole();
+    // this.getGridAuthority();
   },
   methods: {
     // * 控制 menu 選單開啟/關閉
@@ -297,6 +297,9 @@ export default {
         this.userName = jsonData.UserName;
         this.$store.commit('SET_ACCESS_TOKEN', jsonData.UID);
         this.callLoginApi = true;
+
+        this.getUserRole();
+        this.getGridAuthority();
       }).catch((err) => {
         console.log('錯誤:', err);
         console.log(err.status);
@@ -322,7 +325,7 @@ export default {
     },
     // * 取得使用者權限角色
     getUserRole () {
-      fetch('/csc2api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/Role/213801?_format=json', {
+      fetch(`/csc2api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/Role/${this.userID}?_format=json`, {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -339,7 +342,7 @@ export default {
     },
     // * 查詢載入方格圖權限 (回傳 true(有權限) or false(無權限))
     getGridAuthority () {
-      fetch('/csc2api/proxy?url=http://east.csc.com.tw/eas/mhb/rest/mhbe/LoadGridAuth/190199?_format=json', {
+      fetch(`/csc2api/proxy?url=http://east.csc.com.tw/eas/mhb/rest/mhbe/LoadGridAuth/${this.userID}?_format=json`, {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -385,8 +388,8 @@ export default {
     },
     // * 判斷目前頁面欲顯示的 menu 選單項目
     menuFilterHandler () {
-      // return (this.myRole === 1) ? this.menuList : (this.myRole === 2) ? this.menuList2 : (this.myRole === 3) ? this.menuList3 : '';
-      return this.menuList;
+      return (this.myRole === 1) ? this.menuList : (this.myRole === 2) ? this.menuList2 : (this.myRole === 3) ? this.menuList3 : '';
+      // return this.menuList;
     },
     // * 判斷目前頁面是否需要有「返回GIS圖台按鈕」
     backmapBtnVisibleHandler () {
@@ -406,9 +409,20 @@ export default {
     }
   },
   watch: {
-    // * 若沒登入會跳轉回首頁
+    // * 若沒登入會跳轉回首頁、無權使用者(4)登入後也會跳回首頁
     callLoginApi (value) {
       if (value === true && this.hasAccessToken === false) {
+        this.$router.push('/index');
+      }
+
+      if (value === true && this.$store.state.myUserRole === 4) {
+        this.$swal({
+          icon: 'error',
+          width: 280,
+          text: '無權登入',
+          confirmButtonText: '確定',
+          showCloseButton: true
+        });
         this.$router.push('/index');
       }
     }

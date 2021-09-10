@@ -228,18 +228,12 @@ export default {
     // * 從搜尋結果中選取一筆
     setCurrentItemHandler (payload) {
       this.$emit('map-focus', payload);
-      // 如果有報錯就不執行下面的
-      // try {
-      //   this.$store.state.gisMapp.markerBounds([payload.key], 1.25);
-      // } catch (exception) {
-      //   console.log('not exist');
-      //   return;
-      // }
+
       this.$store.state.gisMapp.markerBounds([payload.key], 1.25).forEach((m) => { this.nowMark = m; });
       if (this.nowMark === '') {
         this.$swal({
           icon: 'warning',
-          width: 402,
+          width: 280,
           text: '無建物位置資訊',
           confirmButtonText: '確定',
           showCloseButton: true
@@ -325,18 +319,24 @@ export default {
       if (this.changePic === require('~/assets/img/minus.png')) {
         this.changePic = require('~/assets/img/plus.png');
         document.getElementById('asset_block1').style.display = 'none';
+        // 第一層收合時 順便收合第二層
+        this.$store.commit('HIDE_ASSET_BLOCK', false);
       } else {
         this.changePic = require('~/assets/img/minus.png');
         document.getElementById('asset_block1').style.display = 'block';
+        this.$store.commit('HIDE_ASSET_BLOCK', true);
       }
     },
     picToggler3 () {
       if (this.changePic3 === require('~/assets/img/minus.png')) {
         this.changePic3 = require('~/assets/img/plus.png');
         document.getElementById('asset_block3').style.display = 'none';
+        //
+        this.$store.commit('HIDE_ASSET_BLOCK', false);
       } else {
         this.changePic3 = require('~/assets/img/minus.png');
         document.getElementById('asset_block3').style.display = 'block';
+        this.$store.commit('HIDE_ASSET_BLOCK', true);
       }
     }
   },

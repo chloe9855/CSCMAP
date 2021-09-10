@@ -1,6 +1,18 @@
 @charset "UTF-8";
 @import '../utils/_utils.scss';
 
+.swal2-icon-warning {
+  padding: 71px 0 8px !important;
+}
+
+.swal2-icon-error {
+  padding: 71px 0 8px !important;
+}
+
+.swal2-icon-question {
+  padding: 71px 0 8px !important;
+}
+
 .swal2-popup.swal2-toast {
   width: auto;
   padding: 0.625em;
@@ -336,8 +348,9 @@
   // width: 32em;
   width: 345px;
   max-width: 100%;
-  min-height: 200px;
-  padding: 1.25em;
+  // min-height: 200px;
+  // padding: 1.25em;
+  padding: 27px 0 8px;
   display: none;
   justify-content: center;
   position: relative;
@@ -358,6 +371,7 @@
 }
 
 .swal2-header {
+  // height: 39px; //0907
   padding: 0 1.8em;
   display: flex;
   align-items: center;
@@ -381,7 +395,8 @@
 .swal2-actions {
   width: 100%;
   padding: 0 1.6em;
-  margin: 1.25em auto 0;
+  margin: 6px 0 -5px;
+  // margin: 1.25em auto 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -495,7 +510,8 @@
 
 .swal2-image {
   max-width: 100%;
-  margin: 1.25em auto;
+  // margin: 1.25em auto;
+  margin: 0;
 }
 
 .swal2-close {
@@ -508,7 +524,8 @@
   top: 0;
   right: 0;
   overflow: hidden;
-  font-size: 2.5em;
+  // font-size: 2.5em;
+  font-size: 33px;
   // font-family: serif;
   color: #ccc;
   background: transparent;
@@ -714,9 +731,12 @@
   // height: 5em;
   width: 50px;
   height: 50px;
-  margin: 1.25em auto 1.875em;
+  // margin: 1.25em auto 1.875em;
+  margin: 8px auto 1.875em;
   justify-content: center;
-  position: relative;
+  position: absolute; //0907
+  top: 0;
+  // position: relative;
   // font-family: inherit;
   border: 0.25em solid transparent;
   border-color: #000;

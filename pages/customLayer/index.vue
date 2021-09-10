@@ -337,7 +337,7 @@ export default {
         console.log(data);
 
         this.$swal({
-          width: 402,
+          width: 280,
           text: '儲存成功',
           imageUrl: require('~/assets/img/success.png'),
           imageWidth: 70,
@@ -425,14 +425,15 @@ export default {
 }
 
 .modal {
-  width: 430px;
-  padding: 30px;
+  width: 280px;
+  padding: 5px 31px;
   margin: 0 auto;
   display: flex;
   align-items: center;
   position: fixed;
   top: 50%;
   left: 50%;
+  font-size: 16px;
   text-align: center;
   background-color: #fff;
   border-radius: 10px;
@@ -442,8 +443,8 @@ export default {
 }
 
 .close-modal {
-  width: 35px;
-  height: 35px;
+  width: 25px;
+  height: 25px;
   position: absolute;
   top: 8px;
   right: 10px;
@@ -463,9 +464,12 @@ export default {
 }
 
 .file-button {
-  width: 130px;
+  // width: 130px;
+  // padding: 6px;
+  width: 85px;
   padding: 6px;
-  margin: 26px 0 18px;
+  // margin: 26px 0 18px;
+  margin: 13px 0 7px;
   font-size: 16px;
   color: #fff;
   background-color: #408bc5;
@@ -476,6 +480,7 @@ export default {
 .title-img {
   width: 220px;
   padding: 5px;
+  margin-top: 25px;
   display: flex;
   justify-content: space-evenly;
   color: #408bc5;
@@ -496,7 +501,7 @@ export default {
 }
 
 .p3 {
-  margin-top: 42px;
+  margin-top: 13px;
   font-size: 25px;
   font-weight: bold;
   color: #165f88;

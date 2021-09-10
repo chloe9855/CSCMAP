@@ -36,10 +36,11 @@ export default {
   },
   props: {
     assetItem: Object,
-    firstItem: Object
+    firstItem: Object,
+    hideBlock: Boolean
   },
   mounted () {
-    this.getFirstItem();
+    // this.getFirstItem();
   },
   methods: {
     // * 判斷資料狀態
@@ -65,12 +66,28 @@ export default {
         this.changePic2 = require('~/assets/img/minus.png');
         document.querySelector(`.block-${this.assetItem.srlNo}`).style.display = 'block';
       }
-    },
+    }
     // * 排第一個的會展開
-    getFirstItem () {
-      if (this.firstItem.srlNo === this.assetItem.srlNo) {
-        this.changePic2 = require('~/assets/img/minus.png');
-        document.querySelector(`.block-${this.assetItem.srlNo}`).style.display = 'block';
+    // getFirstItem () {
+    //   if (this.firstItem.srlNo === this.assetItem.srlNo) {
+    //     this.changePic2 = require('~/assets/img/minus.png');
+    //     document.querySelector(`.block-${this.assetItem.srlNo}`).style.display = 'block';
+    //   }
+    // }
+  },
+  computed: {
+    hideAsset () {
+      return this.$store.state.hideAsset;
+    }
+  },
+  watch: {
+    hideAsset (value) {
+      if (value === true) {
+        this.changePic2 = require('~/assets/img/plus.png');
+        const type = document.querySelectorAll('.default');
+        type.forEach((item) => {
+          item.style.display = 'none';
+        });
       }
     }
   }

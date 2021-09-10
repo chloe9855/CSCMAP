@@ -72,9 +72,9 @@ export default {
     };
   },
   mounted () {
-    this.getUserData();
-    this.getUserRole();
-    this.getGridAuthority();
+    // this.getUserData();
+    // this.getUserRole();
+    // this.getGridAuthority();
   },
   methods: {
     // * 登出

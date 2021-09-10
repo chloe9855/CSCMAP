@@ -24,7 +24,8 @@ export const state = () => ({
   inputMode: false,
   myPop: false,
   showClearButton: true,
-  stackWindow: false
+  stackWindow: false,
+  hideAsset: true
 });
 
 // * ==========================================================================
@@ -117,5 +118,8 @@ export const mutations = {
   // * 手機版 當已有建物查詢結果時 又開啟工具列視窗 -> erpbox會被壓在後面
   STACK_MULTI_BOX (state, payload) {
     state.stackWindow = payload;
+  },
+  HIDE_ASSET_BLOCK (state, payload) {
+    state.hideAsset = payload;
   }
 };

@@ -189,9 +189,8 @@ export default {
       navtabs: {
         current: 0,
         typeList: [
-          { id: 0, name: '工程名稱' },
-          { id: 1, name: '各棟名稱' },
-          { id: 2, name: '管理序號' }
+          { id: 0, name: '管理序號' },
+          { id: 1, name: '顯示名稱' }
         ]
       },
       reference: {
@@ -239,12 +238,12 @@ export default {
           {
             id: 'display_name',
             name: '顯示名稱',
-            sort: false
+            sort: true
           },
           {
             id: 'is_visible',
             name: '篩選顯示狀態',
-            sort: true
+            sort: false
           }
         ],
         rows: []
@@ -334,6 +333,11 @@ export default {
         this.rawData.forEach((item) => {
           item.myCoor = `${item.coordinate[0].toFixed(2)},${item.coordinate[1].toFixed(2)}`;
           item.myOffset = `${item.offset[0]},${item.offset[1]}`;
+          if (item.display === true) {
+            item.pastSign = true;
+          } else {
+            item.pastSign = false;
+          }
         });
 
         this.tablesData.rows = this.rawData;
@@ -406,60 +410,88 @@ export default {
     },
     // * 儲存全部修改
     saveAllHandler () {
-      this.saveRows = _.cloneDeep(this.tablesData.rows);
-      this.saveRows.forEach((item) => {
-        delete item.myCoor;
-        delete item.myOffset;
-        delete item.project;
-        delete item.building;
-      });
+      const chosen = this.tablesData.rows.filter(item => item.display === true || (item.pastSign === true && item.display === false));
+      this.saveRows = _.cloneDeep(chosen);
 
-      fetch('/cscmap2/api/label', {
-        method: 'PATCH',
-        headers: new Headers({
-          'Content-Type': 'application/json'
-        }),
-        body: JSON.stringify(this.saveRows)
-      }).then((response) => {
-        return response;
-      }).then((data) => {
-        console.log(data);
+      // 檢查是否輸入框皆沒有空白&皆有逗號
+      const result = this.saveRows.every(item => item.displayName !== '' && item.myCoor.search(',') !== -1 && item.myOffset.search(',') !== -1);
 
+      // 條件皆符合 才執行儲存修改
+      if (result === true) {
+        this.saveRows.forEach((item) => {
+          delete item.myCoor;
+          delete item.myOffset;
+          delete item.project;
+          delete item.building;
+          delete item.pastSign;
+        });
+
+        fetch('/cscmap2/api/label', {
+          method: 'PATCH',
+          headers: new Headers({
+            'Content-Type': 'application/json'
+          }),
+          body: JSON.stringify(this.saveRows)
+        }).then((response) => {
+          return response;
+        }).then((data) => {
+          console.log(data);
+
+          this.$swal({
+            width: 320,
+            text: '儲存成功',
+            imageUrl: require('~/assets/img/success.png'),
+            imageWidth: 70,
+            imageHeight: 70,
+            confirmButtonText: '確定',
+            showCloseButton: true
+          });
+
+          setTimeout(() => {
+            this.getRawData();
+          }, 100);
+        }).catch((err) => {
+          console.log('錯誤:', err);
+        });
+      }
+
+      if (result === false) {
         this.$swal({
-          width: 402,
-          text: '儲存成功',
-          imageUrl: require('~/assets/img/success.png'),
-          imageWidth: 70,
-          imageHeight: 70,
+          icon: 'warning',
+          width: 320,
+          text: '輸入格式錯誤，儲存失敗',
           confirmButtonText: '確定',
           showCloseButton: true
         });
-
-        setTimeout(() => {
-          this.getRawData();
-        }, 100);
-      }).catch((err) => {
-        console.log('錯誤:', err);
-      });
+      }
     },
     // * 搜尋
     searchHandler () {
-      if (this.navtabsCurrentName === '工程名稱' && this.myDisplay !== '') {
-        const newArr = this.rawData.filter(item => item.project === this.myProject && item.display === this.myDisplay);
+      if (this.navtabsCurrentName === '顯示名稱' && this.myDisplay !== '') {
+        // const newArr = this.rawData.filter(item => item.displayName === this.mydName && item.display === this.myDisplay);
+        // this.tablesData.rows = newArr;
+        const newArr = [];
+        this.rawData.forEach((item) => {
+          if (item.displayName.search(this.mydName) !== -1) {
+            newArr.push(item);
+          }
+        });
+        const myArr = newArr.filter(item => item.display === this.myDisplay);
+        this.tablesData.rows = myArr;
+      }
+      if (this.navtabsCurrentName === '顯示名稱' && this.myDisplay === '') {
+        // const newArr = this.rawData.filter(item => item.displayName === this.mydName);
+        // this.tablesData.rows = newArr;
+        const newArr = [];
+        this.rawData.forEach((item) => {
+          if (item.displayName.search(this.mydName) !== -1) {
+            newArr.push(item);
+          }
+        });
         this.tablesData.rows = newArr;
       }
-      if (this.navtabsCurrentName === '工程名稱' && this.myDisplay === '') {
-        const newArr = this.rawData.filter(item => item.project === this.myProject);
-        this.tablesData.rows = newArr;
-      }
-      if (this.navtabsCurrentName === '各棟名稱' && this.myDisplay !== '') {
-        const newArr = this.rawData.filter(item => item.building === this.myBuilding && item.display === this.myDisplay);
-        this.tablesData.rows = newArr;
-      }
-      if (this.navtabsCurrentName === '各棟名稱' && this.myDisplay === '') {
-        const newArr = this.rawData.filter(item => item.building === this.myBuilding);
-        this.tablesData.rows = newArr;
-      }
+
+      // 搜尋管理序號
       if (this.navtabsCurrentName === '管理序號' && this.myDisplay !== '') {
         const newArr = [];
         this.rawData.forEach((item) => {
@@ -510,14 +542,11 @@ export default {
         return false;
       }
     },
-    myProject () {
-      return (this.navtabsCurrentName === '工程名稱') ? this.reference.searchKeyword.replace(/\s/g, '').replace(/,$/, '') : '';
-    },
-    myBuilding () {
-      return (this.navtabsCurrentName === '各棟名稱') ? this.reference.searchKeyword.replace(/\s/g, '').replace(/,$/, '') : '';
-    },
     myKey () {
       return (this.navtabsCurrentName === '管理序號') ? this.reference.searchKeyword.replace(/\s/g, '').replace(/,$/, '') : '';
+    },
+    mydName () {
+      return (this.navtabsCurrentName === '顯示名稱') ? this.reference.searchKeyword.replace(/\s/g, '').replace(/,$/, '') : '';
     },
     myDisplay () {
       const newArr = this.reference.itemsVisible.filter(item => item.isChecked === true);
@@ -571,35 +600,20 @@ h2 {
   padding-left: 2%;
 }
 
-.building_name {
-  // width: 210px;
-  // padding-left: 21px;
-}
-
-.mark_coordinate {
-  // width: 156px;
-  // padding-left: 42px;
-}
-
-.text_offset {
-  // width: 147px;
-}
-
-.display_name {
-  // width: 154px;
-  // padding-left: 11px;
+.my-thead th:nth-child(1) {
+  width: 5.7%;
 }
 
 .my-thead th:nth-child(2) {
-  width: 14.65%;
+  width: 14.1%;  //14.65
 }
 
 .my-thead th:nth-child(3) {
-  width: 20%;
+  width: 19%;  //20
 }
 
 .my-thead th:nth-child(4) {
-  width: 15.4%;
+  width: 15.1%;  //15.4
 }
 
 .my-thead th:nth-child(5) {

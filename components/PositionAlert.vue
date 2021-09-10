@@ -49,10 +49,27 @@ export default {
     cubename: String,
     cold: Object
   },
+  mounted () {
+    this.$store.commit('SET_MOBILE_SELECT', true);
+  },
   computed: {
     contentHandler () {
       const { longitude, latitude } = this.reference;
       return `經度：${longitude}、緯度：${latitude}`;
+    },
+    isHiddenCtrl () {
+      return this.isHidden;
+    }
+  },
+  watch: {
+    isHiddenCtrl (value) {
+      if (value === true) {
+        this.$store.commit('SET_MOBILE_SELECT', false);
+      }
+
+      if (value === false) {
+        this.$store.commit('SET_MOBILE_SELECT', true);
+      }
     }
   }
 };
