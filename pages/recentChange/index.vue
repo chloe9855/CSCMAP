@@ -510,7 +510,7 @@ export default {
     // * 註銷helix
     destroyHandler (fid) {
       const index = this.tablesData.rows.findIndex(item => item.value[item.value.length - 1].fid === fid);
-      fetch(`/cscmap2/api/ChangeDispose/${fid}?type=Cancel`, {
+      fetch(`/cscmap/api/ChangeDispose/${fid}?type=Cancel`, {
         method: 'POST',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -540,7 +540,7 @@ export default {
     // * 更新helix
     updateHandler (fid) {
       const index = this.tablesData.rows.findIndex(item => item.value[item.value.length - 1].fid === fid);
-      fetch(`/cscmap2/api/ChangeDispose/${fid}?type=Update`, {
+      fetch(`/cscmap/api/ChangeDispose/${fid}?type=Update`, {
         method: 'POST',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -614,7 +614,7 @@ export default {
     },
     // * 取得預設資料
     getRawData () {
-      fetch('/cscmap2/api/Change', {
+      fetch('/cscmap/api/Change', {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -640,7 +640,7 @@ export default {
     },
     // * 搜尋
     searchHandler () {
-      fetch(`/cscmap2/api/Change?project=${this.myProject}&manageId=${this.myKey}&useNo=${this.myUseNo}&status=${this.myStatus}&changeTimeFrom=${this.reference.dateSelecter.from}&changeTimeTo=${this.reference.dateSelecter.to}&helix=`, {
+      fetch(`/cscmap/api/Change?project=${this.myProject}&manageId=${this.myKey}&useNo=${this.myUseNo}&status=${this.myStatus}&changeTimeFrom=${this.reference.dateSelecter.from}&changeTimeTo=${this.reference.dateSelecter.to}&helix=`, {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'

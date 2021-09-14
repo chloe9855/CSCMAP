@@ -277,7 +277,7 @@ export default {
     },
     // * 獲取登入資料
     getUserData () {
-      fetch('/cscmap2/api/SignOnStatus', {
+      fetch('/cscmap/api/SignOnStatus', {
         method: 'GET',
         // credentials: 'include',
         headers: new Headers({

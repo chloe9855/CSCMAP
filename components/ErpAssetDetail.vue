@@ -2,18 +2,18 @@
   <div>
     <p class="add_icon2">
       <img class="mipic2" :src="changePic2" @click="picToggler2">
-      <strong>管理序號</strong> {{ assetItem.manageNo }}
+      <strong>資產序號</strong> {{ assetItem.manageNo }}
     </p>
     <div
       :class="`block-${assetItem.srlNo}`"
       class="default"
     >
-      <p><strong>srlNo</strong> {{ assetItem.srlNo }}</p>
+      <!-- <p><strong>srlNo</strong> {{ assetItem.srlNo }}</p> -->
       <p><strong>各棟名稱</strong> {{ assetItem.buildName }}</p>
       <p><strong>類別</strong> {{ assetItem.type }}</p>
       <p><strong>保管單位</strong> {{ assetItem.ownerDept }}</p>
       <p><strong>保管人員</strong> {{ assetItem.ownerMan }}</p>
-      <p><strong>資產編號狀態</strong> {{ checkStus(assetItem.assetsStus) }}</p>
+      <p><strong>資產驗收狀態</strong> {{ checkStus(assetItem.assetsStus) }}</p>
       <p><strong>資產標號</strong> {{ assetItem.assetsNo }}</p>
       <p><strong>房屋稅籍狀態</strong> {{ checkStus(assetItem.taxStus) }}</p>
       <p><strong>房屋稅籍編號</strong> {{ assetItem.taxNo }}</p>
@@ -46,9 +46,11 @@ export default {
     // * 判斷資料狀態
     checkStus (data) {
       if (data === '1') {
-        return '已辦';
-      } else {
         return '未辦';
+      } else if (data === '2') {
+        return '已辦 ';
+      } else {
+        return '';
       }
     },
     checkSaveType (data) {

@@ -95,7 +95,7 @@
                 <p><strong>建物狀態</strong> {{ buildingData.stus }}</p>
                 <p><strong>用地申請單位</strong> {{ buildingData.locApplyDept }}</p>
                 <p><strong>用地申請人</strong> {{ buildingData.locApplyMan }}</p>
-                <p><strong>管理序號</strong> {{ buildingData.manageNo }}</p>
+                <p><strong>資產序號</strong> {{ buildingData.manageNo }}</p>
                 <p><strong>工令計劃編號</strong> {{ buildingData.applNo }}</p>
                 <p><strong>建物使用名稱</strong> {{ buildingData.buildingName }}</p>
                 <p><strong>產線設備名稱</strong> {{ buildingData.keyWord }}</p>
@@ -116,7 +116,7 @@
                 <p><strong>說明</strong> {{ licenseData.envDesc }}</p>
                 <p v-if="licenseData.removeChangeDatas.length > 0" class="add_icon">
                   <img class="mipic" :src="changePic" @click="picToggler">
-                  <strong>拆除變更資料</strong>
+                  <strong>拆除/變更資料</strong>
                 </p>
                 <ul id="asset_block1">
                   <li
@@ -146,8 +146,8 @@
                     />
                   </li>
                   <div class="other_info">
-                    <p><strong>工廠登記工文號狀態</strong> {{ checkStus(assetData.factoryStus) }}</p>
-                    <p><strong>工廠登記工文號</strong> {{ assetData.factoryDoc }}</p>
+                    <p><strong>工廠登記狀態</strong> {{ checkStus(assetData.factoryStus) }}</p>
+                    <p><strong>工廠登記公文號</strong> {{ assetData.factoryDoc }}</p>
                     <p><strong>工廠登記編號</strong> {{ assetData.factoryNo }}</p>
                     <p><strong>辦理狀態說明</strong> {{ assetData.factoryDesc }}</p>
                   </div>
@@ -301,9 +301,11 @@ export default {
     // * 判斷資料狀態
     checkStus (data) {
       if (data === '1') {
-        return '已辦';
-      } else {
         return '未辦';
+      } else if (data === '2') {
+        return '已辦 ';
+      } else {
+        return '';
       }
     },
     checkEnvType (data) {

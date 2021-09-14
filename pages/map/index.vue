@@ -1680,7 +1680,7 @@ export default {
       });
     },
     getPositionData () {
-      fetch('/cscmap2/CustomSetting.json', {
+      fetch('/cscmap/CustomSetting.json', {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -2510,7 +2510,7 @@ export default {
         formData.append(`GridNOs[${index}]`, item);
       });
 
-      fetch('/cscmap2/api/DXFLoader', {
+      fetch('/cscmap/api/DXFLoader', {
         method: 'POST',
         body: formData
       }).then((response) => {
@@ -2739,7 +2739,7 @@ export default {
       console.log(myNos);
       const formData = new FormData();
       formData.append('GridNOs[0]', myNos);
-      fetch('/cscmap2/api/DXFExist', {
+      fetch('/cscmap/api/DXFExist', {
         method: 'POST',
         // headers: new Headers({
         //   'Content-Type': 'application/json'
@@ -2761,7 +2761,7 @@ export default {
     checkDxfHandler2 (myNos) {
       const formData = new FormData();
       formData.append('GridNOs[0]', myNos);
-      fetch('/cscmap2/api/DXFExist', {
+      fetch('/cscmap/api/DXFExist', {
         method: 'POST',
         body: formData
       }).then((response) => {
@@ -2779,7 +2779,7 @@ export default {
         formData.append(`GridNOs[${index}]`, item);
       });
 
-      fetch('/cscmap2/api/DXFExist', {
+      fetch('/cscmap/api/DXFExist', {
         method: 'POST',
         body: formData
       }).then((response) => {
@@ -2863,7 +2863,7 @@ export default {
     },
     // * 取得預設圖層API
     getDefaultLayer () {
-      fetch('/cscmap2/api/layer', {
+      fetch('/cscmap/api/layer', {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -3209,7 +3209,7 @@ export default {
 
       const formData = new FormData();
       formData.append('GridNOs[0]', gridNos);
-      fetch('/cscmap2/api/DXFExist', {
+      fetch('/cscmap/api/DXFExist', {
         method: 'POST',
         body: formData
       }).then((response) => {

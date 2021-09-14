@@ -1627,7 +1627,7 @@ export default {
       });
     },
     getPositionData () {
-      fetch('/cscmap2/CustomSetting.json', {
+      fetch('/cscmap/CustomSetting.json', {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -2437,7 +2437,7 @@ export default {
     },
     // * 取得預設圖層API
     getDefaultLayer () {
-      fetch('/cscmap2/api/layer', {
+      fetch('/cscmap/api/layer', {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -2667,7 +2667,7 @@ export default {
     },
     dxfUpload () {
       this.haveUploaded = true;
-      fetch('/cscmap2/api/DXFLoader', {
+      fetch('/cscmap/api/DXFLoader', {
         method: 'POST',
         headers: new Headers({
           'Content-Type': 'application/json'

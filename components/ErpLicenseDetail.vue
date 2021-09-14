@@ -2,13 +2,13 @@
   <div class="hide_block">
     <p class="add_icon2">
       <img class="mipic2" :src="changePic2" @click="picToggler2">
-      <strong>拆除變更狀態</strong> {{ licenseItem.itemType }}
+      <strong>拆除/變更狀態</strong> {{ licenseItem.itemType }}
     </p>
     <div
       :class="`block-${licenseItem.removeSrlNo}`"
       class="default"
     >
-      <p><strong>拆除序號</strong> {{ licenseItem.removeSrlNo }}</p>
+      <p><strong>序號</strong> {{ licenseItem.removeSrlNo }}</p>
       <p><strong>項目名稱</strong> {{ licenseItem.itemName }}</p>
       <p><strong>影響的建築面積</strong> {{ licenseItem.changeArea }}</p>
       <p v-if="licenseItem.itemType === '拆除'">

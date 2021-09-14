@@ -319,7 +319,7 @@ export default {
     },
     // * 取得預設資料
     getRawData () {
-      fetch('/cscmap2/api/Label', {
+      fetch('/cscmap/api/Label', {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -426,7 +426,7 @@ export default {
           delete item.pastSign;
         });
 
-        fetch('/cscmap2/api/label', {
+        fetch('/cscmap/api/label', {
           method: 'PATCH',
           headers: new Headers({
             'Content-Type': 'application/json'
