@@ -23,16 +23,29 @@
       <p><strong>保存登記建號</strong> {{ assetItem.saveNo }}</p>
       <p><strong>申辦與否</strong> {{ checkSaveType(assetItem.saveType) }}</p>
       <p><strong>辦理狀態說明</strong> {{ assetItem.saveMemo }}</p>
+
+      <ul v-if="assetItem.assetChangeDatas !== undefined">
+        <li v-for="chItem in assetItem.assetChangeDatas" :key="chItem.srlNo">
+          <ErpAssetChange-component
+            :item="chItem"
+          />
+        </li>
+      </ul>
     </div>
   </div>
 </template>
 
 <script>
+import ErpAssetChange from '~/components/ErpAssetChange';
+
 export default {
   data () {
     return {
       changePic2: require('~/assets/img/plus.png')
     };
+  },
+  components: {
+    'ErpAssetChange-component': ErpAssetChange
   },
   props: {
     assetItem: Object,
