@@ -140,15 +140,15 @@
             </thead>
             <tbody v-if="tablesData.rows !== '無資料'">
               <tr v-for="rowsItem of resultRows" :key="rowsItem.name">
-                <td>{{ rowsItem.value[rowsItem.value.length - 1].project }}</td>
+                <td>{{ rowsItem.value[0].project }}</td>
                 <td>{{ rowsItem.name }}</td>
-                <td>{{ rowsItem.value[rowsItem.value.length - 1].permitNo }}</td>
-                <td>{{ rowsItem.value[rowsItem.value.length - 1].useNo }}</td>
-                <td>{{ checkStatus(rowsItem.value[rowsItem.value.length - 1].status) }}</td>
-                <td>{{ rowsItem.value[rowsItem.value.length - 1].changeName }}</td>
-                <td>{{ rowsItem.value[rowsItem.value.length - 1].changeTime }}</td>
+                <td>{{ rowsItem.value[0].permitNo }}</td>
+                <td>{{ rowsItem.value[0].useNo }}</td>
+                <td>{{ checkStatus(rowsItem.value[0].status) }}</td>
+                <td>{{ rowsItem.value[0].changeName }}</td>
+                <td>{{ rowsItem.value[0].changeTime }}</td>
                 <td>
-                  <div v-if="rowsItem.value[rowsItem.value.length - 1].helix === 'True'">
+                  <div v-if="rowsItem.value[0].helix === 'True'">
                     <a
                       href="javascript:;"
                       class="btn is-disabled size-small"
@@ -163,7 +163,7 @@
                       href="javascript:;"
                       class="btn has-outline outline-color-blue-light size-small"
                       title="更新"
-                      @click.stop="clickButtonHandler(false, rowsItem.value[rowsItem.value.length - 1].fid)"
+                      @click.stop="clickButtonHandler(false, rowsItem.value[0].fid)"
                       @mousedown.prevent
                     >
                       <span>更新</span>
@@ -172,7 +172,7 @@
                       href="javascript:;"
                       class="btn size-small"
                       title="註銷"
-                      @click.stop="clickButtonHandler(true, rowsItem.value[rowsItem.value.length - 1].fid)"
+                      @click.stop="clickButtonHandler(true, rowsItem.value[0].fid)"
                       @mousedown.prevent
                     >
                       <span>註銷</span>
@@ -414,12 +414,12 @@ export default {
     // * 表格升序
     ascendingHandler (id) {
       // this.tablesData.rows.sort((a, b) => a[id] > b[id] ? 1 : -1);
-      this.tablesData.rows.sort((a, b) => a.value[a.value.length - 1].fid > b.value[b.value.length - 1].fid ? 1 : -1);
+      this.tablesData.rows.sort((a, b) => a.value[0].fid > b.value[0].fid ? 1 : -1);
     },
     // * 表格降序
     descendingHandler (id) {
       // this.tablesData.rows.sort((a, b) => a[id] > b[id] ? -1 : 1);
-      this.tablesData.rows.sort((a, b) => a.value[a.value.length - 1].fid > b.value[b.value.length - 1].fid ? -1 : 1);
+      this.tablesData.rows.sort((a, b) => a.value[0].fid > b.value[0].fid ? -1 : 1);
     },
     // * 結束年月日不能小於開始年月日
     disabledBeforeFormDate (date) {
@@ -509,7 +509,7 @@ export default {
     },
     // * 註銷helix
     destroyHandler (fid) {
-      const index = this.tablesData.rows.findIndex(item => item.value[item.value.length - 1].fid === fid);
+      const index = this.tablesData.rows.findIndex(item => item.value[0].fid === fid);
       fetch(`/cscmap/api/ChangeDispose/${fid}?type=Cancel`, {
         method: 'POST',
         headers: new Headers({
@@ -535,11 +535,11 @@ export default {
         console.log('錯誤:', err);
       });
 
-      this.tablesData.rows[index].value[this.tablesData.rows[index].value.length - 1].helix = 'True';
+      this.tablesData.rows[index].value[0].helix = 'True';
     },
     // * 更新helix
     updateHandler (fid) {
-      const index = this.tablesData.rows.findIndex(item => item.value[item.value.length - 1].fid === fid);
+      const index = this.tablesData.rows.findIndex(item => item.value[0].fid === fid);
       fetch(`/cscmap/api/ChangeDispose/${fid}?type=Update`, {
         method: 'POST',
         headers: new Headers({
@@ -565,7 +565,7 @@ export default {
         console.log('錯誤:', err);
       });
 
-      this.tablesData.rows[index].value[this.tablesData.rows[index].value.length - 1].helix = 'True';
+      this.tablesData.rows[index].value[0].helix = 'True';
     },
     // * 點擊頁次元件左右按鈕
     pagesideClickHandler (isIncrease) {
@@ -627,9 +627,9 @@ export default {
             return { name: manageId, value: manageValue };
           });
 
-        newObject.sort(function (a, b) {
-          return a.value[a.value.length - 1].fid < b.value[b.value.length - 1].fid ? 1 : -1;
-        });
+        // newObject.sort(function (a, b) {
+        //   return a.value[a.value.length - 1].fid < b.value[b.value.length - 1].fid ? 1 : -1;
+        // });
         this.tablesData.rows = newObject;
         this.pageHandler();
 
@@ -664,19 +664,19 @@ export default {
           .map(([manageId, manageValue]) => {
             return { name: manageId, value: manageValue };
           });
-        newObject.sort(function (a, b) {
-          return a.value[a.value.length - 1].fid < b.value[b.value.length - 1].fid ? 1 : -1;
-        });
+        // newObject.sort(function (a, b) {
+        //   return a.value[a.value.length - 1].fid < b.value[b.value.length - 1].fid ? 1 : -1;
+        // });
 
         if (this.myHelix === '') {
           this.tablesData.rows = newObject;
         } else if (this.myHelix === 'True') {
           // helix搜尋條件是有更新
-          const myArr = newObject.filter(item => item.value[item.value.length - 1].helix === 'True');
+          const myArr = newObject.filter(item => item.value[0].helix === 'True');
           this.tablesData.rows = myArr;
         } else if (this.myHelix === 'Nope') {
           // helix搜尋條件是未更新
-          const myArr2 = newObject.filter(item => item.value[item.value.length - 1].helix !== 'True');
+          const myArr2 = newObject.filter(item => item.value[0].helix !== 'True');
           this.tablesData.rows = myArr2;
         }
 

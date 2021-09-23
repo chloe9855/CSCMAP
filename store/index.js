@@ -25,7 +25,9 @@ export const state = () => ({
   myPop: false,
   showClearButton: true,
   stackWindow: false,
-  hideAsset: true
+  hideAsset: true,
+  labelNameCtrl: null,
+  userName: ''
 });
 
 // * ==========================================================================
@@ -52,6 +54,10 @@ export const mutations = {
   // * 設定登入狀態的 token
   SET_ACCESS_TOKEN (state, payload) {
     state.accessToken = payload;
+  },
+  // * 使用者名稱
+  GET_USER_NAME (state, payload) {
+    state.userName = payload;
   },
   // * 設定元件是否隱藏
   SET_TRIGGER_HIDDEN (state, payload) {
@@ -121,5 +127,8 @@ export const mutations = {
   },
   HIDE_ASSET_BLOCK (state, payload) {
     state.hideAsset = payload;
+  },
+  SHOW_LABEL_NAME (state, payload) {
+    state.labelNameCtrl = payload;
   }
 };

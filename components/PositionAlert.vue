@@ -50,7 +50,9 @@ export default {
     cold: Object
   },
   mounted () {
-    this.$store.commit('SET_MOBILE_SELECT', true);
+    if (this.screenWidth < 1024) {
+      this.$store.commit('SET_MOBILE_SELECT', true);
+    }
   },
   computed: {
     contentHandler () {
@@ -59,15 +61,18 @@ export default {
     },
     isHiddenCtrl () {
       return this.isHidden;
+    },
+    screenWidth () {
+      return this.$store.state.screenWidth;
     }
   },
   watch: {
     isHiddenCtrl (value) {
-      if (value === true) {
+      if (value === true && this.screenWidth < 1024) {
         this.$store.commit('SET_MOBILE_SELECT', false);
       }
 
-      if (value === false) {
+      if (value === false && this.screenWidth < 1024) {
         this.$store.commit('SET_MOBILE_SELECT', true);
       }
     }

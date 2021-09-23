@@ -295,6 +295,7 @@ export default {
         console.log(jsonData);
         this.userID = jsonData.UID;
         this.userName = jsonData.UserName;
+        this.$store.commit('GET_USER_NAME', jsonData.UserName);
         this.$store.commit('SET_ACCESS_TOKEN', jsonData.UID);
         this.callLoginApi = true;
 

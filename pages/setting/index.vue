@@ -30,7 +30,7 @@
           </div>
         </div>
 
-        <h2>是否在圖台上顯示</h2>
+        <h2>僅篩選設為顯示/無顯示</h2>
 
         <div class="option-btn-group">
           <div
@@ -68,6 +68,36 @@
       </div>
     </div>
     <div class="article__content right_wrap">
+      <div class="top_box">
+        建物名稱設定功能
+        <div class="type-control">
+          <div class="type-control__item" @click="showLabelName = true">
+            <input
+              id="mode-type-enable"
+              v-model="modeType"
+              type="radio"
+              name="mode-type"
+              :value="'enable'"
+            >
+            <label for="mode-type-enable">
+              <span>啟用</span>
+            </label>
+          </div>
+          <div class="type-control__item" @click="showLabelName = false">
+            <input
+              id="mode-type-disable"
+              v-model="modeType"
+              type="radio"
+              name="mode-type"
+              :value="'disable'"
+            >
+            <label for="mode-type-disable">
+              <span>停用</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
       <div class="dataTable__wrapper">
         <table class="dataTable">
           <thead class="my-thead">
@@ -112,17 +142,17 @@
               </td>
               <td class="t4">
                 <div class="dataTable__input">
-                  <InputContentListener v-if="rowsItem['display'] === true" v-model="rowsItem['myCoor']" @input="updateCoorValue($event, index)" />
+                  <InputContentListener v-model="rowsItem['myCoor']" @input="updateCoorValue($event, index)" />
                 </div>
               </td>
               <td class="t5">
                 <div class="dataTable__input d5">
-                  <InputContentListener v-if="rowsItem['display'] === true" v-model="rowsItem['myOffset']" @input="updateOffValue($event, index)" />
+                  <InputContentListener v-model="rowsItem['myOffset']" @input="updateOffValue($event, index)" />
                 </div>
               </td>
               <td class="t6">
                 <div class="dataTable__input d6">
-                  <InputContentListener v-if="rowsItem['display'] === true" v-model="rowsItem['displayName']" />
+                  <InputContentListener v-model="rowsItem['displayName']" />
                 </div>
               </td>
               <td>
@@ -186,11 +216,14 @@ export default {
       saveRows: '',
       // 搜尋結果
       searchResult: '',
+      showLabelName: null,
+      modeType: 'enable',
       navtabs: {
         current: 0,
         typeList: [
           { id: 0, name: '管理序號' },
-          { id: 1, name: '顯示名稱' }
+          { id: 1, name: '顯示名稱' },
+          { id: 2, name: '工程名稱' }
         ]
       },
       reference: {
@@ -243,7 +276,7 @@ export default {
           {
             id: 'is_visible',
             name: '篩選顯示狀態',
-            sort: false
+            sort: true
           }
         ],
         rows: []
@@ -255,6 +288,7 @@ export default {
   },
   mounted () {
     this.getRawData();
+    this.getShowData();
     // 開啟 Loading 視窗
     this.$store.commit('CTRL_LOADING_MASK', true);
     // 關閉 Loading 視窗
@@ -315,6 +349,26 @@ export default {
         if (item.id === id) {
           item.isChecked = true;
         }
+      });
+    },
+    // * 取得 CustomSetting.json 建物顯示資料
+    getShowData () {
+      fetch('/cscmap/CustomSetting.json', {
+        method: 'GET',
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        })
+      }).then((response) => {
+        return response.json();
+      }).then((data) => {
+        this.showLabelName = data.displayLabelName;
+        if (this.showLabelName === true) {
+          this.modeType = 'enable';
+        } else {
+          this.modeType = 'disable';
+        }
+      }).catch((err) => {
+        console.log('錯誤:', err);
       });
     },
     // * 取得預設資料
@@ -464,12 +518,13 @@ export default {
           showCloseButton: true
         });
       }
+
+      // 儲存建物名稱顯示or不顯示
+      this.$store.commit('SHOW_LABEL_NAME', this.showLabelName);
     },
     // * 搜尋
     searchHandler () {
       if (this.navtabsCurrentName === '顯示名稱' && this.myDisplay !== '') {
-        // const newArr = this.rawData.filter(item => item.displayName === this.mydName && item.display === this.myDisplay);
-        // this.tablesData.rows = newArr;
         const newArr = [];
         this.rawData.forEach((item) => {
           if (item.displayName.search(this.mydName) !== -1) {
@@ -480,11 +535,30 @@ export default {
         this.tablesData.rows = myArr;
       }
       if (this.navtabsCurrentName === '顯示名稱' && this.myDisplay === '') {
-        // const newArr = this.rawData.filter(item => item.displayName === this.mydName);
-        // this.tablesData.rows = newArr;
         const newArr = [];
         this.rawData.forEach((item) => {
           if (item.displayName.search(this.mydName) !== -1) {
+            newArr.push(item);
+          }
+        });
+        this.tablesData.rows = newArr;
+      }
+
+      // 搜尋工程名稱
+      if (this.navtabsCurrentName === '工程名稱' && this.myDisplay !== '') {
+        const newArr = [];
+        this.rawData.forEach((item) => {
+          if (item.project !== undefined && item.project.search(this.myProject) !== -1) {
+            newArr.push(item);
+          }
+        });
+        const myArr = newArr.filter(item => item.display === this.myDisplay);
+        this.tablesData.rows = myArr;
+      }
+      if (this.navtabsCurrentName === '工程名稱' && this.myDisplay === '') {
+        const newArr = [];
+        this.rawData.forEach((item) => {
+          if (item.project !== undefined && item.project.search(this.myProject) !== -1) {
             newArr.push(item);
           }
         });
@@ -520,6 +594,11 @@ export default {
         }
       }
 
+      // 單獨搜尋是否顯示
+      if (this.myKey === '' && this.mydName === '' && this.myProject === '' && this.myDisplay !== '') {
+        this.tablesData.rows = this.rawData.filter(item => item.display === this.myDisplay);
+      }
+
       // scroll至頂端
       this.$nextTick(() => {
         this.$refs.content.scrollTop = 0;
@@ -548,6 +627,9 @@ export default {
     mydName () {
       return (this.navtabsCurrentName === '顯示名稱') ? this.reference.searchKeyword.replace(/\s/g, '').replace(/,$/, '') : '';
     },
+    myProject () {
+      return (this.navtabsCurrentName === '工程名稱') ? this.reference.searchKeyword.replace(/\s/g, '').replace(/,$/, '') : '';
+    },
     myDisplay () {
       const newArr = this.reference.itemsVisible.filter(item => item.isChecked === true);
       const amount = newArr.length;
@@ -566,6 +648,16 @@ export default {
 <style lang="scss" scoped>
 @import '~/assets/scss/utils/_utils.scss';
 @import '~/assets/scss/_article.scss';
+
+.top_box {
+  display: flex;
+  justify-content: flex-end;
+
+  .checkbox {
+    padding: 2px 10px;
+    background: #408bc5;
+  }
+}
 
 .add-orange {
   color: #f08300 !important;

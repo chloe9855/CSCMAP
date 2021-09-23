@@ -5,7 +5,7 @@
       <strong>資產序號</strong> {{ assetItem.manageNo }}
     </p>
     <div
-      :class="`block-${assetItem.srlNo}`"
+      :class="`block-${assetItem.manageNo}`"
       class="default"
     >
       <!-- <p><strong>srlNo</strong> {{ assetItem.srlNo }}</p> -->
@@ -15,19 +15,20 @@
       <p><strong>保管人員</strong> {{ assetItem.ownerMan }}</p>
       <p><strong>資產驗收狀態</strong> {{ checkStus(assetItem.assetsStus) }}</p>
       <p><strong>資產標號</strong> {{ assetItem.assetsNo }}</p>
-      <p><strong>房屋稅籍狀態</strong> {{ checkStus(assetItem.taxStus) }}</p>
-      <p><strong>房屋稅籍編號</strong> {{ assetItem.taxNo }}</p>
-      <p><strong>優惠稅率狀態</strong> {{ checkStus(assetItem.offerStus) }}</p>
+      <p><strong>房屋稅狀態</strong> {{ checkStus(assetItem.taxStus) }}</p>
+      <p><strong>房屋稅稽編號</strong> {{ assetItem.taxNo }}</p>
+      <p><strong>優惠稅狀態</strong> {{ checkStus(assetItem.offerStus) }}</p>
       <p><strong>優惠稅率核准函</strong> {{ assetItem.offerNo }}</p>
       <p><strong>保存登記狀態</strong> {{ checkStus(assetItem.saveStus) }}</p>
       <p><strong>保存登記建號</strong> {{ assetItem.saveNo }}</p>
-      <p><strong>申辦與否</strong> {{ checkSaveType(assetItem.saveType) }}</p>
-      <p><strong>辦理狀態說明</strong> {{ assetItem.saveMemo }}</p>
+      <p><strong>保登申辦與否</strong> {{ checkSaveType(assetItem.saveType) }}</p>
+      <p><strong>保登辦理狀態說明</strong> {{ assetItem.saveMemo }}</p>
 
       <ul v-if="assetItem.assetChangeDatas !== undefined">
         <li v-for="chItem in assetItem.assetChangeDatas" :key="chItem.srlNo">
           <ErpAssetChange-component
             :item="chItem"
+            :my-manage-no="assetItem.manageNo"
           />
         </li>
       </ul>
@@ -76,10 +77,10 @@ export default {
     picToggler2 () {
       if (this.changePic2 === require('~/assets/img/minus.png')) {
         this.changePic2 = require('~/assets/img/plus.png');
-        document.querySelector(`.block-${this.assetItem.srlNo}`).style.display = 'none';
+        document.querySelector(`.block-${this.assetItem.manageNo}`).style.display = 'none';
       } else {
         this.changePic2 = require('~/assets/img/minus.png');
-        document.querySelector(`.block-${this.assetItem.srlNo}`).style.display = 'block';
+        document.querySelector(`.block-${this.assetItem.manageNo}`).style.display = 'block';
       }
     }
     // * 排第一個的會展開

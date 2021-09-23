@@ -39,6 +39,7 @@ module.exports = {
     'no-console': ['off'],
     'nuxt/no-env-in-hooks': ['off'],
     'vue/require-default-prop': ['off'],
+    'node/no-path-concat': ['off'],
     'vue/order-in-components': ['error', {
       order: [
         'el',

@@ -72,6 +72,7 @@ export default {
     };
   },
   mounted () {
+    this.userName = this.$store.state.userName;
     // this.getUserData();
     // this.getUserRole();
     // this.getGridAuthority();

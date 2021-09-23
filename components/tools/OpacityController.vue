@@ -35,7 +35,7 @@ export default {
     // * 透明度控制
     valueComputeHandler (isIncrease) {
       // const _value = isIncrease === true ? 1 : -1;
-      const _value = isIncrease === true ? 10 : -10;
+      const _value = isIncrease === true ? 25 : -25;
       this.opacity = this.opacity + _value;
       // if (this.opacity >= 10) { this.opacity = 10; }
       if (this.opacity <= 0) { this.opacity = 0; }

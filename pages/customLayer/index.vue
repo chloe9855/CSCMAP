@@ -112,7 +112,7 @@
             請選擇您的檔案
           </p>
           <p class="p2">
-            檔案須符合中鋼方格座標
+            檔案須符合中鋼方格坐標
           </p>
           <label for="upfile" class="file-button">選擇檔案
             <input

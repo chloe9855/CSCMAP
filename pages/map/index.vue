@@ -20,10 +20,10 @@
       <!-- <div>滑鼠相對於地圖的 X 坐標：{{ mousePosition.x }}</div>
       <div>滑鼠相對於地圖的 Y 坐標：{{ mousePosition.y }}</div> -->
       <div class="co_cube">
-        方格座標(X{{ coordinatesCube.x }}, Y{{ coordinatesCube.y }})
+        方格坐標(X{{ coordinatesCube.x }}, Y{{ coordinatesCube.y }})
       </div>
       <div v-if="coldCube.x !== ''" class="co_cube2">
-        冷三方格座標(X{{ coldCube.x }}, Y{{ coldCube.y }})
+        冷三方格坐標(X{{ coldCube.x }}, Y{{ coldCube.y }})
       </div>
       <div v-if="CubeNo !== undefined" class="co_cubeno">
         {{ cubeName }}: {{ CubeNo }}
@@ -382,7 +382,7 @@
                   </div>
                   <div class="clone-block">
                     <div class="clone-pic3" />
-                    <div class="clone-name3" @click.stop="backAllMeasure">
+                    <div class="clone-name3" @click.stop="drawPointHandler">
                       重測
                     </div>
                   </div>
@@ -409,7 +409,7 @@
                   </div>
                   <div class="clone-block">
                     <div class="clone-pic3" />
-                    <div class="clone-name3" @click.stop="backAllMeasure">
+                    <div class="clone-name3" @click.stop="drawPointHandler">
                       重測
                     </div>
                   </div>
@@ -436,7 +436,7 @@
                   </div>
                   <div class="clone-block">
                     <div class="clone-pic3" />
-                    <div class="clone-name3" @click.stop="backAllMeasure">
+                    <div class="clone-name3" @click.stop="drawPointHandler">
                       重測
                     </div>
                   </div>
@@ -496,8 +496,8 @@
                 v-if="geometryMeasurer.current === 'point'"
                 class="row is-flex-center go-margi"
               >
-                <a href="javascript:;" class="links-btn" title="完成" @click.stop="okHandler">
-                  完成
+                <a href="javascript:;" class="links-btn" title="取得" @click.stop="okHandler">
+                  取得
                 </a>
               </div>
               <div
@@ -1334,7 +1334,9 @@ export default {
       sesKeys: '',
       sesId: '',
       // * 現在是建物or方格
-      searchMode: ''
+      searchMode: '',
+      // * 建物名稱顯示設定
+      showLabelName: null
     };
   },
   components: {
@@ -1371,6 +1373,7 @@ export default {
     getDefaultData () {
       // 開啟 Loading 視窗
       this.$store.commit('CTRL_LOADING_MASK', true);
+      this.labelNameCtrl();
 
       // ? 用 setTimeout 模擬 ajax 完成的狀態給人看
       setTimeout(() => {
@@ -1413,6 +1416,9 @@ export default {
         });
         this.gisMap = map;
         this.$store.commit('GET_GIS_MAP', map);
+
+        // * 設定建物名稱顯示
+        this.gisMap.setupMarker({ labelVisible: this.showLabelName });
 
         CSC.GISEvent.addListener(map, 'click', (e) => {
           this.mapClickHandler();
@@ -1889,12 +1895,23 @@ export default {
           this.myTwd.y = this.gisMap.coordinateInfo(corTrans).TWD97.y.toFixed(2);
           if (this.gisMap.coordinateInfo(corTrans).GridNO !== undefined) {
             this.myCubeNo = this.gisMap.coordinateInfo(corTrans).GridNO;
+            //
+            this.CubeNo = this.myCubeNo;
           }
+
+          // 一起修改滑鼠坐標
+          this.coordinatesCube.x = this.myCsc.x;
+          this.coordinatesCube.y = this.myCsc.y;
+          this.coordinatesTwd.x = this.myTwd.x;
+          this.coordinatesTwd.y = this.myTwd.y;
 
           if (typeof this.gisMap.coordinateInfo(corTrans).CRM !== 'undefined') {
             this.myCold.x = this.gisMap.coordinateInfo(corTrans).CRM.x.toFixed(2);
             this.myCold.y = this.gisMap.coordinateInfo(corTrans).CRM.y.toFixed(2);
             this.myCubeName = '冷三方格圖號';
+            //
+            this.coldCube.x = this.myCold.x;
+            this.coldCube.y = this.myCold.y;
           } else {
             this.myCubeName = '方格圖號';
             this.myCold.x = '';
@@ -2708,6 +2725,7 @@ export default {
     // * @方格圖：切換回建物 開啟球標、開啟目前的圖層預設、清除方格搜尋結果
     hideGridHandler () {
       this.searchMode = 'structure';
+      this.activeWindow = '';
       this.searchResult.list.lattice.length = 0;
       this.markerVisible = true;
       this.gisMap.setupMarker({ visible: true });
@@ -2722,6 +2740,10 @@ export default {
         this.gisMap.setupGrid(item, { index: false });
         this.gisMap.removeGrids([item]);
       });
+
+      // 刪除所有圖形
+      this.gisMap.drawingMethod(CSC.DrawingMethod.Clear);
+      this.closeMeasurePopupBox();
 
       // 將圖層設定回復至預設
       setTimeout(() => {
@@ -3139,6 +3161,12 @@ export default {
     },
     // * 鎖點測量: 點測量 (按下確認視窗中的確定後)
     drawPointHandler () {
+      // 若是按下重繪
+      if (this.mobPoint !== '') {
+        this.mobPoint.destroy();
+        this.gisMap.removeGrids([this.pointDxf[this.pointDxf.length - 1]]);
+      }
+
       this.gisMap.drawingMethod(CSC.DrawingMethod.Draw, { measure: true });
       // 定位+畫圖
       const mypo = this.gisMap.coordinateInfo(this.gisMap.getCenter());
@@ -3181,6 +3209,16 @@ export default {
     },
     // * 鎖點測量: 點測量 載入方格圖
     pointDxfUpload (gridNos) {
+      if (this.$store.state.gridRole === false) {
+        this.$swal({
+          width: 280,
+          text: '您目前無權限使用方格圖匯入功能，如需使用請洽V81方格圖小組申請!',
+          confirmButtonText: '確定',
+          showCloseButton: true
+        });
+        return;
+      }
+
       this.checkDxfHandler2(gridNos);
       setTimeout(() => {
         if (this.dxfExist === false && gridNos !== undefined) {
@@ -3205,7 +3243,7 @@ export default {
       }, 100);
     },
     pointDxfUpload2 (gridNos) {
-      this.loadModal = true;
+      this.$store.commit('CTRL_LOADING_MASK', true);
 
       const formData = new FormData();
       formData.append('GridNOs[0]', gridNos);
@@ -3223,7 +3261,7 @@ export default {
         }
 
         setTimeout(() => {
-          this.loadModal = false;
+          this.$store.commit('CTRL_LOADING_MASK', false);
         }, 7000);
       }).catch((err) => {
         console.log('錯誤:', err);
@@ -3257,6 +3295,20 @@ export default {
           console.log('錯誤:', err);
         });
       }
+    },
+    labelNameCtrl () {
+      fetch('/cscmap/CustomSetting.json', {
+        method: 'GET',
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        })
+      }).then((response) => {
+        return response.json();
+      }).then((data) => {
+        this.showLabelName = data.displayLabelName;
+      }).catch((err) => {
+        console.log('錯誤:', err);
+      });
     }
   },
   computed: {

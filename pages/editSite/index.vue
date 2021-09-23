@@ -20,10 +20,10 @@
       <!-- <div>滑鼠相對於地圖的 X 坐標：{{ mousePosition.x }}</div>
       <div>滑鼠相對於地圖的 Y 坐標：{{ mousePosition.y }}</div> -->
       <div class="co_cube">
-        方格座標(X{{ coordinatesCube.x }}, Y{{ coordinatesCube.y }})
+        方格坐標(X{{ coordinatesCube.x }}, Y{{ coordinatesCube.y }})
       </div>
       <div v-if="coldCube.x !== ''" class="co_cube2">
-        冷三方格座標(X{{ coldCube.x }}, Y{{ coldCube.y }})
+        冷三方格坐標(X{{ coldCube.x }}, Y{{ coldCube.y }})
       </div>
       <div v-if="CubeNo !== undefined" class="co_cubeno">
         {{ cubeName }}: {{ CubeNo }}
@@ -1306,12 +1306,12 @@ export default {
   },
   methods: {
     getMySession () {
-      if (sessionStorage.getItem('iptUserID') !== '') {
+      if (sessionStorage.getItem('iptUserID') !== undefined) {
         this.userId = sessionStorage.getItem('iptUserID');
         this.manageId = sessionStorage.getItem('iptManageSerial');
       }
 
-      if (sessionStorage.getItem('iptLandData') !== '') {
+      if (sessionStorage.getItem('iptLandData') !== undefined) {
         this.geoJson = JSON.parse(sessionStorage.getItem('iptLandData'));
         this.landId = this.geoJson.map(item => item.building.key);
       }

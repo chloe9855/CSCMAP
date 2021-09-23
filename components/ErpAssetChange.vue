@@ -1,11 +1,11 @@
 <template>
   <div>
     <p class="add_icon2">
-      <img class="mipic2" :src="changePic2" @click="picToggler2">
+      <img class="mipic2" :src="changePic" @click="picToggler">
       <strong>資產異動序號</strong> {{ item.srlNo }}
     </p>
     <div
-      :class="`block-${item.srlNo}`"
+      :class="`block-${myManageNo}-${item.srlNo}`"
       class="default"
     >
       <p><strong>資產現狀</strong> {{ item.assetStus }}</p>
@@ -21,22 +21,23 @@
 export default {
   data () {
     return {
-      changePic2: require('~/assets/img/plus.png')
+      changePic: require('~/assets/img/plus.png')
     };
   },
   props: {
-    item: Object
+    item: Object,
+    myManageNo: String
   },
   mounted () {
   },
   methods: {
-    picToggler2 () {
-      if (this.changePic2 === require('~/assets/img/minus.png')) {
-        this.changePic2 = require('~/assets/img/plus.png');
-        document.querySelector(`.block-${this.assetItem.srlNo}`).style.display = 'none';
+    picToggler () {
+      if (this.changePic === require('~/assets/img/minus.png')) {
+        this.changePic = require('~/assets/img/plus.png');
+        document.querySelector(`.block-${this.myManageNo}-${this.item.srlNo}`).style.display = 'none';
       } else {
-        this.changePic2 = require('~/assets/img/minus.png');
-        document.querySelector(`.block-${this.assetItem.srlNo}`).style.display = 'block';
+        this.changePic = require('~/assets/img/minus.png');
+        document.querySelector(`.block-${this.myManageNo}-${this.item.srlNo}`).style.display = 'block';
       }
     }
 
@@ -49,7 +50,7 @@ export default {
   watch: {
     hideAsset (value) {
       if (value === true) {
-        this.changePic2 = require('~/assets/img/plus.png');
+        this.changePic = require('~/assets/img/plus.png');
         const type = document.querySelectorAll('.default');
         type.forEach((item) => {
           item.style.display = 'none';
