@@ -182,10 +182,11 @@ $btn-color: #eff2f6;
   }
 
   @include min-width(map-get($desktop, sm)) {
-    top: 50%;
+    // top: 50%;
+    top: 100px;
     bottom: auto;
     right: 20px;
-    transform: translateY(-50%);
+    // transform: translateY(-50%);
   }
 }
 

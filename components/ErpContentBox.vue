@@ -15,7 +15,7 @@
       @click.stop="isHidden = !isHidden"
     />
     <div
-      v-if="modeType === 'current'"
+      v-if="modeType === 'current' && $store.state.myUserRole !== 3"
       class="slideup-tips is-hidden"
       @click.stop="setModeDetailHandler"
     />
@@ -109,9 +109,9 @@
               </div>
               <div v-if="detailTypeCurrent === 1" class="navtabs__content go-pad">
                 <p><strong>建照編號</strong> {{ licenseData.permitNo }}</p>
-                <p><strong>建照編號備註</strong> {{ licenseData.permitMemo }}</p>
+                <p><strong>建照備註</strong> {{ licenseData.permitMemo }}</p>
                 <p><strong>使照編號</strong> {{ licenseData.useNo }}</p>
-                <p><strong>使照編號備註</strong> {{ licenseData.useMemo }}</p>
+                <p><strong>使照備註</strong> {{ licenseData.useMemo }}</p>
                 <p><strong>環評狀態</strong> {{ checkEnvType(licenseData.envType) }}</p>
                 <p><strong>說明</strong> {{ licenseData.envDesc }}</p>
                 <p v-if="licenseData.removeChangeDatas.length > 0" class="add_icon">
@@ -219,6 +219,12 @@ export default {
   },
   created () {
     this.setDefaultDetailType();
+  },
+  mounted () {
+    // * 點選單筆建物後(為current狀態) 又切換至方格,在切換回建物 要保持還是看單筆的current狀態
+    if (this.backStructure === true && this.getModeType === 'current') {
+      this.setCurrentItemHandler(this.$store.state.erpCurrentItem);
+    }
   },
   methods: {
     // * 預設先選詳細資料頁籤的第一個
@@ -345,12 +351,20 @@ export default {
   computed: {
     listenCluster () {
       return this.$store.state.myErpCluster;
+    },
+    getModeType () {
+      return this.$store.state.erpMode;
+    },
+    // * 切換回建物為true
+    backStructure () {
+      return this.$store.state.backStruct;
     }
   },
   watch: {
     currentItem: {
-      handler () {
+      handler (value) {
         this.setDefaultDetailType();
+        this.$store.commit('GET_ERP_CURRENT', value);
       },
       deep: true
     },
@@ -366,6 +380,10 @@ export default {
         }
       },
       deep: true
+    },
+    // * 紀錄目前的modeType 用於目前為current狀態(已點選單筆資料) 切換至方格後,又切換回建物 要記錄建物原本的狀態
+    modeType (value) {
+      this.$store.commit('GET_ERP_MODETYPE', value);
     }
   }
 };

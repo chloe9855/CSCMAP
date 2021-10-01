@@ -176,8 +176,8 @@ export default {
     }
 
     &.is-hidden {
-      .header,
-      .query-window {
+      .query-window,
+      .header {
         transform: translateY(-180px);
       }
 

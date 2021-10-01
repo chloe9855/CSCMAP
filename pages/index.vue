@@ -85,7 +85,14 @@ export default {
     loginHandler () {
       // 如果沒登入
       if (this.$store.state.accessToken === '') {
-        location.href = `https://testeip.csc.com.tw:1443/SSO/DSS0/DSAOS0.aspx?.done=${encodeURIComponent(window.location.href)}map`;
+        this.$swal({
+          icon: 'warning',
+          width: 280,
+          title: '權限不足',
+          text: '這裡似乎不是您該來的地方喔',
+          confirmButtonText: '確定',
+          showCloseButton: true
+        });
       }
 
       // 有登入且有權限
@@ -96,9 +103,10 @@ export default {
       // 有登入但無權限  (為無權使用者(4))
       if (this.$store.state.accessToken !== '' && this.$store.state.myUserRole === 4) {
         this.$swal({
-          icon: 'error',
+          icon: 'warning',
           width: 280,
-          text: '無權登入',
+          title: '權限不足',
+          text: '這裡似乎不是您該來的地方喔',
           confirmButtonText: '確定',
           showCloseButton: true
         });
@@ -107,7 +115,15 @@ export default {
     // * 方格圖載入
     loginHandler2 () {
       if (this.$store.state.accessToken === '') { // 如果沒登入
-        location.href = `https://testeip.csc.com.tw:1443/SSO/DSS0/DSAOS0.aspx?.done=${encodeURIComponent(window.location.href)}map?now=searchModeLattice`;
+        // location.href = `https://testeip.csc.com.tw:1443/SSO/DSS0/DSAOS0.aspx?.done=${encodeURIComponent(window.location.href)}map?now=searchModeLattice`;
+        this.$swal({
+          icon: 'warning',
+          width: 280,
+          title: '權限不足',
+          text: '這裡似乎不是您該來的地方喔',
+          confirmButtonText: '確定',
+          showCloseButton: true
+        });
       } else if (this.$store.state.accessToken !== '' && this.$store.state.gridRole === true) {
         location.href = `${window.location.href}map?now=searchModeLattice`;
       } else if (this.$store.state.accessToken !== '' && this.$store.state.gridRole === false) {
@@ -123,8 +139,16 @@ export default {
     loginHandler3 () {
       // 如果沒登入 -> 跳登入頁 按下登入後導回座標定位
       if (this.$store.state.accessToken === '') {
-        location.href = `https://testeip.csc.com.tw:1443/SSO/DSS0/DSAOS0.aspx?.done=${encodeURIComponent(window.location.href)}map?now=openSetPosition`;
+        // location.href = `https://testeip.csc.com.tw:1443/SSO/DSS0/DSAOS0.aspx?.done=${encodeURIComponent(window.location.href)}map?now=openSetPosition`;
         // this.$router.push({ name: 'map', params: { preload: 'openSetPosition' } });
+        this.$swal({
+          icon: 'warning',
+          width: 280,
+          title: '權限不足',
+          text: '這裡似乎不是您該來的地方喔',
+          confirmButtonText: '確定',
+          showCloseButton: true
+        });
       }
 
       // 有登入且有權限
@@ -135,9 +159,10 @@ export default {
       // 有登入但無權限  (為無權使用者(4))
       if (this.$store.state.accessToken !== '' && this.$store.state.myUserRole === 4) {
         this.$swal({
-          icon: 'error',
+          icon: 'warning',
           width: 280,
-          text: '無權登入',
+          title: '權限不足',
+          text: '這裡似乎不是您該來的地方喔',
           confirmButtonText: '確定',
           showCloseButton: true
         });
@@ -147,20 +172,40 @@ export default {
     loginHandler4 () {
       // 如果沒登入
       if (this.$store.state.accessToken === '') {
-        location.href = 'https://testeip.csc.com.tw:1443/SSO/DSS0/DSAOS0.aspx?.done=https://east.csc.com.tw/eas/mhb/platform/mhbba';
+        // location.href = 'https://testeip.csc.com.tw:1443/SSO/DSS0/DSAOS0.aspx?.done=https://east.csc.com.tw/eas/mhb/platform/mhbba';
+        this.$swal({
+          icon: 'warning',
+          width: 280,
+          title: '權限不足',
+          text: '這裡似乎不是您該來的地方喔',
+          confirmButtonText: '確定',
+          showCloseButton: true
+        });
       }
 
       // 有登入且有權限
-      if (this.$store.state.accessToken !== '' && this.$store.state.myUserRole !== 4) {
+      if (this.$store.state.accessToken !== '' && this.$store.state.myUserRole !== 4 && this.$store.state.myUserRole !== 3) {
         location.href = 'https://east.csc.com.tw/eas/mhb/platform/mhbba';
       }
 
       // 有登入但無權限  (為無權使用者(4))
       if (this.$store.state.accessToken !== '' && this.$store.state.myUserRole === 4) {
         this.$swal({
-          icon: 'error',
+          icon: 'warning',
           width: 280,
-          text: '無權登入',
+          title: '權限不足',
+          text: '這裡似乎不是您該來的地方喔',
+          confirmButtonText: '確定',
+          showCloseButton: true
+        });
+      }
+      // 有登入但無權限 (權限=3)
+      if (this.$store.state.accessToken !== '' && this.$store.state.myUserRole === 3) {
+        this.$swal({
+          icon: 'warning',
+          width: 280,
+          title: '權限不足',
+          text: '這裡似乎不是您該來的地方喔',
           confirmButtonText: '確定',
           showCloseButton: true
         });

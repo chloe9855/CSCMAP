@@ -69,7 +69,7 @@
     </div>
     <div class="article__content right_wrap">
       <div class="top_box">
-        建物名稱設定功能
+        建物名稱設定功能&emsp;
         <div class="type-control">
           <div class="type-control__item" @click="showLabelName = true">
             <input
@@ -161,6 +161,7 @@
                     :id="`visible_${rowsItem['key']}_${index}`"
                     v-model="rowsItem['display']"
                     type="checkbox"
+                    @change="setDisplayName($event.target.checked, rowsItem['key'])"
                   >
                   <label :for="`visible_${rowsItem['key']}_${index}`">顯示</label>
                 </div>
@@ -170,7 +171,7 @@
         </table>
 
         <div v-if="tablesData.rows.length < 1" :style="'position: absolute; left: 47%; top: 48%;'">
-          查無匹配結果
+          查無符合結果
         </div>
       </div>
 
@@ -275,12 +276,13 @@ export default {
           },
           {
             id: 'is_visible',
-            name: '篩選顯示狀態',
-            sort: true
+            name: '關閉/開啟顯示',
+            sort: false
           }
         ],
         rows: []
-      }
+      },
+      sorValue: ''
     };
   },
   components: {
@@ -301,12 +303,62 @@ export default {
   methods: {
     // * 表格升序
     ascendingHandler (id) {
-      this.tablesData.rows.sort((a, b) => a[id] > b[id] ? 1 : -1);
+      this.sorValue = _.cloneDeep(this.tablesData.rows);
+      if (id === 'serial_number') {
+        // this.tablesData.rows.sort((a, b) => a[id] > b[id] ? 1 : -1);
+        this.sorValue.sort((a, b) => a.keyNo > b.keyNo ? 1 : -1);
+        this.tablesData.rows = this.sorValue;
+      }
+      if (id === 'project_name') {
+        this.sorValue.sort((a, b) => a.project > b.project ? 1 : -1);
+        this.tablesData.rows = this.sorValue;
+      }
+      if (id === 'building_name') {
+        this.sorValue.sort((a, b) => a.building > b.building ? 1 : -1);
+        this.tablesData.rows = this.sorValue;
+      }
+      if (id === 'mark_coordinate') {
+        this.sorValue.sort((a, b) => a.coordinate[0] > b.coordinate[0] ? 1 : -1);
+        this.tablesData.rows = this.sorValue;
+      }
+      if (id === 'text_offset') {
+        this.sorValue.sort((a, b) => a.offset[1] > b.offset[1] ? 1 : -1);
+        this.tablesData.rows = this.sorValue;
+      }
+      if (id === 'display_name') {
+        this.sorValue.sort((a, b) => a.displayName > b.displayName ? 1 : -1);
+        this.tablesData.rows = this.sorValue;
+      }
     },
     // * 表格降序
     descendingHandler (id) {
+      this.sorValue = _.cloneDeep(this.tablesData.rows);
       // this.tablesData.rows.sort((a, b) => a[id] > b[id] ? -1 : 1);
-      this.tablesData.rows.sort((a, b) => a[id] > b[id] ? 1 : -1);
+      if (id === 'serial_number') {
+        // this.tablesData.rows.sort((a, b) => a[id] > b[id] ? -1 : 1);
+        this.sorValue.sort((a, b) => a.keyNo > b.keyNo ? -1 : 1);
+        this.tablesData.rows = this.sorValue;
+      }
+      if (id === 'project_name') {
+        this.sorValue.sort((a, b) => a.project > b.project ? -1 : 1);
+        this.tablesData.rows = this.sorValue;
+      }
+      if (id === 'building_name') {
+        this.sorValue.sort((a, b) => a.building > b.building ? -1 : 1);
+        this.tablesData.rows = this.sorValue;
+      }
+      if (id === 'mark_coordinate') {
+        this.sorValue.sort((a, b) => a.coordinate[0] > b.coordinate[0] ? -1 : 1);
+        this.tablesData.rows = this.sorValue;
+      }
+      if (id === 'text_offset') {
+        this.sorValue.sort((a, b) => a.offset[1] > b.offset[1] ? -1 : 1);
+        this.tablesData.rows = this.sorValue;
+      }
+      if (id === 'display_name') {
+        this.sorValue.sort((a, b) => a.displayName > b.displayName ? -1 : 1);
+        this.tablesData.rows = this.sorValue;
+      }
     },
     // * 按下取消 -> 回復原狀
     returnBack () {
@@ -392,6 +444,9 @@ export default {
           } else {
             item.pastSign = false;
           }
+
+          const keyNum = `${item.key.substring(1, 5)}${item.key.substring(6, 8)}`;
+          item.keyNo = parseInt(keyNum, 10);
         });
 
         this.tablesData.rows = this.rawData;
@@ -428,7 +483,7 @@ export default {
       }).then((data) => {
         this.keyInfo = data;
         this.keyInfo.forEach((item) => {
-          result = {
+          const result = {
             key: item.key,
             project: item.project,
             building: item.building
@@ -452,15 +507,26 @@ export default {
       this.rawData[index].project = project;
       this.rawData[index].building = building;
       // 顯示名稱若為空值 預設帶入棟名
-      if (this.rawData[index].displayName === '') {
-        this.rawData[index].displayName = this.rawData[index].building;
-      }
+      // if (this.rawData[index].displayName === '') {
+      //   this.rawData[index].displayName = this.rawData[index].building;
+      // }
 
       this.$forceUpdate();
 
       // 深拷貝一份
       this.oldValue = _.cloneDeep(this.rawData);
       sessionStorage.setItem('oriData', JSON.stringify(this.oldValue));
+    },
+    // * 勾選顯示後判斷 該資料顯示名稱若為空值 預設帶入棟名
+    setDisplayName ($event, key) {
+      const originalData = JSON.parse(sessionStorage.getItem('oriData'));
+      const index = this.rawData.findIndex(item => item.key === key);
+      if (originalData[index].displayName === '' && $event === true) {
+        this.rawData[index].displayName = this.rawData[index].building;
+      }
+      if (originalData[index].displayName === '' && $event === false) {
+        this.rawData[index].displayName = '';
+      }
     },
     // * 儲存全部修改
     saveAllHandler () {
@@ -651,6 +717,7 @@ export default {
 
 .top_box {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
 
   .checkbox {

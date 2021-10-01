@@ -124,7 +124,7 @@
               href="javascript:;"
               class="inner-input__btn icon-clear"
               title="清除全部"
-              @click.stop="clearLatticeSelected"
+              @click.stop="myLatticeWord = '', $emit('clearKeyword')"
               @mousedown.prevent
             >
               清除全部
@@ -556,6 +556,7 @@ export default {
       this.$emit('search', result);
     },
     checkUserRole () {
+      document.activeElement.blur();
       this.$swal({
         width: 280,
         scrollbarPadding: false,
@@ -569,6 +570,15 @@ export default {
     switchGridMode () {
       const result = !this.$store.state.gridMode;
       this.$store.commit('OPEN_GRID_MODE', result);
+
+      // 手機版在方格"鎖定"的狀態 點選地圖可隱藏工具列和上方button列
+      if (this.$store.state.gridMode === false && this.screenWidth < 1024) {
+        this.$store.commit('DONT_HIDE_NAV', false);
+      }
+      if (this.$store.state.gridMode === true && this.screenWidth < 1024) {
+        this.$store.commit('DONT_HIDE_NAV', true);
+        this.$store.commit('SET_MOBILE_SELECT', false);
+      }
     }
   },
   computed: {
@@ -681,6 +691,14 @@ export default {
 
 <style lang="scss" scoped>
 @import '~/assets/scss/utils/_utils.scss';
+
+@media (max-width: 1023px) {
+  .query-window {
+    position: absolute !important;
+    top: 60px !important;
+    left: 0;
+  }
+}
 
 .open-grid::before {
   background: url('~/assets/img/icon/locking.png') no-repeat center/contain !important;

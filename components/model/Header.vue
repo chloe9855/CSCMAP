@@ -440,6 +440,13 @@ export default {
 <style lang="scss" scoped>
 @import '~/assets/scss/utils/_utils.scss';
 
+@media (max-width: 1023px) {
+  .header {
+    position: absolute;
+    top: 0;
+  }
+}
+
 .editstyle {
   height: 60px !important;
   display: flex !important;

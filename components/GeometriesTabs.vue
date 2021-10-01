@@ -148,12 +148,27 @@
           @mousedown.prevent
         >確定</a>
       </div>
+
       <p
         v-if="graphList.length <= 0 && !typesIdList.includes('line','rect','poly','circle')"
         class="notice-tips"
       >
         尚未新增預定用地
       </p>
+
+      <!-- 只在編輯用圖台顯示 -->
+      <div v-if="$store.state.confirmButt === true && graphList.length < 1" class="geometry-under-row">
+        <a
+          v-if="!typesIdList.includes('line','rect','poly','circle')"
+          href="javascript:;"
+          class="btn size-small addme"
+          title="確定"
+          @click.stop="$emit('uploadAllGraph')"
+          @mousedown.prevent
+        >確定</a>
+      </div>
+      <!--  -->
+
       <p
         v-if="graphList.length <= 0 && !typesIdList.includes('rectangleLand', 'polygonLand', 'circleLand')"
         class="notice-tips"

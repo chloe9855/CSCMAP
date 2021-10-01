@@ -27,7 +27,11 @@ export const state = () => ({
   stackWindow: false,
   hideAsset: true,
   labelNameCtrl: null,
-  userName: ''
+  userName: '',
+  confirmButt: false,
+  erpMode: '',
+  backStruct: true,
+  erpCurrentItem: ''
 });
 
 // * ==========================================================================
@@ -130,5 +134,21 @@ export const mutations = {
   },
   SHOW_LABEL_NAME (state, payload) {
     state.labelNameCtrl = payload;
+  },
+  // * 在編輯用圖台無圖形時也會顯示"確定"鈕
+  SHOW_CONFIRM_BUTT (state, payload) {
+    state.confirmButt = payload;
+  },
+  // * 手機板ERP資訊的modeType (''、current、detail)
+  GET_ERP_MODETYPE (state, payload) {
+    state.erpMode = payload;
+  },
+  // * 切換回建物->true  切換至方格->false
+  BACK_TO_STRUCTURE (state, payload) {
+    state.backStruct = payload;
+  },
+  // * 取得目前點擊的ERP單筆資料 (為一個物件)
+  GET_ERP_CURRENT (state, payload) {
+    state.erpCurrentItem = payload;
   }
 };

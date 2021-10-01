@@ -7,7 +7,7 @@
     }"
   >
     <div
-      v-if="modeType === 'current'"
+      v-if="modeType === 'current' && $store.state.myUserRole !== 3"
       class="slideup-tips is-hidden"
       @click.stop="setModeDetailHandler"
     />
@@ -90,9 +90,9 @@
               </div>
               <div v-if="detailTypeCurrent === 1" class="navtabs__content go-pad">
                 <p><strong>建照編號</strong> {{ licenseData.permitNo }}</p>
-                <p><strong>建照編號備註</strong> {{ licenseData.permitMemo }}</p>
+                <p><strong>建照備註</strong> {{ licenseData.permitMemo }}</p>
                 <p><strong>使照編號</strong> {{ licenseData.useNo }}</p>
-                <p><strong>使照編號備註</strong> {{ licenseData.useMemo }}</p>
+                <p><strong>使照備註</strong> {{ licenseData.useMemo }}</p>
                 <p><strong>環評狀態</strong> {{ checkEnvType(licenseData.envType) }}</p>
                 <p><strong>說明</strong> {{ licenseData.envDesc }}</p>
                 <p v-if="licenseData.removeChangeDatas.length > 0" class="add_icon">

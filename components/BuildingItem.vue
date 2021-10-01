@@ -16,9 +16,7 @@
         <p class="has-icon icon-building">
           <strong>各棟名稱</strong>{{ item.building }}
         </p>
-        <!-- <p v-if="item.status === 'A' || item.status === 'G' || item.status === 'Z'" class="has-icon icon-people">
-          <strong>用地申請單位/人員</strong>{{ item.applydept }}/{{ item.applyname }}
-        </p> -->
+
         <p v-if="item.status !== 'B' && item.status !== 'C' && item.status !== 'D' && item.status !== 'E' && item.status !== 'F'" class="has-icon icon-people">
           <strong>用地申請單位/人員</strong>{{ item.applydept }}/{{ item.applyname }}
         </p>
@@ -28,18 +26,16 @@
         <p v-if="item.status === 'E' || item.status === 'F'" class="has-icon icon-people">
           <strong>保管單位/人員</strong>{{ item.ownerdept }}/{{ item.ownername }}
         </p>
-        <!-- <p v-if="item.status === 'A' || item.status === 'G' || item.status === 'Z'" class="has-icon icon-license">
-          <strong>用地登錄時間</strong>{{ item.applytime }}
-        </p> -->
+
         <p v-if="item.status !== 'B' && item.status !== 'C' && item.status !== 'D' && item.status !== 'E' && item.status !== 'F'" class="has-icon icon-license">
           <strong>用地登錄時間</strong>{{ item.applytime }}
         </p>
         <p v-if="item.status === 'B' || item.status === 'C' || item.status === 'D'" class="has-icon icon-license">
           <strong>建築執照編號</strong>{{ item.permitno }}
         </p>
-        <p v-if="item.status === 'E' || item.status === 'F'" class="has-icon icon-license">
+        <!-- <p v-if="item.status === 'E' || item.status === 'F'" class="has-icon icon-license">
           <strong>使用執照編號</strong>{{ item.useno }}
-        </p>
+        </p> -->
       </div>
       <a
         v-if="detailBtn === true"
@@ -51,6 +47,11 @@
         @mousedown.prevent
       >看詳細</a>
     </div>
+
+    <p v-if="item.status === 'E' || item.status === 'F'" class="has-icon icon-license">
+      <strong>使用執照編號</strong>{{ item.useno }}
+    </p>
+
     <div class="building__tag-group" :class="{ 'hide-role' : $store.state.myUserRole === 3 }">
       <span
         class="building__tag"
@@ -113,6 +114,38 @@ export default {
 
 .hide-role {
   display: none !important;
+}
+
+strong {
+  margin-right: 10px;
+  color: $color-black;
+}
+
+p {
+  margin-bottom: 0;
+  line-height: 25px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  word-break: keep-all;
+
+  &.has-icon::before {
+    content: '';
+    width: 15px;
+    height: 15px;
+    margin: 5px 5px 5px 0;
+    display: inline-block;
+    vertical-align: top;
+    background: {
+      repeat: no-repeat;
+      position: center;
+      size: contain;
+    }
+  }
+
+  &.icon-license::before {
+    background-image: url('~/assets/img/icon/icon-license.svg');
+  }
 }
 
 </style>

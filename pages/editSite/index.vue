@@ -1269,6 +1269,14 @@ export default {
       frRows: []
     };
   },
+  head: {
+    script: [
+      {
+        src: 'cscmap/GIS_API/scripts/GIS.aspx',
+        async: true
+      }
+    ]
+  },
   components: {
     'QueryWindow-component': QueryWindow,
     'QueryWindowContainer-component': QueryWindowContainer,
@@ -1292,6 +1300,7 @@ export default {
     this.getDefaultData();
     this.$store.commit('GET_NOW_URL', 'editSite');
     this.$store.commit('CLEAR_BUTTON_HANDLER', false);
+    this.$store.commit('SHOW_CONFIRM_BUTT', true);
 
     // 開啟預定地視窗
     this.activeWindow = 'addLandWindow';

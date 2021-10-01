@@ -286,7 +286,7 @@ export default {
           // 把圖層名稱更新為上傳的檔案名稱 + 增加更新時間
           this.tablesData.rows.forEach((item) => {
             if (item.fid === this.nowFileFid) {
-              item.title = this.fileName;
+              item.title = this.fileName.substring(0, this.fileName.length - 4);
               item.updateTime = this.transDate(new Date());
             }
           });
@@ -304,7 +304,7 @@ export default {
       const index = this.tablesData.rows.findIndex(item => item.fid === this.nowFileFid);
       newArr[index].contentType = 'application/dxf';
       newArr[index].content = this.base64File;
-      newArr[index].title = this.fileName;
+      newArr[index].title = this.fileName.substring(0, this.fileName.length - 4);
 
       // newArr.push({ fid: this.nowFileFid, contentType: 'application/dxf', content: this.base64File, title: this.fileName });
       fetch('/cscmap/api/layer', {

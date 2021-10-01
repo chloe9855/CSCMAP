@@ -17,9 +17,9 @@
         <div class="msgbox__content">
           <!-- <div v-text="contentHandler" /> -->
           <div class="top">
-            <p>方格坐標 ({{ csc.x }}, {{ csc.y }})</p>
+            <p>方格坐標 (X{{ csc.x }}, Y{{ csc.y }})</p>
             <p v-if="cold.x !== ''">
-              冷三方格坐標 ({{ cold.x }}, {{ cold.y }})
+              冷三方格坐標 (X{{ cold.x }}, Y{{ cold.y }})
             </p>
             <p>
               {{ cubename }} {{ cubeno }}
