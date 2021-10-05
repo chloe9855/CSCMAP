@@ -1351,14 +1351,14 @@ export default {
       getGeo: ''
     };
   },
-  head: {
-    script: [
-      {
-        src: 'cscmap/GIS_API/scripts/GIS.aspx',
-        async: true
-      }
-    ]
-  },
+  // head: {
+  //   script: [
+  //     {
+  //       src: 'cscmap/GIS_API/scripts/GIS.aspx',
+  //       async: true
+  //     }
+  //   ]
+  // },
   components: {
     'QueryWindow-component': QueryWindow,
     'QueryWindowContainer-component': QueryWindowContainer,
@@ -2874,8 +2874,10 @@ export default {
       // });
 
       // 刪除所有圖形
-      this.gisMap.drawingMethod(CSC.DrawingMethod.Clear);
-      this.closeMeasurePopupBox();
+      // this.gisMap.drawingMethod(CSC.DrawingMethod.Clear);
+      if (this.screenWidth < 1024) {
+        this.closeMeasurePopupBox();
+      }
 
       // 原本有被點擊的建物球標視窗 恢復開啟
       if (this.singleClusterInfo !== '' && this.eMarker === 'single' && this.notClose === true) {
@@ -3454,8 +3456,9 @@ export default {
         });
       }
     },
+    // * 取得建物名稱是否顯示的資料
     labelNameCtrl () {
-      fetch('/cscmap/CustomSetting.json', {
+      fetch('/cscmap/api/CustomSetting', {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -3463,7 +3466,7 @@ export default {
       }).then((response) => {
         return response.json();
       }).then((data) => {
-        this.showLabelName = data.displayLabelName;
+        this.showLabelName = data[0].LABELNAME;
       }).catch((err) => {
         console.log('錯誤:', err);
       });

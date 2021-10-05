@@ -71,7 +71,7 @@
       <div class="top_box">
         建物名稱設定功能&emsp;
         <div class="type-control">
-          <div class="type-control__item" @click="showLabelName = true">
+          <div class="type-control__item" @click="nameVisibleCtrl(true)">
             <input
               id="mode-type-enable"
               v-model="modeType"
@@ -83,7 +83,7 @@
               <span>啟用</span>
             </label>
           </div>
-          <div class="type-control__item" @click="showLabelName = false">
+          <div class="type-control__item" @click="nameVisibleCtrl(false)">
             <input
               id="mode-type-disable"
               v-model="modeType"
@@ -403,9 +403,9 @@ export default {
         }
       });
     },
-    // * 取得 CustomSetting.json 建物顯示資料
+    // * 取得 CustomSetting 建物名稱顯示設定資料
     getShowData () {
-      fetch('/cscmap/CustomSetting.json', {
+      fetch('/cscmap/api/CustomSetting', {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -413,7 +413,7 @@ export default {
       }).then((response) => {
         return response.json();
       }).then((data) => {
-        this.showLabelName = data.displayLabelName;
+        this.showLabelName = data[0].LABELNAME;
         if (this.showLabelName === true) {
           this.modeType = 'enable';
         } else {
@@ -422,6 +422,30 @@ export default {
       }).catch((err) => {
         console.log('錯誤:', err);
       });
+    },
+    // * 修改建物名稱顯示設定
+    nameVisibleCtrl (payload) {
+      fetch(`/cscmap/api/CustomSetting/${payload}`, {
+        method: 'PUT',
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        }),
+        body: JSON.stringify({
+          LabelName: payload
+        })
+      }).then((response) => {
+        return response.json();
+      }).then((data) => {
+
+      }).catch((err) => {
+        console.log('錯誤:', err);
+      });
+
+      if (payload === true) {
+        this.modeType = 'enable';
+      } else {
+        this.modeType = 'disable';
+      }
     },
     // * 取得預設資料
     getRawData () {

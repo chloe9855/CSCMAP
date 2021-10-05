@@ -179,7 +179,7 @@ export default {
       });
     },
     openWindow () {
-      window.open('https://east.csc.com.tw/eas/mhb/platform/mhbb4');
+      window.open('https://gist.csc.com.tw/wsCscHxUtil/CscHxUtil/Service.asmx/ShowCSCBusinessOwners');
     }
   },
   computed: {

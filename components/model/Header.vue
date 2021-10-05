@@ -363,7 +363,7 @@ export default {
         window.open('https://east.csc.com.tw/eas/mhb/platform/mhbba');
       }
       if (name === '業務負責人') {
-        window.open('https://east.csc.com.tw/eas/mhb/platform/mhbb4');
+        window.open('https://gist.csc.com.tw/wsCscHxUtil/CscHxUtil/Service.asmx/ShowCSCBusinessOwners');
       }
     }
   },
