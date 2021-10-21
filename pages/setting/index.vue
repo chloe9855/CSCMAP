@@ -296,7 +296,7 @@ export default {
     // 關閉 Loading 視窗
     setTimeout(() => {
       this.$store.commit('CTRL_LOADING_MASK', false);
-    }, 6000);
+    }, 12000);
 
     sessionStorage.setItem('oriData', '');
   },

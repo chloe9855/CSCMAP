@@ -26,7 +26,7 @@
     />
     <div class="erpcontent__wrapper">
       <div class="erpcontent__header">
-        <div v-if="modeType === 'current'" class="row" @click.stop="setModeDetailHandler">
+        <div v-if="modeType === 'current'" class="row">
           <a
             href="javascript:;"
             class="back-btn"

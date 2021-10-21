@@ -505,7 +505,7 @@
                 v-if="geometryMeasurer.current === 'line'"
               >
                 <p v-if="drawModeLine === false">
-                  總長 {{ lineSum.toFixed(2) }} 公里
+                  總長 {{ lineSum.toFixed(2) }} 公尺
                 </p>
                 <div v-if="drawModeLine === true" class="row is-flex-center">
                   <a
@@ -1632,9 +1632,9 @@ export default {
                 const unit = item.label.substring(item.label.length - 2, item.label.length - 1);
                 let value;
                 if (unit === 'k') {
-                  value = parseFloat(item.label.substring(0, item.label.length - 2));
+                  value = parseFloat(item.label.substring(0, item.label.length - 2)) * 1000;
                 } else {
-                  value = parseFloat(item.label.substring(0, item.label.length - 1)) / 1000;
+                  value = parseFloat(item.label.substring(0, item.label.length - 1));
                 }
                 console.log(value);
                 this.lineSum += value;
@@ -2493,6 +2493,17 @@ export default {
 
       if (MODE_TYPE === 'lattice') {
         const rawData = payload.keyword.split(',');
+
+        // 去除空值
+        const nuIndex = rawData.findIndex(item => item === '');
+        if (nuIndex !== -1) {
+          rawData.forEach((item, index) => {
+            if (item === '') {
+              rawData.splice(index, 1);
+            }
+          });
+        }
+
         // 先檢查輸入的圖號有無dxf檔
         this.checkDxfHandler3(rawData);
 
@@ -3123,10 +3134,10 @@ export default {
     // * 建物搜尋 -> 更多篩選條件
     iframeSearch () {
       this.$swal({
-        width: 800,
+        width: 784,
         allowOutsideClick: true,
         showConfirmButton: false,
-        html: '<iframe src="https://east.csc.com.tw/eas/mhb/platform/mhbba?ref=gis" width="784" height="164" style="position: absolute; top: 24px; left: 4px;"></iframe>',
+        html: '<iframe src="https://east.csc.com.tw/eas/mhb/platform/mhbba?ref=gis" width="784" height="164" style="position: absolute; top: 15px; left: 0px;"></iframe>',
         onRender: () => {
           window.addEventListener('message', (event) => {
             // console.log(`Received message: ${event.data}`);

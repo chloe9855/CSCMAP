@@ -658,6 +658,8 @@ export default {
         this.isDisabled2 = true;
         this.isDisabled = true;
         this.isChecked = false;
+        // 清除陣列長度
+        this.$emit('clearKeyword');
         return;
       }
 
