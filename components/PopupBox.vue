@@ -1,5 +1,5 @@
 <template>
-  <div ref="mybox" class="popupbox" :class="{ 'is-hidden': isHidden }">
+  <div ref="mybox" class="popupbox" :class="{ 'is-hidden': isHidden, 'all_hide': $store.state.triggerHidden === true && $store.state.backStruct === false }">
     <div
       class="slideup-tips"
       :class="{ 'is-hidden': isHidden }"
@@ -90,6 +90,10 @@ export default {
   &.is-hidden {
     bottom: 56px;
     transform: translateY(100%);
+  }
+
+  &.all_hide {
+    transform: translateY(200%);
   }
 }
 

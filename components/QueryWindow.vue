@@ -571,14 +571,14 @@ export default {
       const result = !this.$store.state.gridMode;
       this.$store.commit('OPEN_GRID_MODE', result);
 
-      // 手機版在方格"鎖定"的狀態 點選地圖可隱藏工具列和上方button列
-      if (this.$store.state.gridMode === false && this.screenWidth < 1024) {
-        this.$store.commit('DONT_HIDE_NAV', false);
-      }
-      if (this.$store.state.gridMode === true && this.screenWidth < 1024) {
-        this.$store.commit('DONT_HIDE_NAV', true);
-        this.$store.commit('SET_MOBILE_SELECT', false);
-      }
+      // 手機版在方格"鎖定"的狀態 點選地圖可隱藏工具列和上方button列 (已移至watch)
+      // if (this.$store.state.gridMode === false && this.screenWidth < 1024) {
+      //   this.$store.commit('DONT_HIDE_NAV', false);
+      // }
+      // if (this.$store.state.gridMode === true && this.screenWidth < 1024) {
+      //   this.$store.commit('DONT_HIDE_NAV', true);
+      //   this.$store.commit('SET_MOBILE_SELECT', false);
+      // }
     }
   },
   computed: {
@@ -647,10 +647,20 @@ export default {
         this.maxlength = 524288;
       }
     },
-    // 長度測量中，若開啟方格點選 長度測量的面板會關閉
+    //* 方格選圖狀態監聽
     gridMode (value) {
+      // 長度測量中，若開啟方格點選 長度測量的面板會關閉
       if (value === true) {
         this.$emit('closeWindow');
+      }
+
+      // 手機版在方格"鎖定"的狀態 點選地圖可隱藏工具列和上方button列
+      if (value === false && this.screenWidth < 1024) {
+        this.$store.commit('DONT_HIDE_NAV', false);
+      }
+      if (value === true && this.screenWidth < 1024) {
+        this.$store.commit('DONT_HIDE_NAV', true);
+        this.$store.commit('SET_MOBILE_SELECT', false);
       }
     },
     myLatticeWord (value) {

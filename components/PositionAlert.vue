@@ -1,6 +1,6 @@
 <template>
   <div class="position-alert">
-    <div class="msgbox" :class="{ 'is-hidden': isHidden }">
+    <div class="msgbox" :class="{ 'is-hidden': isHidden, 'all_hide': $store.state.triggerHidden === true && $store.state.backStruct === false }">
       <div class="slideup-tips" :class="{ 'is-hidden': isHidden }" @click.stop="isHidden = !isHidden" />
       <div class="msgbox__wrapper">
         <div class="msgbox__header">
@@ -111,6 +111,10 @@ export default {
 
   &.is-hidden {
     transform: translateY(65%);
+  }
+
+  &.all_hide {
+    transform: translateY(200%);
   }
 }
 

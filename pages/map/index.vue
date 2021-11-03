@@ -115,7 +115,7 @@
       @clickStructure="hideGridHandler"
       @latticeKeyWord="drawLatticeHandler"
       @crossGrid="drawCrossLattice"
-      @closeWindow="activeWindow = '', cancelStepHandler(), closeMeasurePopupBox()"
+      @closeWindow="activeWindow = '', cancelStepHandler()"
       @moreSearch="iframeSearch"
       @clearKeyword="laLetters.length = 0"
     >
@@ -303,7 +303,7 @@
       :key="'measureWindow'"
       :name="'測量距離/面積'"
       :icon-name="'icon-measure'"
-      @close="activeWindow = '', $store.commit('OPEN_GRID_MODE', true)"
+      @close="closeMeasureDragBox"
     >
       <template #content>
         <GeometriesTabs-component
@@ -1447,23 +1447,25 @@ export default {
           this.myGridNo = map.coordinateInfo(e.point).GridNO;
           console.log(this.myGridNo);
 
-          this.checkDxfHandler2(this.myGridNo);
+          this.showDxfHandler(this.myGridNo);
+
+          // this.checkDxfHandler2(this.myGridNo);
 
           // * 方格圖: 搜尋框&清單沒有的數字 點擊方格變黃色圖塊 搜尋框加上數字 | 搜尋框有的數字 點擊方格變無色 搜尋框去除數字
-          setTimeout(() => {
-            if (this.myGridNo !== undefined && this.$store.state.gridMode === true) {
-              if (this.laLetters.includes(this.myGridNo) === false && this.dxfExist === true && this.latticeListNum.includes(this.myGridNo) === false) {
-                this.gisMap.appendGrids([this.myGridNo], { noData: true, index: true });
-                this.laLetters.push(this.myGridNo);
-                this.oldLetters.push(this.myGridNo);
-              } else if (this.laLetters.includes(this.myGridNo) === true) {
-                this.gisMap.appendGrids([this.myGridNo], { noData: true, index: false });
-                const index = this.laLetters.findIndex(item => item === this.myGridNo);
-                this.laLetters.splice(index, 1);
-              }
-              console.log('set');
-            }
-          }, 50);
+          // setTimeout(() => {
+          //   if (this.myGridNo !== undefined && this.$store.state.gridMode === true) {
+          //     if (this.laLetters.includes(this.myGridNo) === false && this.dxfExist === true && this.latticeListNum.includes(this.myGridNo) === false) {
+          //       this.gisMap.appendGrids([this.myGridNo], { noData: true, index: true });
+          //       this.laLetters.push(this.myGridNo);
+          //       this.oldLetters.push(this.myGridNo);
+          //     } else if (this.laLetters.includes(this.myGridNo) === true) {
+          //       this.gisMap.appendGrids([this.myGridNo], { noData: true, index: false });
+          //       const index = this.laLetters.findIndex(item => item === this.myGridNo);
+          //       this.laLetters.splice(index, 1);
+          //     }
+          //     console.log('set');
+          //   }
+          // }, 1100);
         });
 
         // 滑鼠坐標
@@ -2421,7 +2423,7 @@ export default {
           formData.append('userId', this.$store.state.accessToken);
           formData.append('points', `${JSON.stringify(newArr)}`);
 
-          fetch('/csc2api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/Building', {
+          fetch('/cscmap/api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/Building', {
             method: 'POST',
             // headers: new Headers({
             //   'Content-Type': 'application/json'
@@ -2504,55 +2506,58 @@ export default {
           });
         }
 
+        // 去除重複的值
+        // const setData = new Set(rawData);
+
         // 先檢查輸入的圖號有無dxf檔
-        this.checkDxfHandler3(rawData);
+        this.checkDxfHandler3(rawData, payload);
 
-        setTimeout(() => {
-          const noneRows = this.noDxfRows.join(',');
-          console.log(noneRows);
+        // setTimeout(() => {
+        //   const noneRows = this.noDxfRows.join(',');
+        //   console.log(noneRows);
 
-          // 去除面板已有的圖號
-          const rawData2 = rawData.filter(item => !this.latticeListNum.includes(item));
+        //   // 去除面板已有的圖號
+        //   const rawData2 = rawData.filter(item => !this.latticeListNum.includes(item));
 
-          // 去除沒有dxf檔的圖號
-          this.myData = rawData2.filter(item => !this.noDxfRows.includes(item));
-          // ! call api 抓資料
-          this.gisMap.appendGrids(this.myData, { index: false, annotation: true });
+        //   // 去除沒有dxf檔的圖號
+        //   this.myData = rawData2.filter(item => !this.noDxfRows.includes(item));
+        //   // ! call api 抓資料
+        //   this.gisMap.appendGrids(this.myData, { index: false, annotation: true });
 
-          setTimeout(() => {
-            if (this.noDxfRows.length > 0 && payload.isChecked === false) {
-              this.$swal({
-                width: 280,
-                confirmButtonText: '確定',
-                showCloseButton: true,
-                html: `${noneRows}<br />無方格圖面`
-              });
-            }
+        //   setTimeout(() => {
+        //     if (this.noDxfRows.length > 0 && payload.isChecked === false) {
+        //       this.$swal({
+        //         width: 280,
+        //         confirmButtonText: '確定',
+        //         showCloseButton: true,
+        //         html: `${noneRows}<br />無方格圖面`
+        //       });
+        //     }
 
-            // 新增至清單中
-            this.myData.forEach((item) => {
-              const lattResult = {
-                name: item,
-                id: Math.random().toString(16),
-                visible: true,
-                opacity: 0
-              };
+        //     // 新增至清單中
+        //     this.myData.forEach((item) => {
+        //       const lattResult = {
+        //         name: item,
+        //         id: Math.random().toString(16),
+        //         visible: true,
+        //         opacity: 0
+        //       };
 
-              if (lattResult.name !== '') {
-                this.searchResult.list.lattice.push(lattResult);
-              }
-            });
+        //       if (lattResult.name !== '') {
+        //         this.searchResult.list.lattice.push(lattResult);
+        //       }
+        //     });
 
-            this.laLetters.length = 0;
+        //     this.laLetters.length = 0;
 
-            //* 匯入方格 出現面板 -> 關閉方格點選、關閉loading遮罩、手機版隱藏側邊工具列
-            this.$store.commit('OPEN_GRID_MODE', false);
-            this.$store.commit('CTRL_LOADING_MASK', false);
-            if (this.screenWidth < 1024) {
-              this.$store.commit('SET_MOBILE_SELECT', true);
-            }
-          }, 7000 * this.myData.length);
-        }, 100);
+        //     //* 匯入方格 出現面板 -> 關閉方格點選、關閉loading遮罩、手機版隱藏側邊工具列
+        //     this.$store.commit('OPEN_GRID_MODE', false);
+        //     this.$store.commit('CTRL_LOADING_MASK', false);
+        //     if (this.screenWidth < 1024) {
+        //       this.$store.commit('SET_MOBILE_SELECT', true);
+        //     }
+        //   }, 7000 * this.myData.length);
+        // }, 100);
       }
     },
     // * @搜尋：清除所有搜尋結果
@@ -2561,6 +2566,7 @@ export default {
       if (this.nowMode === 'structure') {
         this.searchResult.list.structure = [];
         this.searchResult.currentBuilding = '';
+        this.laLetters.length = 0;
 
         // 清除地圖上有被定位選取的建物
         this.myNewss.forEach((item) => {
@@ -2730,6 +2736,7 @@ export default {
     drawCrossLattice (value) {
       const myNo = parseInt(this.laLetters, 10);
       const myRows = [`${myNo + 100}`, `${myNo - 100}`, `${myNo + 1}`, `${myNo - 1}`];
+      const newArr = [];
 
       // 有勾選多圖顯示
       if (value === true) {
@@ -2744,12 +2751,13 @@ export default {
             item = `-00${Math.abs(item)}`;
           }
 
-          if (this.gisMap.gridInfo(item) !== null) {
-            this.checkDxfHandler(item);
-            // this.gisMap.appendGrids([item], { noData: true, index: true });
-            // this.oldLetters.push(item);
-          }
+          newArr.push(item);
+
+          // if (this.gisMap.gridInfo(item) !== null) {
+          //   this.checkDxfHandler(item);
+          // }
         });
+        this.multiDxfHandler(newArr);
       }
       // 取消勾選
       if (value === false && this.laLetters.length === 1 && this.laLetters[0] !== '') {
@@ -2887,7 +2895,7 @@ export default {
       // 刪除所有圖形
       // this.gisMap.drawingMethod(CSC.DrawingMethod.Clear);
       if (this.screenWidth < 1024) {
-        this.closeMeasurePopupBox();
+        // this.closeMeasurePopupBox();
       }
 
       // 原本有被點擊的建物球標視窗 恢復開啟
@@ -2927,14 +2935,10 @@ export default {
     },
     // * @方格圖：判斷dxf檔是否存在
     checkDxfHandler (myNos) {
-      console.log(myNos);
       const formData = new FormData();
       formData.append('GridNOs[0]', myNos);
       fetch('/cscmap/api/DXFExist', {
         method: 'POST',
-        // headers: new Headers({
-        //   'Content-Type': 'application/json'
-        // }),
         body: formData
       }).then((response) => {
         return response.json();
@@ -2949,22 +2953,8 @@ export default {
         console.log('錯誤:', err);
       });
     },
-    checkDxfHandler2 (myNos) {
-      const formData = new FormData();
-      formData.append('GridNOs[0]', myNos);
-      fetch('/cscmap/api/DXFExist', {
-        method: 'POST',
-        body: formData
-      }).then((response) => {
-        return response.json();
-      }).then((data) => {
-        console.log(data);
-        this.dxfExist = data[0].Status;
-      }).catch((err) => {
-        console.log('錯誤:', err);
-      });
-    },
-    checkDxfHandler3 (myNos) {
+    //* 多圖顯示: 判斷dxf是否存在
+    multiDxfHandler (myNos) {
       const formData = new FormData();
       myNos.forEach((item, index) => {
         formData.append(`GridNOs[${index}]`, item);
@@ -2976,9 +2966,149 @@ export default {
       }).then((response) => {
         return response.json();
       }).then((data) => {
+        console.log(data);
+
+        data.forEach((item) => {
+          if (item.Status === true) {
+            this.gisMap.appendGrids([item.GridNOs], { noData: true, index: true });
+            this.oldLetters.push(item.GridNOs);
+          }
+        });
+      }).catch((err) => {
+        console.log('錯誤:', err);
+      });
+    },
+    // * 點測量 載入dxf
+    checkDxfHandler2 (gridNos) {
+      const formData = new FormData();
+      formData.append('GridNOs[0]', gridNos);
+      fetch('/cscmap/api/DXFExist', {
+        method: 'POST',
+        body: formData
+      }).then((response) => {
+        return response.json();
+      }).then((data) => {
+        console.log(data);
+        this.dxfExist = data[0].Status;
+
+        // * 點測量 載入dxf
+        if (this.dxfExist === false && gridNos !== undefined) {
+          this.$swal({
+            width: 280,
+            showCloseButton: true,
+            confirmButtonText: '確定',
+            html: `${gridNos}無方格圖面`
+          });
+        } else if (this.dxfExist === false && gridNos === undefined) {
+          this.$swal({
+            width: 280,
+            showCloseButton: true,
+            confirmButtonText: '確定',
+            html: '無方格圖面'
+          });
+        }
+
+        if (this.dxfExist === true) {
+          this.pointDxfUpload2(gridNos);
+        }
+      }).catch((err) => {
+        console.log('錯誤:', err);
+      });
+    },
+    // * 按下匯入方格
+    checkDxfHandler3 (rawData, payload) {
+      const formData = new FormData();
+      rawData.forEach((item, index) => {
+        formData.append(`GridNOs[${index}]`, item);
+      });
+
+      fetch('/cscmap/api/DXFExist', {
+        method: 'POST',
+        body: formData
+      }).then((response) => {
+        return response.json();
+      }).then((data) => {
         const filData = data.filter(item => item.Status === false);
         this.noDxfRows = filData.map(item => item.GridNOs.toString());
-        console.log(this.noDxfRows);
+
+        // *
+        const noneRows = this.noDxfRows.join(',');
+        console.log(noneRows);
+
+        // 去除面板已有的圖號
+        const rawData2 = rawData.filter(item => !this.latticeListNum.includes(item));
+
+        // 去除沒有dxf檔的圖號
+        this.myData = rawData2.filter(item => !this.noDxfRows.includes(item));
+        // ! call api 抓資料
+        this.gisMap.appendGrids(this.myData, { index: false, annotation: true });
+
+        setTimeout(() => {
+          if (this.noDxfRows.length > 0 && payload.isChecked === false) {
+            this.$swal({
+              width: 280,
+              confirmButtonText: '確定',
+              showCloseButton: true,
+              html: `${noneRows}<br />無方格圖面`
+            });
+          }
+
+          // 新增至清單中
+          this.myData.forEach((item) => {
+            const lattResult = {
+              name: item,
+              id: Math.random().toString(16),
+              visible: true,
+              opacity: 0
+            };
+
+            if (lattResult.name !== '') {
+              this.searchResult.list.lattice.push(lattResult);
+            }
+          });
+
+          this.laLetters.length = 0;
+
+          //* 匯入方格 出現面板 -> 關閉方格點選、關閉loading遮罩、手機版隱藏側邊工具列
+          if (this.searchResult.list.lattice.length > 0) {
+            this.$store.commit('OPEN_GRID_MODE', false);
+          }
+
+          this.$store.commit('CTRL_LOADING_MASK', false);
+
+          if (this.screenWidth < 1024 && this.searchResult.list.lattice.length > 0) {
+            this.$store.commit('SET_MOBILE_SELECT', true);
+          }
+        }, 10000 * this.myData.length);
+      }).catch((err) => {
+        console.log('錯誤:', err);
+      });
+    },
+    // * 點擊顯示黃色方格圖號
+    showDxfHandler (myNos) {
+      const formData = new FormData();
+      formData.append('GridNOs[0]', myNos);
+      fetch('/cscmap/api/DXFExist', {
+        method: 'POST',
+        body: formData
+      }).then((response) => {
+        return response.json();
+      }).then((data) => {
+        console.log(data);
+        this.dxfExist = data[0].Status;
+        // * 方格圖: 搜尋框&清單沒有的數字 點擊方格變黃色圖塊 搜尋框加上數字 | 搜尋框有的數字 點擊方格變無色 搜尋框去除數字
+        if (this.myGridNo !== undefined && this.$store.state.gridMode === true) {
+          if (this.laLetters.includes(this.myGridNo) === false && this.dxfExist === true && this.latticeListNum.includes(this.myGridNo) === false) {
+            this.gisMap.appendGrids([this.myGridNo], { noData: true, index: true });
+            this.laLetters.push(this.myGridNo);
+            this.oldLetters.push(this.myGridNo);
+          } else if (this.laLetters.includes(this.myGridNo) === true) {
+            this.gisMap.appendGrids([this.myGridNo], { noData: true, index: false });
+            const index = this.laLetters.findIndex(item => item === this.myGridNo);
+            this.laLetters.splice(index, 1);
+          }
+          console.log('clickDXF');
+        }
       }).catch((err) => {
         console.log('錯誤:', err);
       });
@@ -2991,11 +3121,12 @@ export default {
     // 點擊地圖區塊
     mapClickHandler () {
       if (this.screenWidth > 1023) { return; }
-      if (this.activeWindow !== '') { return; }
-      if (this.searchResult.types !== '') { return; }
+      if (this.activeWindow !== '' && this.nowMode === 'structure') { return; }
+      // if (this.searchResult.types !== '') { return; }
       if (this.positionAlert.isOpen === true) { return; }
       if (this.$store.state.menuOpen === true) { return; }
       if (this.$store.state.notHide === true) { return; }
+      if (this.$store.state.gridMode === true) { return; }
 
       const result = !this.$store.state.triggerHidden;
       this.$store.commit('SET_TRIGGER_HIDDEN', result);
@@ -3033,7 +3164,7 @@ export default {
     },
     // * 取得建物類型資料 F3 API
     getStructureType () {
-      fetch('/csc2api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/BuildingType?_format=json', {
+      fetch('/cscmap/api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/BuildingType?_format=json', {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -3075,7 +3206,7 @@ export default {
     },
     // * 取得建物搜尋結果 F3 API
     getSearchResult () {
-      fetch(`/csc2api/proxy?url=${encodeURIComponent(`https://east.csc.com.tw/eas/mhb/rest/mhbe/BuildingList?_format=json&Keyword=${this.searchSelected.keyword}&Status=${this.searchSelected.status}&Type=${this.searchSelected.types}`)}`, {
+      fetch(`/cscmap/api/proxy?url=${encodeURIComponent(`https://east.csc.com.tw/eas/mhb/rest/mhbe/BuildingList?_format=json&Keyword=${this.searchSelected.keyword}&Status=${this.searchSelected.status}&Type=${this.searchSelected.types}`)}`, {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -3169,7 +3300,7 @@ export default {
       // const cluster = require('~/static/_resources/single.json');
       // this.singleClusterInfo = cluster.data[0];
 
-      fetch(`/csc2api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/getBuildingByKey/${mykey}?_format=json`, {
+      fetch(`/cscmap/api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/getBuildingByKey/${mykey}?_format=json`, {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -3189,7 +3320,7 @@ export default {
       // const cluster = require('~/static/_resources/multi.json');
       // this.multiClusterInfo = cluster.data;
 
-      fetch(`/csc2api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/getBuildingByKey/${mykey}?_format=json`, {
+      fetch(`/cscmap/api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/getBuildingByKey/${mykey}?_format=json`, {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -3309,6 +3440,12 @@ export default {
         // 清除點測量dxf檔
         this.gisMap.removeGrids([this.pointDxf[this.pointDxf.length - 1]]);
       }
+
+      // 恢復球標顯示
+      if (this.nowMode === 'structure') {
+        this.markerVisible = true;
+        this.gisMap.setupMarker({ visible: true });
+      }
     },
     // * 返回所有測量視窗 & 重繪
     backAllMeasure () {
@@ -3391,27 +3528,27 @@ export default {
       }
 
       this.checkDxfHandler2(gridNos);
-      setTimeout(() => {
-        if (this.dxfExist === false && gridNos !== undefined) {
-          this.$swal({
-            width: 280,
-            showCloseButton: true,
-            confirmButtonText: '確定',
-            html: `${gridNos}無方格圖面`
-          });
-        } else if (this.dxfExist === false && gridNos === undefined) {
-          this.$swal({
-            width: 280,
-            showCloseButton: true,
-            confirmButtonText: '確定',
-            html: '無方格圖面'
-          });
-        }
+      // setTimeout(() => {
+      //   if (this.dxfExist === false && gridNos !== undefined) {
+      //     this.$swal({
+      //       width: 280,
+      //       showCloseButton: true,
+      //       confirmButtonText: '確定',
+      //       html: `${gridNos}無方格圖面`
+      //     });
+      //   } else if (this.dxfExist === false && gridNos === undefined) {
+      //     this.$swal({
+      //       width: 280,
+      //       showCloseButton: true,
+      //       confirmButtonText: '確定',
+      //       html: '無方格圖面'
+      //     });
+      //   }
 
-        if (this.dxfExist === true) {
-          this.pointDxfUpload2(gridNos);
-        }
-      }, 100);
+      //   if (this.dxfExist === true) {
+      //     this.pointDxfUpload2(gridNos);
+      //   }
+      // }, 100);
     },
     pointDxfUpload2 (gridNos) {
       this.$store.commit('CTRL_LOADING_MASK', true);
@@ -3438,13 +3575,52 @@ export default {
         console.log('錯誤:', err);
       });
     },
+    // * 關閉桌機版測量視窗
+    closeMeasureDragBox () {
+      this.activeWindow = '';
+      this.cancelStepHandler();
+
+      if (this.nowMode === 'lattice') {
+        this.$store.commit('OPEN_GRID_MODE', true);
+      }
+
+      if (this.nowMode === 'structure') {
+        // 恢復開啟球標
+        this.markerVisible = true;
+        this.gisMap.setupMarker({ visible: true });
+
+        // 原本有被點擊的建物球標視窗 恢復開啟
+        if (this.singleClusterInfo !== '' && this.eMarker === 'single' && this.notClose === true) {
+          const infoBox = document.getElementById('meme1');
+          this.gisMap.showInformation(
+            this.eCenter,
+            infoBox,
+            {}
+          );
+
+          const key = this.singleClusterInfo[this.singleClusterInfo.length - 1].key;
+          this.gisMap.markerBounds([key], 1.5).forEach((m) => {
+            m.selected = true;
+          });
+        }
+
+        if (this.multiClusterInfo !== '' && this.eMarker === 'multi' && this.notClose === true) {
+          const infoBox = document.getElementById('meme2');
+          this.gisMap.showInformation(
+            this.eCenter,
+            infoBox,
+            {}
+          );
+        }
+      }
+    },
     // * 監測是否有sessionStorage傳來 有->接值進行建物搜尋
     getSession () {
       if (sessionStorage.getItem('iptKeys') !== null) {
         this.sesKeys = sessionStorage.getItem('iptKeys');
         this.sesId = sessionStorage.getItem('iptUserID');
 
-        fetch(`/csc2api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/getBuildingByKey/${this.sesKeys}?_format=json`, {
+        fetch(`/cscmap/api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/getBuildingByKey/${this.sesKeys}?_format=json`, {
           method: 'GET',
           headers: new Headers({
             'Content-Type': 'application/json'
@@ -3512,6 +3688,36 @@ export default {
         this.pointMeasurer.aimpoint = false;
       }
 
+      // 原本已完成點測量 又切換至其他視窗 在切換回測量視窗時 要顯示點測量結果
+      if (value === 'measureWindow' && this.screenWidth < 1024 && this.pointTwdXy.x !== '') {
+        this.activeWindow = 'mobileMeasureWindow';
+      }
+
+      // 測量面板出現時 隱藏球標
+      if (value === 'measureWindow' || value === 'mobileMeasureWindow') {
+        this.markerVisible = false;
+        this.gisMap.setupMarker({ visible: false });
+
+        // 使用者是否有自己關掉視窗 notClose=true代表沒關 (桌機版)
+        if (this.screenWidth > 1023 && this.clusRows.length > 0) {
+          if (this.clusRows[this.clusRows.length - 1].selected === true) {
+            this.notClose = true;
+          } else {
+            this.notClose = false;
+          }
+        }
+
+        // 關閉桌機版點擊球標會出現的視窗
+        this.gisMap.showInformation();
+
+        if (this.singleClusterInfo.length > 0) {
+          this.clusRows[this.clusRows.length - 1].selected = false;
+          this.$store.commit('ERP_CLUSTER_BOX', false);
+          this.$store.commit('DONT_HIDE_NAV', false);
+          this.$store.commit('SET_MOBILE_SELECT', false);
+        }
+      }
+
       // * 手機版 當已有建物查詢結果時 又開啟工具列視窗 -> erpbox會被壓在後面
       if (value !== '' && this.searchResult.list.structure.length >= 1 && this.screenWidth < 1024) {
         this.$store.commit('STACK_MULTI_BOX', true);
@@ -3560,6 +3766,17 @@ export default {
     'searchResult.list.lattice': {
       handler (value) {
         this.latticeListNum = value.map(item => item.name);
+      },
+      deep: true
+    },
+    'searchResult.list.structure': {
+      handler (value) {
+        if (value.length > 0 && this.nowMode === 'structure') {
+          this.$store.commit('DONT_HIDE_NAV', true);
+        }
+        if (value.length <= 0 && this.nowMode === 'structure') {
+          this.$store.commit('DONT_HIDE_NAV', false);
+        }
       },
       deep: true
     }

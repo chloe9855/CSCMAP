@@ -32,67 +32,118 @@ export default {
       },
       items: [
         {
-          src: require('~/assets/img/guides/1.png'),
+          src: require('~/assets/img/guides/1.JPG'),
           w: 1920,
           h: 1080
         }, {
-          src: require('~/assets/img/guides/2.png'),
+          src: require('~/assets/img/guides/2.JPG'),
           w: 1920,
           h: 1080
         },
         {
-          src: require('~/assets/img/guides/3.png'),
+          src: require('~/assets/img/guides/3.JPG'),
           w: 1920,
           h: 1080
         }, {
-          src: require('~/assets/img/guides/4.png'),
+          src: require('~/assets/img/guides/4.JPG'),
           w: 1920,
           h: 1080
         },
         {
-          src: require('~/assets/img/guides/5.png'),
+          src: require('~/assets/img/guides/5.JPG'),
           w: 1920,
           h: 1080
         }, {
-          src: require('~/assets/img/guides/6.png'),
+          src: require('~/assets/img/guides/6.JPG'),
           w: 1920,
           h: 1080
         },
         {
-          src: require('~/assets/img/guides/7.png'),
+          src: require('~/assets/img/guides/7.JPG'),
           w: 1920,
           h: 1080
         }, {
-          src: require('~/assets/img/guides/8.png'),
+          src: require('~/assets/img/guides/8.JPG'),
           w: 1920,
           h: 1080
         },
         {
-          src: require('~/assets/img/guides/9.png'),
+          src: require('~/assets/img/guides/9.JPG'),
           w: 1920,
           h: 1080
         }, {
-          src: require('~/assets/img/guides/10.png'),
+          src: require('~/assets/img/guides/10.JPG'),
           w: 1920,
           h: 1080
         },
         {
-          src: require('~/assets/img/guides/11.png'),
+          src: require('~/assets/img/guides/11.JPG'),
           w: 1920,
           h: 1080
         },
         {
-          src: require('~/assets/img/guides/12.png'),
+          src: require('~/assets/img/guides/12.JPG'),
           w: 1920,
           h: 1080
         },
         {
-          src: require('~/assets/img/guides/13.png'),
+          src: require('~/assets/img/guides/13.JPG'),
           w: 1920,
           h: 1080
         },
         {
-          src: require('~/assets/img/guides/14.png'),
+          src: require('~/assets/img/guides/14.JPG'),
+          w: 1920,
+          h: 1080
+        },
+        {
+          src: require('~/assets/img/guides/15.JPG'),
+          w: 1920,
+          h: 1080
+        }, {
+          src: require('~/assets/img/guides/16.JPG'),
+          w: 1920,
+          h: 1080
+        },
+        {
+          src: require('~/assets/img/guides/17.JPG'),
+          w: 1920,
+          h: 1080
+        },
+        {
+          src: require('~/assets/img/guides/18.JPG'),
+          w: 1920,
+          h: 1080
+        }, {
+          src: require('~/assets/img/guides/19.JPG'),
+          w: 1920,
+          h: 1080
+        },
+        {
+          src: require('~/assets/img/guides/20.JPG'),
+          w: 1920,
+          h: 1080
+        },
+        {
+          src: require('~/assets/img/guides/21.JPG'),
+          w: 1920,
+          h: 1080
+        }, {
+          src: require('~/assets/img/guides/22.JPG'),
+          w: 1920,
+          h: 1080
+        },
+        {
+          src: require('~/assets/img/guides/23.JPG'),
+          w: 1920,
+          h: 1080
+        },
+        {
+          src: require('~/assets/img/guides/24.JPG'),
+          w: 1920,
+          h: 1080
+        }, {
+          src: require('~/assets/img/guides/25.JPG'),
           w: 1920,
           h: 1080
         }

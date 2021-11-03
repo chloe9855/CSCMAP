@@ -2207,7 +2207,7 @@ export default {
           formData.append('key', this.manageId);
           formData.append('points', `${JSON.stringify(newArr)}`);
 
-          fetch('/csc2api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/UpdateBuildingPoints', {
+          fetch('/cscmap/api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/UpdateBuildingPoints', {
             method: 'POST',
             // headers: new Headers({
             //   'Content-Type': 'multipart/form-data'
@@ -2425,7 +2425,7 @@ export default {
     },
     // * 取得建物類型資料 F3 API
     getStructureType () {
-      fetch('/csc2api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/BuildingType?_format=json', {
+      fetch('/cscmap/api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/BuildingType?_format=json', {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -2467,7 +2467,7 @@ export default {
     },
     // * 取得建物搜尋結果 F3 API
     getSearchResult () {
-      fetch(`/csc2api/proxy?url=${encodeURIComponent(`https://east.csc.com.tw/eas/mhb/rest/mhbe/BuildingList?_format=json&Keyword=${this.searchSelected.keyword}&Status=${this.searchSelected.status}&Type=${this.searchSelected.types}`)}`, {
+      fetch(`/cscmap/api/proxy?url=${encodeURIComponent(`https://east.csc.com.tw/eas/mhb/rest/mhbe/BuildingList?_format=json&Keyword=${this.searchSelected.keyword}&Status=${this.searchSelected.status}&Type=${this.searchSelected.types}`)}`, {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
