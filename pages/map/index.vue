@@ -2507,10 +2507,11 @@ export default {
         }
 
         // 去除重複的值
-        // const setData = new Set(rawData);
+        const arrToSet = new Set(rawData);
+        const uniqueArr = [...arrToSet];
 
         // 先檢查輸入的圖號有無dxf檔
-        this.checkDxfHandler3(rawData, payload);
+        this.checkDxfHandler3(uniqueArr, payload);
 
         // setTimeout(() => {
         //   const noneRows = this.noDxfRows.join(',');
