@@ -354,7 +354,8 @@ export default {
     condition: Array,
     buildtype: Array,
     resultType: String,
-    lattword: String
+    lattword: String,
+    showMulBox: Boolean
   },
   created () {
     this.structure.types.options = this.buildtype;
@@ -617,7 +618,7 @@ export default {
           this.isDisabled = true;
         }
 
-        if (arr.length >= 6 && this.showBox === false) {
+        if (arr.length >= 6 && this.showBox === false && this.showMulBox === false) {
           this.$swal({
             text: '輸入過多圖號，將造成系統不穩定',
             width: 280,
@@ -687,7 +688,7 @@ export default {
         this.isDisabled = true;
       }
 
-      if (arr.length >= 6 && this.showBox === false) {
+      if (arr.length >= 6 && this.showBox === false && this.showMulBox === false) {
         this.$swal({
           text: '輸入過多圖號，將造成系統不穩定',
           width: 280,

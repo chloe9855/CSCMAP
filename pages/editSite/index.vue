@@ -1597,21 +1597,36 @@ export default {
               return undefined;
             });
             // 偵測重疊
-            if (p.overlay instanceof CSC.GISFill) {
-              p.overlay.setFillColor(p.intersects ? '#FFFF00' : '#8D2683');
+            if (p.action === 'ADD' || p.action === 'SAVE' || p.action === 'MOVED') {
+              const intersects = this.gisMap.IntersectDetection(p.overlay);
+              if (intersects.length > 0) {
+                if (p.overlay instanceof CSC.GISFill) {
+                  p.overlay.setFillColor(intersects ? '#FFFF00' : '#8D2683');
+                }
+                if (intersects) {
+                  this.$swal({
+                    icon: 'warning',
+                    width: 280,
+                    text: '新繪製建地有重疊',
+                    confirmButtonText: '確定',
+                    showCloseButton: true
+                  });
+                }
+              }
             }
-            if (p.intersects) {
-              this.$swal({
-                icon: 'warning',
-                width: 320,
-                text: '新繪製建地有重疊',
-                confirmButtonText: '確定',
-                showCloseButton: true
-              });
 
-              // console.log(p.intersects.filter(function (x) { return x instanceof CSC.GISMarker && x.data; }).map(function (x) { return x.data.key; }));
-              // console.log(p.intersects);
-            }
+            // if (p.overlay instanceof CSC.GISFill) {
+            //   p.overlay.setFillColor(p.intersects ? '#FFFF00' : '#8D2683');
+            // }
+            // if (p.intersects) {
+            //   this.$swal({
+            //     icon: 'warning',
+            //     width: 320,
+            //     text: '新繪製建地有重疊',
+            //     confirmButtonText: '確定',
+            //     showCloseButton: true
+            //   });
+            // }
           }
         });
       }, 1000);

@@ -107,6 +107,7 @@
       :buildtype="structureType"
       :result-type="searchResult.types"
       :lattword="laLetters.join(',')"
+      :show-mul-box="showMulBox"
       @control="payload => queryWindowOpen = payload"
       @search="searchHandler"
       @clearResult="clearSearchResultHandler"
@@ -117,7 +118,7 @@
       @crossGrid="drawCrossLattice"
       @closeWindow="activeWindow = '', cancelStepHandler()"
       @moreSearch="iframeSearch"
-      @clearKeyword="laLetters.length = 0"
+      @clearKeyword="laLetters.length = 0, multiDxfLength = 0, showMulBox = false;"
     >
       <QueryWindowContainer-component
         v-if="screenWidth > 1023 && searchResult.list.structure.length > 0 && nowMode === 'structure'"
@@ -1348,7 +1349,12 @@ export default {
       // * 建物名稱顯示設定
       showLabelName: null,
       isIE: false,
-      getGeo: ''
+      getGeo: '',
+      // * 多圖顯示: 此圖號有幾張多圖dxf
+      multiDxfLength: 0,
+      // 過多圖號警示窗只能出現一次
+      showMulBox: false,
+      totalVal: 0
     };
   },
   // head: {
@@ -1627,7 +1633,7 @@ export default {
             }
 
             // 鎖點測量 線段長度
-            if (this.geometryMeasurer.current === 'line') {
+            if (this.geometryMeasurer.current === 'line' || this.geometryOptions.current === 'line') {
               this.lineSum = 0;
               console.log(p.overlay);
               p.overlay.measure.forEach((item) => {
@@ -1638,7 +1644,7 @@ export default {
                 } else {
                   value = parseFloat(item.label.substring(0, item.label.length - 1));
                 }
-                console.log(value);
+
                 this.lineSum += value;
               });
             }
@@ -1682,21 +1688,35 @@ export default {
               return undefined;
             });
             // 偵測重疊
-            if (p.overlay instanceof CSC.GISFill) {
-              p.overlay.setFillColor(p.intersects ? '#FFFF00' : '#8D2683');
+            if (p.action === 'ADD' || p.action === 'SAVE' || p.action === 'MOVED') {
+              const intersects = this.gisMap.IntersectDetection(p.overlay);
+              if (intersects.length > 0) {
+                if (p.overlay instanceof CSC.GISFill) {
+                  p.overlay.setFillColor(intersects ? '#FFFF00' : '#8D2683');
+                }
+                if (intersects) {
+                  this.$swal({
+                    icon: 'warning',
+                    width: 280,
+                    text: '新繪製建地有重疊',
+                    confirmButtonText: '確定',
+                    showCloseButton: true
+                  });
+                }
+              }
             }
-            if (p.intersects) {
-              this.$swal({
-                icon: 'warning',
-                width: 280,
-                text: '新繪製建地有重疊',
-                confirmButtonText: '確定',
-                showCloseButton: true
-              });
-
-              // console.log(p.intersects.filter(function (x) { return x instanceof CSC.GISMarker && x.data; }).map(function (x) { return x.data.key; }));
-              // console.log(p.intersects);
-            }
+            // if (p.overlay instanceof CSC.GISFill) {
+            //   p.overlay.setFillColor(p.intersects ? '#FFFF00' : '#8D2683');
+            // }
+            // if (p.intersects) {
+            //   this.$swal({
+            //     icon: 'warning',
+            //     width: 280,
+            //     text: '新繪製建地有重疊',
+            //     confirmButtonText: '確定',
+            //     showCloseButton: true
+            //   });
+            // }
           }
         });
       }, 1000);
@@ -2387,7 +2407,8 @@ export default {
         coordinate: [],
         detail: this.totalArea[this.totalArea.length - 1],
         controlBar: false,
-        radius: this.circleRadius[this.circleRadius.length - 1]
+        radius: this.circleRadius[this.circleRadius.length - 1],
+        lineLength: this.lineSum
       };
 
       // * 在暫存圖形中新增type屬性 值為line/circle/circleland...等
@@ -2579,6 +2600,9 @@ export default {
       if (this.nowMode === 'lattice') {
         this.searchResult.list.lattice = [];
         this.laLetters.length = 0;
+
+        this.multiDxfLength = 0;
+        this.showMulBox = false;
 
         // 清除地圖上所有已載入的DXF檔
         this.oldLetters.forEach((item) => {
@@ -2774,6 +2798,9 @@ export default {
           }
           this.gisMap.appendGrids([item], { noData: true, index: false });
         });
+
+        this.multiDxfLength = 0;
+        this.showMulBox = false;
       }
     },
     // * @方格圖：刪除方格圖層
@@ -2968,6 +2995,8 @@ export default {
         return response.json();
       }).then((data) => {
         console.log(data);
+        const trueRows = data.filter(item => item.Status === true);
+        this.multiDxfLength = trueRows.length;
 
         data.forEach((item) => {
           if (item.Status === true) {
@@ -3745,6 +3774,22 @@ export default {
       } else {
         this.addClusterBg = false;
       }
+    },
+    // * 有勾多圖顯示 在點選其他方格圖 -> 跳輸入過多圖號視窗
+    laLetters (value) {
+      this.totalVal = this.multiDxfLength + this.laLetters.length;
+      if (this.totalVal >= 6 && this.showMulBox === false) {
+        this.$swal({
+          text: '輸入過多圖號，將造成系統不穩定',
+          width: 280,
+          confirmButtonText: '確定',
+          showCloseButton: true
+        });
+
+        this.showMulBox = true;
+        this.totalVal = 0;
+      }
+      console.log(this.totalVal);
     },
 
     // * 這邊用 watch 監聽資料的變化，也可以改用別種方式來做

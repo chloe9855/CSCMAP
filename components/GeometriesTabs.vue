@@ -94,7 +94,7 @@
                     半徑{{ graphItem.radius }}m
                   </p>
                   <p v-if="graphItem.type === 'line'">
-                    總長{{ graphItem.radius }}
+                    總長{{ graphItem.lineLength }}m
                   </p>
                   <p v-if="graphItem.type !== 'line'">
                     總面積{{ graphItem.detail }}平方公尺
