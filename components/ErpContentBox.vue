@@ -278,6 +278,8 @@ export default {
       this.modeType = 'detail';
       this.getDetailData();
       this.CONSOLE('【ERP介面】根據所選項目取得建物的詳細資訊');
+      // 存使用者紀錄
+      this.setUserLog();
     },
     // * 先切割每筆資料的key值 (到'-'符號之前)
     getMyKey () {
@@ -286,7 +288,7 @@ export default {
     },
     // * 根據所選項目取得建物的詳細資訊
     getDetailData () {
-      fetch(`/cscmap/api/proxy?url=http://east.csc.com.tw/eas/mhb/rest/mhbe/getDataByManageNo?_format=json%26manageNo=${this.myKey}`, {
+      fetch(`/cscmap/api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/getDataByManageNo?_format=json%26manageNo=${this.myKey}`, {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -346,6 +348,26 @@ export default {
         document.getElementById('asset_block3').style.display = 'block';
         this.$store.commit('HIDE_ASSET_BLOCK', true);
       }
+    },
+    setUserLog () {
+      fetch('/cscmap/api/CSCLog', {
+        method: 'POST',
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        }),
+        body: JSON.stringify({
+          DEPT: this.$store.state.userDept,
+          ID: this.$store.state.userId,
+          NAME: this.$store.state.userName,
+          Type: 3
+        })
+      }).then((response) => {
+        return response.json();
+      }).then((data) => {
+
+      }).catch((err) => {
+        console.log('錯誤:', err);
+      });
     }
   },
   computed: {

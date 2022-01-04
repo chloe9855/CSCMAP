@@ -253,6 +253,8 @@ export default {
       this.$store.commit('SET_ACCESS_TOKEN', '');
       this.$router.push('/index');
       this.logOut(false);
+
+      // this.setUserLog();
     },
     // *登出重設cookie
     logOut (autoRedirectQS) {
@@ -274,6 +276,7 @@ export default {
     loginHandler () {
       location.href = 'https://testeip.csc.com.tw:1443/SSO/DSS0/DSAOS0.aspx?.done=' + encodeURIComponent(window.location.href);
       this.getUserData();
+      // this.setUserLog();
     },
     // * 獲取登入資料
     getUserData () {
@@ -296,6 +299,8 @@ export default {
         this.userID = jsonData.UID;
         this.userName = jsonData.UserName;
         this.$store.commit('GET_USER_NAME', jsonData.UserName);
+        this.$store.commit('GET_USER_ID', jsonData.UserId);
+        this.$store.commit('GET_USER_DEPT', jsonData.UserDept);
         this.$store.commit('SET_ACCESS_TOKEN', jsonData.UID);
         this.callLoginApi = true;
 
@@ -343,7 +348,7 @@ export default {
     },
     // * 查詢載入方格圖權限 (回傳 true(有權限) or false(無權限))
     getGridAuthority () {
-      fetch(`/cscmap/api/proxy?url=http://east.csc.com.tw/eas/mhb/rest/mhbe/LoadGridAuth/${this.userID}?_format=json`, {
+      fetch(`/cscmap/api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/LoadGridAuth/${this.userID}?_format=json`, {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -365,6 +370,29 @@ export default {
       if (name === '業務負責人') {
         window.open('https://gist.csc.com.tw/wsCscHxUtil/CscHxUtil/Service.asmx/ShowCSCBusinessOwners');
       }
+    },
+    // * 使用者紀錄api
+    setUserLog () {
+      const newObj = {
+        DEPT: this.$store.state.userDept,
+        ID: this.$store.state.userId,
+        NAME: this.$store.state.userName,
+        Type: 4
+      };
+
+      fetch('/cscmap/api/CSCLog', {
+        method: 'POST',
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        }),
+        body: JSON.stringify(newObj)
+      }).then((response) => {
+        return response.json();
+      }).then((data) => {
+
+      }).catch((err) => {
+        console.log('錯誤:', err);
+      });
     }
   },
   computed: {

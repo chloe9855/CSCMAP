@@ -163,7 +163,7 @@ export default {
     },
     // * 查詢載入方格圖權限 (回傳 true(有權限) or false(無權限))
     getGridAuthority () {
-      fetch('/cscmap/api/proxy?url=http://east.csc.com.tw/eas/mhb/rest/mhbe/LoadGridAuth/190199?_format=json', {
+      fetch('/cscmap/api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/LoadGridAuth/190199?_format=json', {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'

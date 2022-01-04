@@ -28,6 +28,8 @@ export const state = () => ({
   hideAsset: true,
   labelNameCtrl: null,
   userName: '',
+  userId: '',
+  userDept: '',
   confirmButt: false,
   erpMode: '',
   backStruct: true,
@@ -62,6 +64,14 @@ export const mutations = {
   // * 使用者名稱
   GET_USER_NAME (state, payload) {
     state.userName = payload;
+  },
+  // * 使用者帳號
+  GET_USER_ID (state, payload) {
+    state.userId = payload;
+  },
+  // * 使用者單位
+  GET_USER_DEPT (state, payload) {
+    state.userDept = payload;
   },
   // * 設定元件是否隱藏
   SET_TRIGGER_HIDDEN (state, payload) {
