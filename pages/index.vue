@@ -185,7 +185,7 @@ export default {
 
       // 有登入且有權限
       if (this.$store.state.accessToken !== '' && this.$store.state.myUserRole !== 4 && this.$store.state.myUserRole !== 3) {
-        location.href = 'https://east.csc.com.tw/eas/mhb/platform/mhbba';
+        location.href = 'https://east.csc.com.tw/eas/kub/platform/kubba';
       }
 
       // 有登入但無權限  (為無權使用者(4))

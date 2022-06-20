@@ -1597,35 +1597,22 @@ export default {
               return undefined;
             });
             // 偵測重疊
-            if (p.action === 'ADD' || p.action === 'SAVE' || p.action === 'MOVED') {
-              const intersects = this.gisMap.IntersectDetection(p.overlay);
-              if (intersects.length > 0) {
-                if (p.overlay instanceof CSC.GISFill) {
-                  p.overlay.setFillColor(intersects ? '#FFFF00' : '#8D2683');
-                }
-                if (intersects) {
-                  this.$swal({
-                    icon: 'warning',
-                    width: 280,
-                    text: '新繪製建地有重疊',
-                    confirmButtonText: '確定',
-                    showCloseButton: true
-                  });
-                }
-              }
-            }
-
-            // if (p.overlay instanceof CSC.GISFill) {
-            //   p.overlay.setFillColor(p.intersects ? '#FFFF00' : '#8D2683');
-            // }
-            // if (p.intersects) {
-            //   this.$swal({
-            //     icon: 'warning',
-            //     width: 320,
-            //     text: '新繪製建地有重疊',
-            //     confirmButtonText: '確定',
-            //     showCloseButton: true
-            //   });
+            // if (p.action === 'ADD' || p.action === 'SAVE' || p.action === 'MOVED') {
+            //   const intersects = this.gisMap.IntersectDetection(p.overlay);
+            //   if (intersects.length > 0) {
+            //     if (p.overlay instanceof CSC.GISFill) {
+            //       p.overlay.setFillColor(intersects ? '#FFFF00' : '#8D2683');
+            //     }
+            //     if (intersects) {
+            //       this.$swal({
+            //         icon: 'warning',
+            //         width: 280,
+            //         text: '新繪製建地有重疊',
+            //         confirmButtonText: '確定',
+            //         showCloseButton: true
+            //       });
+            //     }
+            //   }
             // }
           }
         });
@@ -2222,7 +2209,7 @@ export default {
           formData.append('key', this.manageId);
           formData.append('points', `${JSON.stringify(newArr)}`);
 
-          fetch('/cscmap/api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/UpdateBuildingPoints', {
+          fetch('/cscmap/api/proxy?url=https://east.csc.com.tw/eas/kub/rest/kube/UpdateBuildingPoints', {
             method: 'POST',
             // headers: new Headers({
             //   'Content-Type': 'multipart/form-data'
@@ -2440,7 +2427,7 @@ export default {
     },
     // * 取得建物類型資料 F3 API
     getStructureType () {
-      fetch('/cscmap/api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/BuildingType?_format=json', {
+      fetch('/cscmap/api/proxy?url=https://east.csc.com.tw/eas/kub/rest/kube/BuildingType?_format=json', {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -2482,7 +2469,7 @@ export default {
     },
     // * 取得建物搜尋結果 F3 API
     getSearchResult () {
-      fetch(`/cscmap/api/proxy?url=${encodeURIComponent(`https://east.csc.com.tw/eas/mhb/rest/mhbe/BuildingList?_format=json&Keyword=${this.searchSelected.keyword}&Status=${this.searchSelected.status}&Type=${this.searchSelected.types}`)}`, {
+      fetch(`/cscmap/api/proxy?url=${encodeURIComponent(`https://east.csc.com.tw/eas/kub/rest/kube/BuildingList?_format=json&Keyword=${this.searchSelected.keyword}&Status=${this.searchSelected.status}&Type=${this.searchSelected.types}`)}`, {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -2502,7 +2489,7 @@ export default {
     },
     // * 桌機版 點擊單筆ERP看詳細
     singleErpDetail (payload) {
-      window.open(`https://east.csc.com.tw/eas/mhb/platform/mhbbd?manageNo=${payload}`);
+      window.open(`https://east.csc.com.tw/eas/kub/platform/kubbd?manageNo=${payload}`);
     },
     // * 桌機版 點擊多筆ERP看詳細
     allErpDetail () {
@@ -2511,7 +2498,7 @@ export default {
         newArr.push(item.key);
       });
       const keyNumber = newArr.join(',');
-      window.open(`https://east.csc.com.tw/eas/mhb/platform/mhbba?keys=${keyNumber}`);
+      window.open(`https://east.csc.com.tw/eas/kub/platform/kubba?keys=${keyNumber}`);
     },
     sortTimeHandler (payload) {
       console.log(payload);
@@ -2540,13 +2527,13 @@ export default {
     },
     getSingleCluster (mykey) {
       // 一期 f3 api 1
-      // https://east.csc.com.tw/eas/mhb/rest/mhbe/getBuildingByKey/00004-01?_format=json
+      // https://east.csc.com.tw/eas/kub/rest/kube/getBuildingByKey/00004-01?_format=json
       const cluster = require('~/static/_resources/single.json');
       this.singleClusterInfo = cluster.data[0];
     },
     getMultiCluster (mykey) {
       // 一期 f3 api 3
-      // https://east.csc.com.tw/eas/mhb/rest/mhbe/getBuildingByKey/00004-01,00004-02?_format=json
+      // https://east.csc.com.tw/eas/kub/rest/kube/getBuildingByKey/00004-01,00004-02?_format=json
       const cluster = require('~/static/_resources/multi.json');
       this.multiClusterInfo = cluster.data;
     },

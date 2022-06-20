@@ -497,7 +497,7 @@ export default {
     },
     // * 用key值去call f3 api以取得 工程名稱project、各棟名稱building
     getKeyData (myKey) {
-      fetch(`/cscmap/api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/getBuildingByKey/${myKey}?_format=json`, {
+      fetch(`/cscmap/api/proxy?url=https://east.csc.com.tw/eas/kub/rest/kube/getBuildingByKey/${myKey}?_format=json`, {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'

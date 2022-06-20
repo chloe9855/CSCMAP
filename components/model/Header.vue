@@ -331,7 +331,7 @@ export default {
     },
     // * 取得使用者權限角色
     getUserRole () {
-      fetch(`/cscmap/api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/Role/${this.userID}?_format=json`, {
+      fetch(`/cscmap/api/proxy?url=https://east.csc.com.tw/eas/kub/rest/kube/Role/${this.userID}?_format=json`, {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -348,7 +348,7 @@ export default {
     },
     // * 查詢載入方格圖權限 (回傳 true(有權限) or false(無權限))
     getGridAuthority () {
-      fetch(`/cscmap/api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/LoadGridAuth/${this.userID}?_format=json`, {
+      fetch(`/cscmap/api/proxy?url=https://east.csc.com.tw/eas/kub/rest/kube/LoadGridAuth/${this.userID}?_format=json`, {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -365,7 +365,7 @@ export default {
     },
     openWindow (name) {
       if (name === 'ERP建物資訊') {
-        window.open('https://east.csc.com.tw/eas/mhb/platform/mhbba');
+        window.open('https://east.csc.com.tw/eas/kub/platform/kubba');
       }
       if (name === '業務負責人') {
         window.open('https://gist.csc.com.tw/wsCscHxUtil/CscHxUtil/Service.asmx/ShowCSCBusinessOwners');
@@ -387,7 +387,7 @@ export default {
         }),
         body: JSON.stringify(newObj)
       }).then((response) => {
-        return response.json();
+        return response;
       }).then((data) => {
 
       }).catch((err) => {

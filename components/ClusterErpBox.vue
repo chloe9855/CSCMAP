@@ -220,7 +220,7 @@ export default {
     },
     // * 根據所選項目取得建物的詳細資訊
     getDetailData () {
-      fetch(`/cscmap/api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/getDataByManageNo?_format=json%26manageNo=${this.myKey}`, {
+      fetch(`/cscmap/api/proxy?url=https://east.csc.com.tw/eas/kub/rest/kube/getDataByManageNo?_format=json%26manageNo=${this.myKey}`, {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'

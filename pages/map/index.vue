@@ -621,7 +621,7 @@
         <div class="navtabs__content theme-dark-mode">
           <div class="layersTable__wrapper theme-scrollbar">
             <table class="layersTable">
-              <thead>
+              <thead :class="{ 'hide_head': layerOptions.current === 'addition' }">
                 <tr>
                   <th>圖層名稱</th>
                   <th>可見度</th>
@@ -632,7 +632,6 @@
                 <template v-for="layerItem of switchLayerProvider(layerOptions.current)">
                   <tr
                     :key="layerItem.fid"
-                    :class="{ 'is-active': layerOptions.current === 'addition' && layerOptions.active === layerItem.fid }"
                     @mouseenter="layerOptions.active = layerItem.fid"
                     @mouseleave="layerOptions.active = ''"
                   >
@@ -657,8 +656,25 @@
                         @update="updateLayerOpacities"
                       />
                     </td>
+                    <td v-if="layerOptions.current === 'addition'">
+                      <a
+                        href="javascript:;"
+                        class="location-btn"
+                        title="定位"
+                        @click.stop="setLayerPositionHandler(layerItem.fid, layerItem.myLayerFile)"
+                        @mousedown.prevent
+                      />
+                    </td>
+                    <td v-if="layerOptions.current === 'addition'">
+                      <a
+                        href="javascript:;"
+                        class="delete-btn"
+                        title="刪除"
+                        @click.stop="deleteLayerHandler(layerItem.fid, layerItem.myLayerFile)"
+                      />
+                    </td>
                   </tr>
-                  <tr
+                  <!-- <tr
                     v-if="layerOptions.current === 'addition'"
                     v-show="layerOptions.active === layerItem.fid"
                     :key="`table-detail_${layerItem.fid}`"
@@ -688,7 +704,7 @@
                         </a>
                       </div>
                     </td>
-                  </tr>
+                  </tr> -->
                 </template>
                 <tr v-if="switchLayerProvider(layerOptions.current).length <= 0">
                   <td colspan="3" align="center">
@@ -1688,34 +1704,22 @@ export default {
               return undefined;
             });
             // 偵測重疊
-            if (p.action === 'ADD' || p.action === 'SAVE' || p.action === 'MOVED') {
-              const intersects = this.gisMap.IntersectDetection(p.overlay);
-              if (intersects.length > 0) {
-                if (p.overlay instanceof CSC.GISFill) {
-                  p.overlay.setFillColor(intersects ? '#FFFF00' : '#8D2683');
-                }
-                if (intersects) {
-                  this.$swal({
-                    icon: 'warning',
-                    width: 280,
-                    text: '新繪製建地有重疊',
-                    confirmButtonText: '確定',
-                    showCloseButton: true
-                  });
-                }
-              }
-            }
-            // if (p.overlay instanceof CSC.GISFill) {
-            //   p.overlay.setFillColor(p.intersects ? '#FFFF00' : '#8D2683');
-            // }
-            // if (p.intersects) {
-            //   this.$swal({
-            //     icon: 'warning',
-            //     width: 280,
-            //     text: '新繪製建地有重疊',
-            //     confirmButtonText: '確定',
-            //     showCloseButton: true
-            //   });
+            // if (p.action === 'ADD' || p.action === 'SAVE' || p.action === 'MOVED') {
+            //   const intersects = this.gisMap.IntersectDetection(p.overlay);
+            //   if (intersects.length > 0) {
+            //     if (p.overlay instanceof CSC.GISFill) {
+            //       p.overlay.setFillColor(intersects ? '#FFFF00' : '#8D2683');
+            //     }
+            //     if (intersects) {
+            //       this.$swal({
+            //         icon: 'warning',
+            //         width: 280,
+            //         text: '新繪製建地有重疊',
+            //         confirmButtonText: '確定',
+            //         showCloseButton: true
+            //       });
+            //     }
+            //   }
             // }
           }
         });
@@ -2444,7 +2448,7 @@ export default {
           formData.append('userId', this.$store.state.accessToken);
           formData.append('points', `${JSON.stringify(newArr)}`);
 
-          fetch('/cscmap/api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/Building', {
+          fetch('/cscmap/api/proxy?url=https://east.csc.com.tw/eas/kub/rest/kube/Building', {
             method: 'POST',
             // headers: new Headers({
             //   'Content-Type': 'application/json'
@@ -3109,7 +3113,10 @@ export default {
           if (this.screenWidth < 1024 && this.searchResult.list.lattice.length > 0) {
             this.$store.commit('SET_MOBILE_SELECT', true);
           }
-        }, 10000 * this.myData.length);
+
+          // * call cscLog api
+          this.setUserLog('addGrid', this.myData);
+        }, 2300 * this.myData.length);
       }).catch((err) => {
         console.log('錯誤:', err);
       });
@@ -3194,7 +3201,7 @@ export default {
     },
     // * 取得建物類型資料 F3 API
     getStructureType () {
-      fetch('/cscmap/api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/BuildingType?_format=json', {
+      fetch('/cscmap/api/proxy?url=https://east.csc.com.tw/eas/kub/rest/kube/BuildingType?_format=json', {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -3236,7 +3243,7 @@ export default {
     },
     // * 取得建物搜尋結果 F3 API
     getSearchResult () {
-      fetch(`/cscmap/api/proxy?url=${encodeURIComponent(`https://east.csc.com.tw/eas/mhb/rest/mhbe/BuildingList?_format=json&Keyword=${this.searchSelected.keyword}&Status=${this.searchSelected.status}&Type=${this.searchSelected.types}`)}`, {
+      fetch(`/cscmap/api/proxy?url=${encodeURIComponent(`https://east.csc.com.tw/eas/kub/rest/kube/BuildingList?_format=json&Keyword=${this.searchSelected.keyword}&Status=${this.searchSelected.status}&Type=${this.searchSelected.types}`)}`, {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -3253,6 +3260,10 @@ export default {
 
         // 定位搜尋結果
         this.getBuildingPosition(data);
+
+        // 存使用者紀錄
+        const keyRows = data.map(item => item.key);
+        this.setUserLog('addBuild', keyRows);
       }).catch((err) => {
         console.log('錯誤:', err);
       });
@@ -3269,7 +3280,8 @@ export default {
     },
     // * 桌機版 點擊單筆ERP看詳細
     singleErpDetail (payload) {
-      window.open(`https://east.csc.com.tw/eas/mhb/platform/mhbbd?manageNo=${payload}`);
+      window.open(`https://east.csc.com.tw/eas/kub/platform/kubbd?manageNo=${payload}`);
+      this.setUserLog('goErp');
     },
     // * 桌機版 點擊多筆ERP看詳細
     allErpDetail () {
@@ -3278,7 +3290,9 @@ export default {
         newArr.push(item.key);
       });
       const keyNumber = newArr.join(',');
-      window.open(`https://east.csc.com.tw/eas/mhb/platform/mhbba?keys=${keyNumber}`);
+      window.open(`https://east.csc.com.tw/eas/kub/platform/kubba?keys=${keyNumber}`);
+
+      this.setUserLog('goErp');
     },
     sortTimeHandler (payload) {
       console.log(payload);
@@ -3298,7 +3312,7 @@ export default {
         width: 784,
         allowOutsideClick: true,
         showConfirmButton: false,
-        html: '<iframe src="https://east.csc.com.tw/eas/mhb/platform/mhbba?ref=gis" width="784" height="164" style="position: absolute; top: 15px; left: 0px;"></iframe>',
+        html: '<iframe src="https://east.csc.com.tw/eas/kub/platform/kubba?ref=gis" width="784" height="164" style="position: absolute; top: 15px; left: 0px;"></iframe>',
         onRender: () => {
           window.addEventListener('message', (event) => {
             // console.log(`Received message: ${event.data}`);
@@ -3326,11 +3340,11 @@ export default {
     },
     getSingleCluster (mykey) {
       // 一期 f3 api 1
-      // https://east.csc.com.tw/eas/mhb/rest/mhbe/getBuildingByKey/00004-01?_format=json
+      // https://east.csc.com.tw/eas/kub/rest/kube/getBuildingByKey/00004-01?_format=json
       // const cluster = require('~/static/_resources/single.json');
       // this.singleClusterInfo = cluster.data[0];
 
-      fetch(`/cscmap/api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/getBuildingByKey/${mykey}?_format=json`, {
+      fetch(`/cscmap/api/proxy?url=https://east.csc.com.tw/eas/kub/rest/kube/getBuildingByKey/${mykey}?_format=json`, {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -3346,11 +3360,11 @@ export default {
     },
     getMultiCluster (mykey) {
       // 一期 f3 api 3
-      // https://east.csc.com.tw/eas/mhb/rest/mhbe/getBuildingByKey/00004-01,00004-02?_format=json
+      // https://east.csc.com.tw/eas/kub/rest/kube/getBuildingByKey/00004-01,00004-02?_format=json
       // const cluster = require('~/static/_resources/multi.json');
       // this.multiClusterInfo = cluster.data;
 
-      fetch(`/cscmap/api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/getBuildingByKey/${mykey}?_format=json`, {
+      fetch(`/cscmap/api/proxy?url=https://east.csc.com.tw/eas/kub/rest/kube/getBuildingByKey/${mykey}?_format=json`, {
         method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json'
@@ -3597,10 +3611,12 @@ export default {
           this.gisMap.appendGrids([data[0].GridNOs], { index: false, annotation: true });
           this.pointDxf.push(data[0].GridNOs);
         }
+        // 存使用者紀錄
+        this.setUserLog('addGrid', [data[0].GridNOs]);
 
         setTimeout(() => {
           this.$store.commit('CTRL_LOADING_MASK', false);
-        }, 7000);
+        }, 2300);
       }).catch((err) => {
         console.log('錯誤:', err);
       });
@@ -3650,7 +3666,7 @@ export default {
         this.sesKeys = sessionStorage.getItem('iptKeys');
         this.sesId = sessionStorage.getItem('iptUserID');
 
-        fetch(`/cscmap/api/proxy?url=https://east.csc.com.tw/eas/mhb/rest/mhbe/getBuildingByKey/${this.sesKeys}?_format=json`, {
+        fetch(`/cscmap/api/proxy?url=https://east.csc.com.tw/eas/kub/rest/kube/getBuildingByKey/${this.sesKeys}?_format=json`, {
           method: 'GET',
           headers: new Headers({
             'Content-Type': 'application/json'
@@ -3684,6 +3700,41 @@ export default {
         return response.json();
       }).then((data) => {
         this.showLabelName = data[0].LABELNAME;
+      }).catch((err) => {
+        console.log('錯誤:', err);
+      });
+    },
+    // * 使用者紀錄api
+    setUserLog (type, myData) {
+      const newObj = {
+        DEPT: this.$store.state.userDept,
+        ID: this.$store.state.userId,
+        NAME: this.$store.state.userName,
+        Type: '',
+        Detail: ''
+      };
+      if (type === 'addGrid') {
+        newObj.Type = 1;
+        newObj.Detail = myData;
+      }
+      if (type === 'addBuild') {
+        newObj.Type = 2;
+        newObj.Detail = myData;
+      }
+      if (type === 'goErp') {
+        newObj.Type = 3;
+      }
+
+      fetch('/cscmap/api/CSCLog', {
+        method: 'POST',
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        }),
+        body: JSON.stringify(newObj)
+      }).then((response) => {
+        return response;
+      }).then((data) => {
+
       }).catch((err) => {
         console.log('錯誤:', err);
       });
@@ -4273,6 +4324,28 @@ export default {
   // max-height: 360px;
   overflow-x: hidden;
   overflow-y: auto;
+}
+
+.hide_head {
+  display: none;
+}
+
+.location-btn {
+  width: 20px;
+  height: 20px;
+  margin-left: 25px;
+  display: block;
+  background: url('~/assets/img/icon/icon-location.svg') no-repeat center/contain;
+
+}
+
+.delete-btn {
+  width: 20px;
+  height: 20px;
+  margin-left: -12px;
+  display: block;
+  background: url('~/assets/img/icon/icon-delete_blue.svg') no-repeat center/contain;
+
 }
 
 @import '~/assets/scss/components/_navtabs.scss';
