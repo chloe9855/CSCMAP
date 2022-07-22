@@ -234,7 +234,7 @@
       :key="'addLandWindow'"
       :name="'新增預定用地'"
       :icon-name="'icon-add-land'"
-      @close="activeWindow = ''"
+      @close="closeAddLandWindow"
     >
       <template #content>
         <GeometriesTabs-component
@@ -3738,6 +3738,10 @@ export default {
       }).catch((err) => {
         console.log('錯誤:', err);
       });
+    },
+    closeAddLandWindow () {
+      this.cancelStepHandler();
+      this.activeWindow = '';
     }
   },
   computed: {
